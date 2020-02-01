@@ -3,6 +3,6 @@
   "name": "Philips AirPurifier",
   "documentation": "https://github.com/xMrVizzy/philips-airpurifier",
   "dependencies": [],
-  "codeowners": ["@xMrVizzy"],
-  "requirements": ["pycryptodome"]
+  "codeowners": ["@shexbeer"],
+  "requirements": ["pycryptodome", "coapthon3"]
 }
