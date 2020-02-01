@@ -1,6 +1,6 @@
 """Philips Air Purifier & Humidifier"""
 import voluptuous as vol
-import airctrl as air
+from . import airctrl as air
 import homeassistant.helpers.config_validation as cv
 from homeassistant.components.fan import FanEntity, PLATFORM_SCHEMA
 
