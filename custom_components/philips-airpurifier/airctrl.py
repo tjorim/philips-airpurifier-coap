@@ -297,6 +297,8 @@ class AirClient(object):
 class AirClient2:
     def __init__(self, host, port = 5683):
         self.coapthon_logger = logging.getLogger("coapthon")
+        self.root_logger = logging.getLogger()
+        self.root_logger.setLevel("WARN")
         self.coapthon_logger.setLevel("WARN")
         self.server = host
         self.port = port
