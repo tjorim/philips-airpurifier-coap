@@ -99,73 +99,79 @@ class PhilipsAirPurifierFan(FanEntity):
             filters = self._client.get(url)
         else:
             filters = {}
-            filters = self._client._get()
+            filters = self._client.get_filters()
         return filters
 
     def update(self):
-        filters = self._get_filter()
-        self._pre_filter = filters["fltsts0"]
-        if "wicksts" in filters:
-            self._wick_filter = filters["wicksts"]
-        self._carbon_filter = filters["fltsts2"]
-        self._hepa_filter = filters["fltsts1"]
+        try:
+            filters = self._get_filter()
+            self._pre_filter = filters["fltsts0"]
+            if "wicksts" in filters:
+                self._wick_filter = filters["wicksts"]
+            self._carbon_filter = filters["fltsts2"]
+            self._hepa_filter = filters["fltsts1"]
 
-        status = self._get_status()
-        if "pwr" in status:
-            if status["pwr"] == "1":
-                self._state = "on"
-            else:
-                self._state = "off"
-        if "pm25" in status:
-            self._pm25 = status["pm25"]
-        if "rh" in status:
-            self._humidity = status["rh"]
-        if "rhset" in status:
-            self._target_humidity = status["rhset"]
-        if "iaql" in status:
-            self._allergen_index = status["iaql"]
-        if "temp" in status:
-            self._temperature = status["temp"]
-        if "func" in status:
-            func = status["func"]
-            func_str = {"P": "Purification", "PH": "Purification & Humidification"}
-            self._function = func_str.get(func, func)
-        if "mode" in status:
-            mode = status["mode"]
-            mode_str = {
-                "P": "Auto Mode",
-                "A": "Allergen Mode",
-                "S": "Sleep Mode",
-                "M": "Manual",
-                "B": "Bacteria",
-                "N": "Night",
-            }
-            self._fan_speed = mode_str.get(mode, mode)
-        if "om" in status:
-            om = status["om"]
-            om_str = {
-                "s": "Silent",
-                "t": "Turbo",
-                "1": "Speed 1",
-                "2": "Speed 2",
-                "3": "Speed 3",
-            }
-            om = om_str.get(om, om)
-            if om != "Silent" and self._fan_speed == "Manual":
-                self._fan_speed = om
-        if "aqil" in status:
-            self._light_brightness = status["aqil"]
-        if "ddp" in status:
-            ddp = status["ddp"]
-            if self._is_protocol_1():
-                ddp_str = {"0": "PM2.5", "1": "IAI"}
-            else:
-                ddp_str = {"0": "IAI", "1": "PM2.5", "3": "Humidity"}
-            self._used_index = ddp_str.get(ddp, ddp)
-        if "wl" in status:
-            self._water_level = status["wl"]
-        if "cl" in status:
-            self._child_lock = status["cl"]
+            status = self._get_status()
+            if "pwr" in status:
+                if status["pwr"] == "1":
+                    self._state = "on"
+                else:
+                    self._state = "off"
+            if "pm25" in status:
+                self._pm25 = status["pm25"]
+            if "rh" in status:
+                self._humidity = status["rh"]
+            if "rhset" in status:
+                self._target_humidity = status["rhset"]
+            if "iaql" in status:
+                self._allergen_index = status["iaql"]
+            if "temp" in status:
+                self._temperature = status["temp"]
+            if "func" in status:
+                func = status["func"]
+                func_str = {"P": "Purification", "PH": "Purification & Humidification"}
+                self._function = func_str.get(func, func)
+            if "mode" in status:
+                mode = status["mode"]
+                mode_str = {
+                    "P": "Auto Mode",
+                    "A": "Allergen Mode",
+                    "S": "Sleep Mode",
+                    "M": "Manual",
+                    "B": "Bacteria",
+                    "N": "Night",
+                }
+                self._fan_speed = mode_str.get(mode, mode)
+            if "om" in status:
+                om = status["om"]
+                om_str = {
+                    "s": "Silent",
+                    "t": "Turbo",
+                    "1": "Speed 1",
+                    "2": "Speed 2",
+                    "3": "Speed 3",
+                }
+                om = om_str.get(om, om)
+                if om != "Silent" and self._fan_speed == "Manual":
+                    self._fan_speed = om
+            if "aqil" in status:
+                self._light_brightness = status["aqil"]
+            if "ddp" in status:
+                ddp = status["ddp"]
+                if self._is_protocol_1():
+                    ddp_str = {"0": "PM2.5", "1": "IAI"}
+                else:
+                    ddp_str = {"0": "IAI", "1": "PM2.5", "3": "Humidity"}
+                self._used_index = ddp_str.get(ddp, ddp)
+            if "wl" in status:
+                self._water_level = status["wl"]
+            if "cl" in status:
+                self._child_lock = status["cl"]
+        except Exception as e:
+            print(type(e))
+            print(e.args)
+            print(e)
+            print("End of try of update!")
 
     ### Properties ###
 
