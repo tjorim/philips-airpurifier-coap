@@ -1,5 +1,8 @@
 """Philips Air Purifier & Humidifier"""
-from . import airctrl as air
+from . import status_transformer as STATUS_TRANSFORMER
+from . import coap_client as CoAPAirClient
+from . import http_client as HTTPAirClient
+from . import plain_coap_client as PlainCoAPAirClient
 import voluptuous as vol
 import homeassistant.helpers.config_validation as cv
 from homeassistant.components.fan import FanEntity, PLATFORM_SCHEMA
@@ -68,12 +71,12 @@ class PhilipsAirPurifierFan(FanEntity):
         self._child_lock = None
 
         if self._protocol == "1":
-            self._client = air.HTTPAirCli(self._host)
+            self._client = HTTPAirClient.HTTPAirClient(self._host)
             #self._client.load_key()
         if self._protocol == "2":
-            self._client = air.PlainCoAPAirCli(self._host)
+            self._client = PlainCoAPAirClient.PlainCoAPAirClient(self._host)
         else:
-            self._client = air.CoAPCli(self._host)
+            self._client = CoAPAirClient.CoAPAirClient(self._host)
 
         self.update()
 
@@ -87,7 +90,7 @@ class PhilipsAirPurifierFan(FanEntity):
             url = "http://{}/di/v1/products/1/air".format(self._host)
             status = self._client.get(url)
         else:
-            status = self._client.get()
+            status = self._client._get()
         return status
 
     def _get_filter(self):
