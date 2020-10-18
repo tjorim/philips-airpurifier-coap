@@ -4,10 +4,10 @@ import argparse
 import sys
 import pprint
 
-from status_transformer import STATUS_TRANSFORMER
-from coap_client import CoAPAirClient
-from http_client import HTTPAirClient
-from plain_coap_client import PlainCoAPAirClient
+from . import status_transformer as STATUS_TRANSFORMER
+from . import coap_client as CoAPAirClient
+from . import http_client as HTTPAirClient
+from . import plain_coap_client as PlainCoAPAirClient
 
 
 class CoAPCli:
