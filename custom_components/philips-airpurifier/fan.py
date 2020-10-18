@@ -96,7 +96,7 @@ class PhilipsAirPurifierFan(FanEntity):
             filters = self._client.get(url)
         else:
             filters = {}
-            filters = self._client.get()
+            filters = self._client._get()
         return filters
 
     def update(self):
