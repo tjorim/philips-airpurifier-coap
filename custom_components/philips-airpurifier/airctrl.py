@@ -4,10 +4,10 @@ import argparse
 import sys
 import pprint
 
-from pyairctrl.status_transformer import STATUS_TRANSFORMER
-from pyairctrl.coap_client import CoAPAirClient
-from pyairctrl.http_client import HTTPAirClient
-from pyairctrl.plain_coap_client import PlainCoAPAirClient
+from status_transformer import STATUS_TRANSFORMER
+from coap_client import CoAPAirClient
+from http_client import HTTPAirClient
+from plain_coap_client import PlainCoAPAirClient
 
 
 class CoAPCli:
