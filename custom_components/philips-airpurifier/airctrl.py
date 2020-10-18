@@ -12,7 +12,7 @@ from . import plain_coap_client as PlainCoAPAirClient
 
 class CoAPCli:
     def __init__(self, host, port=5683, debug=False):
-        self._client = CoAPAirClient(host, port, debug)
+        self._client = CoAPAirClient.CoAPAirClient(host, port, debug)
 
     def _get_info_for_key(self, key, current_value):
         if key in STATUS_TRANSFORMER:
@@ -91,13 +91,13 @@ class CoAPCli:
 class HTTPAirCli:
     @staticmethod
     def ssdp(timeout=1, repeats=3, debug=False):
-        response = HTTPAirClient.ssdp(timeout, repeats)
+        response = HTTPAirClient.HTTPAirClient.ssdp(timeout, repeats)
         if debug:
             pprint.pprint(response)
         return response
 
     def __init__(self, host, debug=True):
-        self._client = HTTPAirClient(host, debug)
+        self._client = HTTPAirClient.HTTPAirClient(host, debug)
 
     def set_values(self, values, debug=False):
         try:
@@ -227,7 +227,7 @@ class HTTPAirCli:
 
 class PlainCoAPAirCli:
     def __init__(self, host, port=5683):
-        self._client = PlainCoAPAirClient(host, port)
+        self._client = PlainCoAPAirClient.PlainCoAPAirClient(host, port)
 
     def _dump_status(self, status, debug=False):
         if debug:
