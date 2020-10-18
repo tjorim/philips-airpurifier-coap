@@ -1,6 +1,6 @@
 """Philips Air Purifier & Humidifier"""
+import airctrl as air
 import voluptuous as vol
-from . import airctrl as air
 import homeassistant.helpers.config_validation as cv
 from homeassistant.components.fan import FanEntity, PLATFORM_SCHEMA
 
@@ -68,10 +68,12 @@ class PhilipsAirPurifierFan(FanEntity):
         self._child_lock = None
 
         if self._protocol == "1":
-            self._client = air.AirClient(self._host)
-            self._client.load_key()
+            self._client = air.HTTPAirCli(self._host)
+            #self._client.load_key()
+        if self._protocol == "2":
+            self._client = air.PlainCoAPAirCli(self._host)
         else:
-            self._client = air.AirClient2(self._host)
+            self._client = air.CoAPCli(self._host)
 
         self.update()
 
