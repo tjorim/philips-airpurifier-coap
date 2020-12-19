@@ -1,8 +1,8 @@
 {
-  "domain": "philips-airpurifier",
+  "domain": "philips_airpurifier",
   "name": "Philips AirPurifier (with CoAP)",
   "documentation": "https://github.com/shexbeer/philips-airpurifier",
   "dependencies": [],
   "codeowners": ["@shexbeer"],
-  "requirements": ["pycryptodome", "coapthon3"]
+  "requirements": ["aiocoap", "pycryptodomex"]
 }
