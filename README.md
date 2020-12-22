@@ -5,14 +5,14 @@
 fan:
   platform: philips-airpurifier
   host: 192.168.0.17
-  protocol: 2
+  model: ac4236
 ```
 
 ## Configuration variables:
 Field | Value | Necessity | Description
 --- | --- | --- | ---
 platform | `philips-airpurifier` | *Required* | The platform name.
-host | 192.168.0.17 | *Required* | IP address of your Purifier.
+host | 192.168.0.17 | *Required* | IP address of the Purifier.
+model | ac4236 | *Required* | Model of the Purifier.
 name | Philips Air Purifier | Optional | Name of the Fan.
-protocol | 2 | Optional | Protocol version (1=HTTP, 2=PLAIN COAP 3=COAP encrypted)
 ***

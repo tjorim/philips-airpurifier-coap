@@ -1,28 +1,22 @@
-import logging
 import asyncio
-import binascii
-import os
-import sys
 import hashlib
 import json
+import logging
+import os
 
 from aiocoap import (
     Context,
-    Message,
     GET,
-    POST,
-    PUT,
+    Message,
     NON,
+    POST,
 )
 
 from Cryptodome.Cipher import AES
 from Cryptodome.Util.Padding import pad, unpad
 
 
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-logging.getLogger("coap").setLevel(logging.DEBUG)
 
 
 class DigestMismatchException(Exception):
@@ -110,7 +104,7 @@ class CoAPClient:
             code=POST,
             mtype=NON,
             uri=f"coap://{self.host}:{self.port}{self.SYNC_PATH}",
-            payload=sync_request.encode()
+            payload=sync_request.encode(),
         )
         logger.debug(f"Sending sync-request: {sync_request}")
         response = await self._client_context.request(request).response
@@ -120,9 +114,7 @@ class CoAPClient:
 
     async def get_status(self):
         request = Message(
-            code=GET,
-            mtype=NON,
-            uri=f"coap://{self.host}:{self.port}{self.STATUS_PATH}"
+            code=GET, mtype=NON, uri=f"coap://{self.host}:{self.port}{self.STATUS_PATH}"
         )
         request.opt.observe = 0
         response = await self._client_context.request(request).response
@@ -148,10 +140,7 @@ class CoAPClient:
             state_reported = json.loads(payload)
             observer_responses.put_nowait(state_reported["state"]["reported"])
 
-        request = Message(
-            code=GET,
-            uri=f"coap://{self.host}:{self.port}{self.STATUS_PATH}"
-        )
+        request = Message(code=GET, uri=f"coap://{self.host}:{self.port}{self.STATUS_PATH}")
         request.opt.observe = 0
         requester = self._client_context.request(request)
         requester.observation.register_errback(observation_errback)
@@ -179,34 +168,7 @@ class CoAPClient:
             code=POST,
             mtype=NON,
             uri=f"coap://{self.host}:{self.port}{self.CONTROL_PATH}",
-            payload=payload_encrypted.encode()
+            payload=payload_encrypted.encode(),
         )
         response = await self._client_context.request(request).response
         logger.debug("RESPONSE: %s", response.payload)
-
-
-async def main():
-    client = await CoAPClient.create(host="192.168.10.58")
-    #  m = "55D0D47084C885DE58673F50E69D946F65F4CBDD12507405CA12D1AE10E86B1347DADAF3C89CCFE71EC956CE097AB1DD781CBFA97CEDAE4CF140DCB7DEBED859FB05CF5C7FE18516E01F789730064CE69EE114E27328CC3503208CF48D59B5374129B3052A19018549FCC02A8083F70C304816755B816A2A8B681D9358FA39FCC71C84F1"
-    #  k = m[0:8]
-    #  d = client._decrypt_payload(m)
-    #  client._set_client_key("55D0D46F")
-    #  e = client._encrypt_payload(d)
-    #  print("M:", m)
-    #  print("K:",k)
-    #  print(d)
-    #  print(e)
-    #  print(m == e)
-    #  async for s in client.observe_status():
-    #      print(s)
-    #  client._set_client_key("2ED7B666")
-    #  await client.set_control_value("pwr", "1")
-    print("GETTING STATUS")
-    print(await client.get_status())
-    print("OBSERVING")
-    async for s in client.observe_status():
-        print("GOT STATE")
-    await asyncio.sleep(10)
-
-if __name__ == "__main__":
-    asyncio.get_event_loop().run_until_complete(main())
