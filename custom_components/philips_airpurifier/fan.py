@@ -185,6 +185,11 @@ class PhilipsGenericCoAPFan(PhilipsGenericFan):
     async def async_added_to_hass(self) -> None:
         self._observer_task = asyncio.create_task(self._observe_status())
 
+    async def async_will_remove_from_hass(self) -> None:
+        self._observer_task.cancel()
+        await self._observer_task
+        await self._client.shutdown()
+
     async def _observe_status(self) -> None:
         async for status in self._client.observe_status():
             _LOGGER.debug(status)

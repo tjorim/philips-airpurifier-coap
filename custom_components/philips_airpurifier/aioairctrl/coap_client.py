@@ -44,6 +44,10 @@ class CoAPClient:
         await obj._init()
         return obj
 
+    async def shutdown(self) -> None:
+        if self._client_context:
+            await self._client_context.shutdown()
+
     def _create_cipher(self, key: str):
         key_and_iv = hashlib.md5((self.SECRET_KEY + key).encode()).hexdigest().upper()
         half_keylen = len(key_and_iv) // 2
