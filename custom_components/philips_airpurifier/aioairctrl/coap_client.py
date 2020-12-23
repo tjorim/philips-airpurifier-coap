@@ -3,6 +3,7 @@ import json
 import logging
 import os
 
+from . import aiocoap_monkeypatch
 from aiocoap import (
     Context,
     GET,
