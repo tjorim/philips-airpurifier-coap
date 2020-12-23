@@ -1,4 +1,3 @@
-import asyncio
 import hashlib
 import json
 import logging
@@ -118,37 +117,20 @@ class CoAPClient:
         )
         request.opt.observe = 0
         response = await self._client_context.request(request).response
-        #  requester = self._client_context.request(request)
-        #  print(dir(requester))
-        #  response = await requester.response
-        #  print(dir(response))
         payload_encrypted = response.payload.decode()
         payload = self._decrypt_payload(payload_encrypted)
         state_reported = json.loads(payload)
         return state_reported["state"]["reported"]
 
     async def observe_status(self):
-        observer_got_exception = asyncio.Event()
-        observer_responses = asyncio.Queue()
-
-        def observation_errback(exception):
-            observer_got_exception.set()
-
-        def observation_callback(response):
-            payload_encrypted = response.payload.decode()
-            payload = self._decrypt_payload(payload_encrypted)
-            state_reported = json.loads(payload)
-            observer_responses.put_nowait(state_reported["state"]["reported"])
-
         request = Message(code=GET, uri=f"coap://{self.host}:{self.port}{self.STATUS_PATH}")
         request.opt.observe = 0
         requester = self._client_context.request(request)
-        requester.observation.register_errback(observation_errback)
-        requester.observation.register_callback(observation_callback)
-        response = await requester.response
-        while not observer_got_exception.is_set():
-            response = await observer_responses.get()
-            yield response
+        async for response in requester.observation:
+            payload_encrypted = response.payload.decode()
+            payload = self._decrypt_payload(payload_encrypted)
+            status = json.loads(payload)
+            yield status["state"]["reported"]
 
     async def set_control_value(self, key, value, retry_count=5, resync=True) -> None:
         state_desired = {
