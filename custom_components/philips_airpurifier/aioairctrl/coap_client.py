@@ -150,7 +150,7 @@ class CoAPClient:
             response = await observer_responses.get()
             yield response
 
-    async def set_control_value(self, key, value):
+    async def set_control_value(self, key, value, retry_count=5, resync=True) -> None:
         state_desired = {
             "state": {
                 "desired": {
@@ -172,3 +172,10 @@ class CoAPClient:
         )
         response = await self._client_context.request(request).response
         logger.debug("RESPONSE: %s", response.payload)
+        result = json.loads(response.payload)
+        if result.get("status") != "success" and resync:
+            logger.debug("set_control_value failed. resyncing...")
+            await self._sync()
+        if result.get("status") != "success" and retry_count > 0:
+            logger.debug("set_control_value failed. retrying...")
+            await self.set_control_value(key, value, retry_count - 1, resync)
