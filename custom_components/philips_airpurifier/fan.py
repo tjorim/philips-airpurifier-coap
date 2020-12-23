@@ -1,17 +1,21 @@
 """Philips Air Purifier & Humidifier"""
 import asyncio
 import logging
+from datetime import timedelta
 from typing import (
     Any,
     Callable,
     Dict,
     List,
     Optional,
+    Union,
 )
 
 from homeassistant.components.fan import (
     FanEntity,
     PLATFORM_SCHEMA,
+    SPEED_OFF,
+    SUPPORT_SET_SPEED,
 )
 from homeassistant.const import (
     CONF_HOST,
@@ -30,13 +34,58 @@ import voluptuous as vol
 
 from .aioairctrl.coap_client import CoAPClient
 from .const import (
+    ATTR_AIR_QUALITY_INDEX,
+    ATTR_CHILD_LOCK,
+    ATTR_DEVICE_ID,
+    ATTR_DEVICE_VERSION,
+    ATTR_DISPLAY_BACKLIGHT,
+    ATTR_INDOOR_ALLERGEN_INDEX,
+    ATTR_LANGUAGE,
+    ATTR_LIGHT_BRIGHTNESS,
+    ATTR_MODEL_ID,
+    ATTR_NAME,
+    ATTR_PM25,
+    ATTR_PREFERRED_INDEX,
+    ATTR_PRODUCT_ID,
+    ATTR_RUNTIME,
+    ATTR_SOFTWARE_VERSION,
+    ATTR_TOTAL_VOLATILE_ORGANIC_COMPOUNDS,
+    ATTR_TYPE,
+    ATTR_WIFI_VERSION,
     CONF_MODEL,
     DEFAULT_ICON,
     DEFAULT_NAME,
     MODEL_AC4236,
+    PHILIPS_AIR_QUALITY_INDEX,
+    PHILIPS_CHILD_LOCK,
+    PHILIPS_DEVICE_ID,
+    PHILIPS_DEVICE_VERSION,
+    PHILIPS_DISPLAY_BACKLIGHT,
+    PHILIPS_DISPLAY_BACKLIGHT_MAP,
+    PHILIPS_INDOOR_ALLERGEN_INDEX,
+    PHILIPS_LANGUAGE,
+    PHILIPS_LIGHT_BRIGHTNESS,
+    PHILIPS_MODE,
+    PHILIPS_MODEL_ID,
+    PHILIPS_NAME,
+    PHILIPS_PM25,
+    PHILIPS_POWER,
+    PHILIPS_PREFERRED_INDEX,
+    PHILIPS_PREFERRED_INDEX_MAP,
+    PHILIPS_PRODUCT_ID,
+    PHILIPS_RUNTIME,
+    PHILIPS_SOFTWARE_VERSION,
+    PHILIPS_SPEED,
+    PHILIPS_TOTAL_VOLATILE_ORGANIC_COMPOUNDS,
+    PHILIPS_TYPE,
+    PHILIPS_WIFI_VERSION,
+    SPEED_1,
+    SPEED_2,
+    SPEED_MODE_AUTO,
+    SPEED_MODE_SLEEP,
+    SPEED_MODE_TURBO,
 )
 from .const import DOMAIN  # noqa: F401
-
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -87,7 +136,6 @@ class PhilipsGenericFan(FanEntity):
         self._icon = icon
         self._available = False
         self._state = None
-        self._state_attrs = {}
         self._unique_id = None
 
     async def init(self) -> None:
@@ -115,16 +163,12 @@ class PhilipsGenericFan(FanEntity):
     def available(self) -> bool:
         return self._available
 
-    @property
-    def is_on(self) -> Optional[bool]:
-        return self._state
 
-    @property
-    def device_state_attributes(self) -> Optional[Dict[str, Any]]:
-        return self._state_attrs
+class PhilipsGenericCoAPFan(PhilipsGenericFan):
+    def __init__(self, host: str, model: str, name: str, icon: str) -> None:
+        super().__init__(host, model, name, icon)
+        self._device_state = dict()
 
-
-class PhilipsCoAPFan(PhilipsGenericFan):
     async def init(self) -> None:
         self._client = await CoAPClient.create(self._host)
         self._observer_task = None
@@ -132,7 +176,7 @@ class PhilipsCoAPFan(PhilipsGenericFan):
             _LOGGER.debug("retrieving initial status")
             status = await self._client.get_status()
             _LOGGER.debug(status)
-            device_id = status["DeviceId"]
+            device_id = status[PHILIPS_DEVICE_ID]
             self._unique_id = f"{self._model}-{device_id}"
         except Exception as e:
             _LOGGER.error("Failed retrieving unique_id: %s", e)
@@ -147,95 +191,123 @@ class PhilipsCoAPFan(PhilipsGenericFan):
             await self._update_status(status)
 
     async def _update_status(self, status: dict) -> None:
-        pass
+        self._available = True
+        self._state = status.get(PHILIPS_POWER) == "1"
+        self._device_status = status
+        self.schedule_update_ha_state()
 
     @property
     def should_poll(self) -> bool:
         return False
 
+    @property
+    def is_on(self) -> bool:
+        return self._state
+
+    @property
+    def device_state_attributes(self) -> Optional[Dict[str, Any]]:
+        def append(
+            attributes: dict,
+            key: str,
+            philips_key: str,
+            value_map: Union[dict, Callable[[Any], Any]] = None,
+        ):
+            if philips_key in self._device_status:
+                value = self._device_status[philips_key]
+                if isinstance(value_map, dict) and value in value_map:
+                    value = value_map[value]
+                elif callable(value_map):
+                    value = value_map(value)
+                attributes.update({key: value})
+
+        attributes = (
+            (ATTR_AIR_QUALITY_INDEX, PHILIPS_AIR_QUALITY_INDEX),
+            (ATTR_CHILD_LOCK, PHILIPS_CHILD_LOCK),
+            (ATTR_DEVICE_ID, PHILIPS_DEVICE_ID),
+            (ATTR_DEVICE_VERSION, PHILIPS_DEVICE_VERSION),
+            (ATTR_DISPLAY_BACKLIGHT, PHILIPS_DISPLAY_BACKLIGHT, PHILIPS_DISPLAY_BACKLIGHT_MAP),
+            (ATTR_INDOOR_ALLERGEN_INDEX, PHILIPS_INDOOR_ALLERGEN_INDEX),
+            (ATTR_LANGUAGE, PHILIPS_LANGUAGE),
+            (ATTR_LIGHT_BRIGHTNESS, PHILIPS_LIGHT_BRIGHTNESS),
+            (ATTR_MODEL_ID, PHILIPS_MODEL_ID),
+            (ATTR_NAME, PHILIPS_NAME),
+            (ATTR_PM25, PHILIPS_PM25),
+            (ATTR_PREFERRED_INDEX, PHILIPS_PREFERRED_INDEX, PHILIPS_PREFERRED_INDEX_MAP),
+            (ATTR_PRODUCT_ID, PHILIPS_PRODUCT_ID),
+            (ATTR_RUNTIME, PHILIPS_RUNTIME, lambda x: str(timedelta(seconds=round(x / 1000)))),
+            (ATTR_SOFTWARE_VERSION, PHILIPS_SOFTWARE_VERSION),
+            (ATTR_TOTAL_VOLATILE_ORGANIC_COMPOUNDS, PHILIPS_TOTAL_VOLATILE_ORGANIC_COMPOUNDS),
+            (ATTR_TYPE, PHILIPS_TYPE),
+            (ATTR_WIFI_VERSION, PHILIPS_WIFI_VERSION),
+        )
+        device_attributes = dict()
+        for key, philips_key, *rest in attributes:
+            value_map = rest[0] if len(rest) else None
+            append(device_attributes, key, philips_key, value_map)
+        return device_attributes
+
     async def async_turn_on(self, speed: Optional[str] = None, **kwargs):
-        await self._client.set_control_value("pwr", "1")
+        _LOGGER.debug("TURN ON: %s", speed)
+        if speed is None:
+            await self._client.set_control_value(PHILIPS_POWER, "1")
+        elif speed == SPEED_OFF:
+            await self.async_turn_off()
+        else:
+            await self.async_set_speed(speed)
 
     async def async_turn_off(self, **kwargs) -> None:
-        await self._client.set_control_value("pwr", "0")
+        await self._client.set_control_value(PHILIPS_POWER, "0")
 
 
-class PhilipsAC4236(PhilipsCoAPFan):
-    async def _update_status(self, status: dict) -> None:  # noqa: C901
-        new_state = None
-        new_state_attrs = {}
-        for k, v in status.items():
-            if k == "pwr" and v == "1":
-                new_state = True
-            elif k == "pwr" and v != "1":
-                new_state = False
-            elif k == "pm25":
-                new_state_attrs["pm25"] = v
-            elif k == "rh":
-                new_state_attrs["humidity"] = v
-            elif k == "rhset":
-                new_state_attrs["target_humidity"] = v
-            elif k == "iaql":
-                new_state_attrs["allergen_index"] = v
-            elif k == "temp":
-                new_state_attrs["temperature"] = v
-            elif k == "func":
-                func_str = {
-                    "P": "Purification",
-                    "PH": "Purification & Humidification",
-                }
-                new_state_attrs["function"] = func_str.get(v, v)
-            elif k == "mode":
-                mode_str = {
-                    "P": "Auto Mode",
-                    "AG": "Auto Mode",
-                    "A": "Allergen Mode",
-                    "S": "Sleep Mode",
-                    "M": "Manual",
-                    "B": "Bacteria",
-                    "N": "Night",
-                    "T": "Turbo Mode",
-                }
-                new_state_attrs["mode"] = mode_str.get(v, v)
-            elif k == "om":
-                om_str = {
-                    "0": "Off",
-                    "1": "Speed 1",
-                    "2": "Speed 2",
-                    "3": "Speed 3",
-                    "s": "Silent",
-                    "t": "Turbo",
-                }
-                new_state_attrs["fan_speed"] = om_str.get(v, v)
-            elif k == "aqil":
-                new_state_attrs["light_brightness"] = v
-            elif k == "ddp":
-                ddp_str = {
-                    "0": "IAI",
-                    "1": "PM2.5",
-                    "2": "Gas",
-                    "3": "Humidity",
-                }
-                new_state_attrs["used_index"] = ddp_str.get(v, v)
-            elif k == "wl":
-                new_state_attrs["water_level"] = v
-            elif k == "cl":
-                new_state_attrs["child_lock"] = v
-            elif k == "fltsts0":
-                new_state_attrs["pre_filter"] = v
-            elif k == "fltsts1":
-                new_state_attrs["hepa_filter"] = v
-            elif k == "fltsts2":
-                new_state_attrs["carbon_filter"] = v
-            elif k == "wicksts":
-                new_state_attrs["wick_filter"] = v
-        update_state = False
-        if new_state != self._state:
-            self._state = new_state
-            update_state = True
-        if set(new_state_attrs.items()) != set(self._state_attrs.items()):
-            self._state_attrs = new_state_attrs
-            update_state = True
-        if update_state:
-            self._available = True
-            self.schedule_update_ha_state()
+class PhilipsAC4236(PhilipsGenericCoAPFan):
+    SPEED_LIST = [
+        SPEED_OFF,
+        SPEED_1,
+        SPEED_2,
+        SPEED_MODE_AUTO,
+        SPEED_MODE_SLEEP,
+        SPEED_MODE_TURBO,
+    ]
+
+    @property
+    def supported_features(self) -> int:
+        return SUPPORT_SET_SPEED
+
+    @property
+    def speed_list(self) -> list:
+        return self.SPEED_LIST
+
+    @property
+    def speed(self) -> str:
+        power = self._device_status.get(PHILIPS_POWER)
+        mode = self._device_status.get(PHILIPS_MODE)
+        speed = self._device_status.get(PHILIPS_SPEED)
+        if power == "0":
+            return SPEED_OFF
+        elif mode == "M" and speed == "1":
+            return SPEED_1
+        elif mode == "M" and speed == "2":
+            return SPEED_2
+        elif mode == "AG":
+            return SPEED_MODE_AUTO
+        elif mode == "S":
+            return SPEED_MODE_SLEEP
+        elif mode == "T":
+            return SPEED_MODE_TURBO
+
+    async def async_set_speed(self, speed: str) -> None:
+        if speed == SPEED_OFF:
+            await self.async_turn_off()
+            return
+        elif not self.is_on:
+            await self.async_turn_on()
+        if speed == SPEED_1:
+            await self._client.set_control_value(PHILIPS_SPEED, "1")
+        elif speed == SPEED_2:
+            await self._client.set_control_value(PHILIPS_SPEED, "2")
+        elif speed == SPEED_MODE_AUTO:
+            await self._client.set_control_value(PHILIPS_MODE, "AG")
+        elif speed == SPEED_MODE_SLEEP:
+            await self._client.set_control_value(PHILIPS_MODE, "S")
+        elif speed == SPEED_MODE_TURBO:
+            await self._client.set_control_value(PHILIPS_MODE, "T")
