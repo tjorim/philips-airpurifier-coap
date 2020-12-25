@@ -55,6 +55,7 @@ from .const import (
     CONF_MODEL,
     DEFAULT_ICON,
     DEFAULT_NAME,
+    MODEL_AC1214,
     MODEL_AC4236,
     PHILIPS_AIR_QUALITY_INDEX,
     PHILIPS_CHILD_LOCK,
@@ -81,7 +82,10 @@ from .const import (
     PHILIPS_WIFI_VERSION,
     SPEED_1,
     SPEED_2,
+    SPEED_3,
+    SPEED_ALLERGEN,
     SPEED_AUTO,
+    SPEED_NIGHT,
     SPEED_SLEEP,
     SPEED_TURBO,
 )
@@ -115,6 +119,7 @@ async def async_setup_platform(
     icon = config[CONF_ICON]
 
     model_to_class = {
+        MODEL_AC1214: PhilipsAC1214,
         MODEL_AC4236: PhilipsAC4236,
     }
 
@@ -287,6 +292,19 @@ class PhilipsGenericCoAPFan(PhilipsGenericFan):
             value_map = rest[0] if len(rest) else None
             append(device_attributes, key, philips_key, value_map)
         return device_attributes
+
+
+class PhilipsAC1214(PhilipsGenericCoAPFan):
+    SPEED_MAP = {
+        **PhilipsGenericCoAPFan.SPEED_MAP,
+        SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
+        SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
+        SPEED_3: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
+        SPEED_ALLERGEN: {PHILIPS_POWER: "1", PHILIPS_MODE: "A"},
+        SPEED_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "P"},
+        SPEED_NIGHT: {PHILIPS_POWER: "1", PHILIPS_MODE: "N"},
+        SPEED_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
+    }
 
 
 class PhilipsAC4236(PhilipsGenericCoAPFan):

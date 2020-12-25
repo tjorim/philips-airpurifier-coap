@@ -5,11 +5,15 @@ DEFAULT_ICON = "mdi:air-purifier"
 
 CONF_MODEL = "model"
 
+MODEL_AC1214 = "ac1214"
 MODEL_AC4236 = "ac4236"
 
 SPEED_1 = "1"
 SPEED_2 = "2"
+SPEED_3 = "3"
+SPEED_ALLERGEN = "allergen"
 SPEED_AUTO = "auto"
+SPEED_NIGHT = "night"
 SPEED_SLEEP = "sleep"
 SPEED_TURBO = "turbo"
 
