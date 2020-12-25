@@ -62,26 +62,19 @@ class CoAPClient:
         return cipher
 
     def _set_client_key(self, client_key):
-        logger.debug(f"Setting client-key: {client_key}")
         self._client_key = client_key
 
     def _get_client_key_next(self, store=True):
         client_key_next = (int(self._client_key, 16) + 1).to_bytes(4, byteorder="big").hex().upper()
-        logger.debug(f"Generated next client-key: {self._client_key} -> {client_key_next}")
         if store:
             self._client_key = client_key_next
         return client_key_next
 
     def _decrypt_payload(self, payload_encrypted: str) -> str:
-        logger.debug(f"decrypting: {payload_encrypted}")
         key = payload_encrypted[0:8]
-        logger.debug(f"KEY: {len(key)} - {key}")
         ciphertext = payload_encrypted[8:-64]
-        logger.debug(f"CIPHERTEXT: {len(ciphertext)} - {ciphertext}")
         digest = payload_encrypted[-64:]
-        logger.debug(f"DIGEST: {digest}")
         digest_calculated = hashlib.sha256((key + ciphertext).encode()).hexdigest().upper()
-        logger.debug(f"CALC: {digest_calculated}")
         if digest != digest_calculated:
             raise DigestMismatchException
         cipher = self._create_cipher(key)
@@ -90,16 +83,11 @@ class CoAPClient:
         return plaintext_unpadded.decode()
 
     def _encrypt_payload(self, payload: str) -> str:
-        logger.debug(f"encrypting payload: {payload}")
         key = self._get_client_key_next()
-        logger.debug(f"KEY: {key}")
         plaintext_padded = pad(payload.encode(), 16, style="pkcs7")
-        logger.debug(f"p: {plaintext_padded}")
         cipher = self._create_cipher(key)
         ciphertext = cipher.encrypt(plaintext_padded).hex().upper()
-        logger.debug(f"CIPHERTEXT: {ciphertext}")
         digest = hashlib.sha256((key + ciphertext).encode()).hexdigest().upper()
-        logger.debug(f"DIGEST: {digest}")
         return key + ciphertext + digest
 
     async def _sync(self):
@@ -110,10 +98,8 @@ class CoAPClient:
             uri=f"coap://{self.host}:{self.port}{self.SYNC_PATH}",
             payload=sync_request.encode(),
         )
-        logger.debug(f"Sending sync-request: {sync_request}")
         response = await self._client_context.request(request).response
         client_key = response.payload.decode()
-        logger.debug(f"Received client-key: {client_key}")
         self._set_client_key(client_key)
 
     async def get_status(self):
@@ -149,8 +135,8 @@ class CoAPClient:
             }
         }
         payload = json.dumps(state_desired)
+        logger.debug("REQUEST: %s", payload)
         payload_encrypted = self._encrypt_payload(payload)
-        logger.debug("D: %s", self._decrypt_payload(payload_encrypted))
         request = Message(
             code=POST,
             mtype=NON,
