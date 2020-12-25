@@ -7,11 +7,11 @@ CONF_MODEL = "model"
 
 MODEL_AC4236 = "ac4236"
 
-SPEED_MODE_AUTO = "auto"
-SPEED_MODE_TURBO = "turbo"
-SPEED_MODE_SLEEP = "sleep"
 SPEED_1 = "1"
 SPEED_2 = "2"
+SPEED_AUTO = "auto"
+SPEED_SLEEP = "sleep"
+SPEED_TURBO = "turbo"
 
 ATTR_AIR_QUALITY_INDEX = "air_quality_index"
 ATTR_CHILD_LOCK = "child_lock"
