@@ -53,3 +53,15 @@ source aioairctrl-shell.sh
 ```sh
 aioairctrl --host $DEVICE_IP status --json
 ```
+
+## Debugging
+
+To aquire debug-logs, add the following to your `configuration.yaml`:
+
+```yaml
+logger:
+  logs:
+    custom_components.philips_airpurifier: debug
+```
+
+logs should now be available in `home-assistant.log`
