@@ -155,3 +155,5 @@ class CoAPClient:
         if result.get("status") != "success" and retry_count > 0:
             logger.debug("set_control_value failed. retrying...")
             await self.set_control_values(data, retry_count - 1, resync)
+        elif result.get("status") != "success":
+            logger.error("set_control_value failed: %s", data)
