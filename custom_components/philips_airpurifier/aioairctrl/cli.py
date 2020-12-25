@@ -53,6 +53,17 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Output status as JSON",
     )
+    parser_set = subparsers.add_parser(
+        "set",
+        help="Set value of device",
+    )
+    parser_set.add_argument(
+        "values",
+        metavar="K=V",
+        type=str,
+        nargs="+",
+        help="Key-Value pairs to set",
+    )
     return parser.parse_args()
 
 
@@ -73,6 +84,13 @@ async def main() -> None:
                     print(json.dumps(status))
                 else:
                     print(status)
+        elif args.command == "set":
+            data = {}
+            for e in args.values:
+                k, v = e.split("=")
+                data[k] = v
+            if data:
+                await client.set_control_values(data=data)
     except (KeyboardInterrupt, asyncio.CancelledError):
         pass
     finally:
