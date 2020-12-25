@@ -56,6 +56,7 @@ from .const import (
     DEFAULT_ICON,
     DEFAULT_NAME,
     MODEL_AC1214,
+    MODEL_AC2729,
     MODEL_AC4236,
     PHILIPS_AIR_QUALITY_INDEX,
     PHILIPS_CHILD_LOCK,
@@ -120,6 +121,7 @@ async def async_setup_platform(
 
     model_to_class = {
         MODEL_AC1214: PhilipsAC1214,
+        MODEL_AC2729: PhilipsAC2729,
         MODEL_AC4236: PhilipsAC4236,
     }
 
@@ -303,6 +305,19 @@ class PhilipsAC1214(PhilipsGenericCoAPFan):
         SPEED_ALLERGEN: {PHILIPS_POWER: "1", PHILIPS_MODE: "A"},
         SPEED_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "P"},
         SPEED_NIGHT: {PHILIPS_POWER: "1", PHILIPS_MODE: "N"},
+        SPEED_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
+    }
+
+
+class PhilipsAC2729(PhilipsGenericCoAPFan):
+    SPEED_MAP = {
+        **PhilipsGenericCoAPFan.SPEED_MAP,
+        SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
+        SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
+        SPEED_3: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
+        SPEED_ALLERGEN: {PHILIPS_POWER: "1", PHILIPS_MODE: "A"},
+        SPEED_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "P"},
+        SPEED_NIGHT: {PHILIPS_POWER: "1", PHILIPS_MODE: "S", PHILIPS_SPEED: "s"},
         SPEED_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
     }
 

@@ -6,6 +6,7 @@ DEFAULT_ICON = "mdi:air-purifier"
 CONF_MODEL = "model"
 
 MODEL_AC1214 = "ac1214"
+MODEL_AC2729 = "ac2729"
 MODEL_AC4236 = "ac4236"
 
 SPEED_1 = "1"
