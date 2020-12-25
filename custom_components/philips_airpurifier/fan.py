@@ -18,6 +18,7 @@ from homeassistant.components.fan import (
     SUPPORT_SET_SPEED,
 )
 from homeassistant.const import (
+    ATTR_TEMPERATURE,
     CONF_HOST,
     CONF_ICON,
     CONF_NAME,
@@ -39,6 +40,7 @@ from .const import (
     ATTR_DEVICE_ID,
     ATTR_DEVICE_VERSION,
     ATTR_DISPLAY_BACKLIGHT,
+    ATTR_HUMIDITY,
     ATTR_INDOOR_ALLERGEN_INDEX,
     ATTR_LANGUAGE,
     ATTR_LIGHT_BRIGHTNESS,
@@ -57,6 +59,7 @@ from .const import (
     DEFAULT_NAME,
     MODEL_AC1214,
     MODEL_AC2729,
+    MODEL_AC2889,
     MODEL_AC4236,
     PHILIPS_AIR_QUALITY_INDEX,
     PHILIPS_CHILD_LOCK,
@@ -64,6 +67,7 @@ from .const import (
     PHILIPS_DEVICE_VERSION,
     PHILIPS_DISPLAY_BACKLIGHT,
     PHILIPS_DISPLAY_BACKLIGHT_MAP,
+    PHILIPS_HUMIDITY,
     PHILIPS_INDOOR_ALLERGEN_INDEX,
     PHILIPS_LANGUAGE,
     PHILIPS_LIGHT_BRIGHTNESS,
@@ -78,6 +82,7 @@ from .const import (
     PHILIPS_RUNTIME,
     PHILIPS_SOFTWARE_VERSION,
     PHILIPS_SPEED,
+    PHILIPS_TEMPERATURE,
     PHILIPS_TOTAL_VOLATILE_ORGANIC_COMPOUNDS,
     PHILIPS_TYPE,
     PHILIPS_WIFI_VERSION,
@@ -86,6 +91,7 @@ from .const import (
     SPEED_3,
     SPEED_ALLERGEN,
     SPEED_AUTO,
+    SPEED_BACTERIA,
     SPEED_NIGHT,
     SPEED_SLEEP,
     SPEED_TURBO,
@@ -122,6 +128,7 @@ async def async_setup_platform(
     model_to_class = {
         MODEL_AC1214: PhilipsAC1214,
         MODEL_AC2729: PhilipsAC2729,
+        MODEL_AC2889: PhilipsAC2889,
         MODEL_AC4236: PhilipsAC4236,
     }
 
@@ -320,6 +327,26 @@ class PhilipsAC2729(PhilipsGenericCoAPFan):
         SPEED_NIGHT: {PHILIPS_POWER: "1", PHILIPS_MODE: "S", PHILIPS_SPEED: "s"},
         SPEED_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
     }
+
+
+class PhilipsAC2889(PhilipsGenericCoAPFan):
+    SPEED_MAP = {
+        **PhilipsGenericCoAPFan.SPEED_MAP,
+        SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
+        SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
+        SPEED_3: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
+        SPEED_ALLERGEN: {PHILIPS_POWER: "1", PHILIPS_MODE: "A"},
+        SPEED_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "P"},
+        SPEED_BACTERIA: {PHILIPS_POWER: "1", PHILIPS_MODE: "B"},
+        SPEED_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "s"},
+        SPEED_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
+    }
+
+    AVAILABLE_ATTRIBUTES = [
+        *PhilipsGenericCoAPFan.AVAILABLE_ATTRIBUTES,
+        (ATTR_TEMPERATURE, PHILIPS_TEMPERATURE),
+        (ATTR_HUMIDITY, PHILIPS_HUMIDITY),
+    ]
 
 
 class PhilipsAC4236(PhilipsGenericCoAPFan):
