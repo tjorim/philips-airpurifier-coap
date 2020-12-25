@@ -219,7 +219,7 @@ class PhilipsGenericCoAPFan(PhilipsGenericFan):
         try:
             _LOGGER.debug("retrieving initial status")
             status = await self._client.get_status()
-            _LOGGER.debug(status)
+            _LOGGER.debug("initial status: %s", status)
             device_id = status[PHILIPS_DEVICE_ID]
             self._unique_id = f"{self._model}-{device_id}"
         except Exception as e:
@@ -235,8 +235,9 @@ class PhilipsGenericCoAPFan(PhilipsGenericFan):
         await self._client.shutdown()
 
     async def _observe_status(self) -> None:
+        _LOGGER.debug("starting observation of status")
         async for status in self._client.observe_status():
-            _LOGGER.debug(status)
+            _LOGGER.debug("observation status: %s", status)
             await self._update_status(status)
 
     async def _update_status(self, status: dict) -> None:
