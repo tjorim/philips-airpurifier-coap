@@ -106,6 +106,10 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Required(CONF_HOST): cv.string,
         vol.Required(CONF_MODEL): vol.In(
             [
+                MODEL_AC1214,
+                MODEL_AC2729,
+                MODEL_AC2889,
+                MODEL_AC3858,
                 MODEL_AC4236,
             ]
         ),
