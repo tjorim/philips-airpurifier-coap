@@ -3,7 +3,7 @@ import json
 import logging
 import os
 
-from . import aiocoap_monkeypatch
+from . import aiocoap_monkeypatch  # noqa: F401
 from aiocoap import (
     Context,
     GET,
@@ -124,13 +124,16 @@ class CoAPClient:
             yield status["state"]["reported"]
 
     async def set_control_value(self, key, value, retry_count=5, resync=True) -> None:
+        await self.set_control_values(data={key: value}, retry_count=retry_count, resync=resync)
+
+    async def set_control_values(self, data: dict, retry_count=5, resync=True) -> None:
         state_desired = {
             "state": {
                 "desired": {
                     "CommandType": "app",
                     "DeviceId": "",
                     "EnduserId": "",
-                    key: value,
+                    **data,
                 }
             }
         }
@@ -151,4 +154,4 @@ class CoAPClient:
             await self._sync()
         if result.get("status") != "success" and retry_count > 0:
             logger.debug("set_control_value failed. retrying...")
-            await self.set_control_value(key, value, retry_count - 1, resync)
+            await self.set_control_values(data, retry_count - 1, resync)
