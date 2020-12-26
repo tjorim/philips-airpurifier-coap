@@ -1,8 +1,12 @@
 import argparse
 import asyncio
 import json
+import logging
 
 from .coap_client import CoAPClient
+
+logging.basicConfig(level=logging.WARN)
+logger = logging.getLogger(__package__)
 
 
 def parse_args() -> argparse.Namespace:
@@ -30,6 +34,13 @@ def parse_args() -> argparse.Namespace:
         required=False,
         default=5683,
         help="Port of CoAP-device (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-D",
+        "--debug",
+        dest="debug",
+        action="store_true",
+        help="Enable debug output",
     )
     parser_status = subparsers.add_parser(
         "status",
@@ -69,6 +80,10 @@ def parse_args() -> argparse.Namespace:
 
 async def main() -> None:
     args = parse_args()
+    if args.debug:
+        logger.setLevel(logging.DEBUG)
+        logging.getLogger("coap").setLevel(logging.DEBUG)
+        logging.getLogger("philips_airpurifier").setLevel(logging.DEBUG)
     client = None
     try:
         client = await CoAPClient.create(host=args.host, port=args.port)
