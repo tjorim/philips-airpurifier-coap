@@ -91,6 +91,7 @@ class CoAPClient:
         return key + ciphertext + digest
 
     async def _sync(self):
+        logger.debug("syncing")
         sync_request = os.urandom(4).hex().upper()
         request = Message(
             code=POST,
@@ -100,9 +101,11 @@ class CoAPClient:
         )
         response = await self._client_context.request(request).response
         client_key = response.payload.decode()
+        logger.debug("synced: %s", client_key)
         self._set_client_key(client_key)
 
     async def get_status(self):
+        logger.debug("retrieving status")
         request = Message(
             code=GET, mtype=NON, uri=f"coap://{self.host}:{self.port}{self.STATUS_PATH}"
         )
@@ -110,16 +113,19 @@ class CoAPClient:
         response = await self._client_context.request(request).response
         payload_encrypted = response.payload.decode()
         payload = self._decrypt_payload(payload_encrypted)
+        logger.debug("status: %s", payload)
         state_reported = json.loads(payload)
         return state_reported["state"]["reported"]
 
     async def observe_status(self):
+        logger.debug("observing status")
         request = Message(code=GET, uri=f"coap://{self.host}:{self.port}{self.STATUS_PATH}")
         request.opt.observe = 0
         requester = self._client_context.request(request)
         async for response in requester.observation:
             payload_encrypted = response.payload.decode()
             payload = self._decrypt_payload(payload_encrypted)
+            logger.debug("observation status: %s", payload)
             status = json.loads(payload)
             yield status["state"]["reported"]
 
