@@ -107,7 +107,9 @@ class CoAPClient:
     async def get_status(self):
         logger.debug("retrieving status")
         request = Message(
-            code=GET, mtype=NON, uri=f"coap://{self.host}:{self.port}{self.STATUS_PATH}"
+            code=GET,
+            mtype=NON,
+            uri=f"coap://{self.host}:{self.port}{self.STATUS_PATH}",
         )
         request.opt.observe = 0
         response = await self._client_context.request(request).response
@@ -119,7 +121,11 @@ class CoAPClient:
 
     async def observe_status(self):
         logger.debug("observing status")
-        request = Message(code=GET, uri=f"coap://{self.host}:{self.port}{self.STATUS_PATH}")
+        request = Message(
+            code=GET,
+            mtype=NON,
+            uri=f"coap://{self.host}:{self.port}{self.STATUS_PATH}",
+        )
         request.opt.observe = 0
         requester = self._client_context.request(request)
         async for response in requester.observation:
