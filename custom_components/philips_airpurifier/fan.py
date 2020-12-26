@@ -60,6 +60,7 @@ from .const import (
     MODEL_AC1214,
     MODEL_AC2729,
     MODEL_AC2889,
+    MODEL_AC3059,
     MODEL_AC3858,
     MODEL_AC4236,
     PHILIPS_AIR_QUALITY_INDEX,
@@ -109,6 +110,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
                 MODEL_AC1214,
                 MODEL_AC2729,
                 MODEL_AC2889,
+                MODEL_AC3059,
                 MODEL_AC3858,
                 MODEL_AC4236,
             ]
@@ -134,6 +136,7 @@ async def async_setup_platform(
         MODEL_AC1214: PhilipsAC1214,
         MODEL_AC2729: PhilipsAC2729,
         MODEL_AC2889: PhilipsAC2889,
+        MODEL_AC3059: PhilipsAC3059,
         MODEL_AC3858: PhilipsAC3858,
         MODEL_AC4236: PhilipsAC4236,
     }
@@ -306,6 +309,7 @@ class PhilipsGenericCoAPFan(PhilipsGenericFan):
         return device_attributes
 
 
+# TODO consolidate these classes as soon as we see a proper pattern
 class PhilipsAC1214(PhilipsGenericCoAPFan):
     SPEED_MAP = {
         **PhilipsGenericCoAPFan.SPEED_MAP,
@@ -349,6 +353,22 @@ class PhilipsAC2889(PhilipsGenericCoAPFan):
         *PhilipsGenericCoAPFan.AVAILABLE_ATTRIBUTES,
         (ATTR_TEMPERATURE, PHILIPS_TEMPERATURE),
         (ATTR_HUMIDITY, PHILIPS_HUMIDITY),
+    ]
+
+
+class PhilipsAC3059(PhilipsGenericCoAPFan):
+    SPEED_MAP = {
+        **PhilipsGenericCoAPFan.SPEED_MAP,
+        SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
+        SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
+        SPEED_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "AG"},
+        SPEED_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "S", PHILIPS_SPEED: "s"},
+        SPEED_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T", PHILIPS_SPEED: "t"},
+    }
+
+    AVAILABLE_ATTRIBUTES = [
+        *PhilipsGenericCoAPFan.AVAILABLE_ATTRIBUTES,
+        (ATTR_TOTAL_VOLATILE_ORGANIC_COMPOUNDS, PHILIPS_TOTAL_VOLATILE_ORGANIC_COMPOUNDS),
     ]
 
 
