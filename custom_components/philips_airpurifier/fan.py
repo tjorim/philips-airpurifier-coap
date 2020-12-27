@@ -40,6 +40,12 @@ from .const import (
     ATTR_DEVICE_ID,
     ATTR_DEVICE_VERSION,
     ATTR_DISPLAY_BACKLIGHT,
+    ATTR_FILTER_ACTIVE_CARBON_REMAINING,
+    ATTR_FILTER_ACTIVE_CARBON_TYPE,
+    ATTR_FILTER_HEPA_REMAINING,
+    ATTR_FILTER_HEPA_TYPE,
+    ATTR_FILTER_PRE_REMAINING,
+    ATTR_FILTER_WICK_REMAINING,
     ATTR_HUMIDITY,
     ATTR_INDOOR_ALLERGEN_INDEX,
     ATTR_LANGUAGE,
@@ -70,6 +76,12 @@ from .const import (
     PHILIPS_DEVICE_VERSION,
     PHILIPS_DISPLAY_BACKLIGHT,
     PHILIPS_DISPLAY_BACKLIGHT_MAP,
+    PHILIPS_FILTER_ACTIVE_CARBON_REMAINING,
+    PHILIPS_FILTER_ACTIVE_CARBON_TYPE,
+    PHILIPS_FILTER_HEPA_REMAINING,
+    PHILIPS_FILTER_HEPA_TYPE,
+    PHILIPS_FILTER_PRE_REMAINING,
+    PHILIPS_FILTER_WICK_REMAINING,
     PHILIPS_HUMIDITY,
     PHILIPS_INDOOR_ALLERGEN_INDEX,
     PHILIPS_LANGUAGE,
@@ -334,6 +346,24 @@ class PhilipsGenericCoAPFan(PhilipsGenericCoAPFanBase):
         (ATTR_LIGHT_BRIGHTNESS, PHILIPS_LIGHT_BRIGHTNESS),
         (ATTR_DISPLAY_BACKLIGHT, PHILIPS_DISPLAY_BACKLIGHT, PHILIPS_DISPLAY_BACKLIGHT_MAP),
         (ATTR_PREFERRED_INDEX, PHILIPS_PREFERRED_INDEX, PHILIPS_PREFERRED_INDEX_MAP),
+        # filter information
+        (
+            ATTR_FILTER_PRE_REMAINING,
+            PHILIPS_FILTER_PRE_REMAINING,
+            lambda x: str(timedelta(hours=x)),
+        ),
+        (ATTR_FILTER_HEPA_TYPE, PHILIPS_FILTER_HEPA_TYPE),
+        (
+            ATTR_FILTER_HEPA_REMAINING,
+            PHILIPS_FILTER_HEPA_REMAINING,
+            lambda x: str(timedelta(hours=x)),
+        ),
+        (ATTR_FILTER_ACTIVE_CARBON_TYPE, PHILIPS_FILTER_ACTIVE_CARBON_TYPE),
+        (
+            ATTR_FILTER_ACTIVE_CARBON_REMAINING,
+            PHILIPS_FILTER_ACTIVE_CARBON_REMAINING,
+            lambda x: str(timedelta(hours=x)),
+        ),
         # device sensors
         (ATTR_RUNTIME, PHILIPS_RUNTIME, lambda x: str(timedelta(seconds=round(x / 1000)))),
         (ATTR_AIR_QUALITY_INDEX, PHILIPS_AIR_QUALITY_INDEX),
@@ -345,6 +375,16 @@ class PhilipsGenericCoAPFan(PhilipsGenericCoAPFanBase):
 class PhilipsTVOCMixin(PhilipsGenericCoAPFanBase):
     AVAILABLE_ATTRIBUTES = [
         (ATTR_TOTAL_VOLATILE_ORGANIC_COMPOUNDS, PHILIPS_TOTAL_VOLATILE_ORGANIC_COMPOUNDS),
+    ]
+
+
+class PhilipsFilterWickMixin(PhilipsGenericCoAPFanBase):
+    AVAILABLE_ATTRIBUTES = [
+        (
+            ATTR_FILTER_WICK_REMAINING,
+            PHILIPS_FILTER_WICK_REMAINING,
+            lambda x: str(timedelta(hours=x)),
+        ),
     ]
 
 
@@ -368,7 +408,7 @@ class PhilipsAC1214(PhilipsGenericCoAPFan):
     }
 
 
-class PhilipsAC2729(PhilipsHumidifierMixin, PhilipsGenericCoAPFan):
+class PhilipsAC2729(PhilipsHumidifierMixin, PhilipsFilterWickMixin, PhilipsGenericCoAPFan):
     AVAILABLE_SPEEDS = {
         SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
         SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
@@ -403,7 +443,7 @@ class PhilipsAC3059(PhilipsTVOCMixin, PhilipsGenericCoAPFan):
     }
 
 
-class PhilipsAC3829(PhilipsHumidifierMixin, PhilipsGenericCoAPFan):
+class PhilipsAC3829(PhilipsHumidifierMixin, PhilipsFilterWickMixin, PhilipsGenericCoAPFan):
     AVAILABLE_SPEEDS = {
         SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
         SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
