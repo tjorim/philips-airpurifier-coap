@@ -24,10 +24,15 @@ SPEED_NIGHT = "night"
 SPEED_SLEEP = "sleep"
 SPEED_TURBO = "turbo"
 
+FUNCTION_PURIFICATION = "purification"
+FUNCTION_PURIFICATION_HUMIDIFICATION = "purification_humidification"
+
 SERVICE_SET_CHILD_LOCK_OFF = "set_child_lock_off"
 SERVICE_SET_CHILD_LOCK_ON = "set_child_lock_on"
 SERVICE_SET_DISPLAY_BACKLIGHT_OFF = "set_display_backlight_off"
 SERVICE_SET_DISPLAY_BACKLIGHT_ON = "set_display_backlight_on"
+SERVICE_SET_FUNCTION = "set_function"
+SERVICE_SET_HUMIDITY_TARGET = "set_humidity_target"
 SERVICE_SET_LIGHT_BRIGHTNESS = "set_light_brightness"
 
 ATTR_AIR_QUALITY_INDEX = "air_quality_index"
@@ -41,7 +46,9 @@ ATTR_FILTER_HEPA_REMAINING = "filter_hepa_remaining"
 ATTR_FILTER_HEPA_TYPE = "filter_hepa_type"
 ATTR_FILTER_PRE_REMAINING = "filter_pre_remaining"
 ATTR_FILTER_WICK_REMAINING = "filter_wick_remaining"
+ATTR_FUNCTION = "function"
 ATTR_HUMIDITY = "humidity"
+ATTR_HUMIDITY_TARGET = "humidity_target"
 ATTR_INDOOR_ALLERGEN_INDEX = "indoor_allergen_index"
 ATTR_LANGUAGE = "language"
 ATTR_LIGHT_BRIGHTNESS = "light_brightness"
@@ -69,7 +76,9 @@ PHILIPS_FILTER_HEPA_REMAINING = "fltsts1"
 PHILIPS_FILTER_HEPA_TYPE = "fltt1"
 PHILIPS_FILTER_PRE_REMAINING = "fltsts0"
 PHILIPS_FILTER_WICK_REMAINING = "wicksts"
+PHILIPS_FUNCTION = "func"
 PHILIPS_HUMIDITY = "rh"
+PHILIPS_HUMIDITY_TARGET = "rhset"
 PHILIPS_INDOOR_ALLERGEN_INDEX = "iaql"
 PHILIPS_LANGUAGE = "language"
 PHILIPS_LIGHT_BRIGHTNESS = "aqil"
@@ -96,4 +105,8 @@ PHILIPS_PREFERRED_INDEX_MAP = {
 PHILIPS_DISPLAY_BACKLIGHT_MAP = {
     "0": False,
     "1": True,
+}
+PHILIPS_FUNCTION_MAP = {
+    "P": "Purification",
+    "PH": "Purification and Humidification",
 }

@@ -48,7 +48,9 @@ from .const import (
     ATTR_FILTER_HEPA_TYPE,
     ATTR_FILTER_PRE_REMAINING,
     ATTR_FILTER_WICK_REMAINING,
+    ATTR_FUNCTION,
     ATTR_HUMIDITY,
+    ATTR_HUMIDITY_TARGET,
     ATTR_INDOOR_ALLERGEN_INDEX,
     ATTR_LANGUAGE,
     ATTR_LIGHT_BRIGHTNESS,
@@ -67,6 +69,8 @@ from .const import (
     DEFAULT_ICON,
     DEFAULT_NAME,
     DOMAIN,
+    FUNCTION_PURIFICATION,
+    FUNCTION_PURIFICATION_HUMIDIFICATION,
     MODEL_AC1214,
     MODEL_AC2729,
     MODEL_AC2889,
@@ -86,7 +90,10 @@ from .const import (
     PHILIPS_FILTER_HEPA_TYPE,
     PHILIPS_FILTER_PRE_REMAINING,
     PHILIPS_FILTER_WICK_REMAINING,
+    PHILIPS_FUNCTION,
+    PHILIPS_FUNCTION_MAP,
     PHILIPS_HUMIDITY,
+    PHILIPS_HUMIDITY_TARGET,
     PHILIPS_INDOOR_ALLERGEN_INDEX,
     PHILIPS_LANGUAGE,
     PHILIPS_LIGHT_BRIGHTNESS,
@@ -109,6 +116,8 @@ from .const import (
     SERVICE_SET_CHILD_LOCK_ON,
     SERVICE_SET_DISPLAY_BACKLIGHT_OFF,
     SERVICE_SET_DISPLAY_BACKLIGHT_ON,
+    SERVICE_SET_FUNCTION,
+    SERVICE_SET_HUMIDITY_TARGET,
     SERVICE_SET_LIGHT_BRIGHTNESS,
     SPEED_1,
     SPEED_2,
@@ -484,9 +493,56 @@ class PhilipsFilterWickMixin(PhilipsGenericCoAPFanBase):
 
 class PhilipsHumidifierMixin(PhilipsGenericCoAPFanBase):
     AVAILABLE_ATTRIBUTES = [
-        (ATTR_TEMPERATURE, PHILIPS_TEMPERATURE),
+        (ATTR_FUNCTION, PHILIPS_FUNCTION, PHILIPS_FUNCTION_MAP),
         (ATTR_HUMIDITY, PHILIPS_HUMIDITY),
+        (ATTR_HUMIDITY_TARGET, PHILIPS_HUMIDITY_TARGET),
+        (ATTR_TEMPERATURE, PHILIPS_TEMPERATURE),
     ]
+
+    SERVICE_SCHEMA_SET_FUNCTION = vol.Schema(
+        {
+            vol.Required(ATTR_ENTITY_ID): cv.entity_id,
+            vol.Required(ATTR_FUNCTION): vol.In(
+                [
+                    FUNCTION_PURIFICATION,
+                    FUNCTION_PURIFICATION_HUMIDIFICATION,
+                ]
+            ),
+        }
+    )
+
+    SERVICE_SCHEMA_SET_HUMIDITY_TARGET = vol.Schema(
+        {
+            vol.Required(ATTR_ENTITY_ID): cv.entity_id,
+            vol.Required(ATTR_HUMIDITY_TARGET): vol.All(
+                vol.Coerce(int),
+                vol.In([40, 50, 60, 70]),
+            ),
+        }
+    )
+
+    def register_services(self, async_register) -> None:
+        async_register(
+            domain=DOMAIN,
+            service=SERVICE_SET_FUNCTION,
+            service_func=self.async_set_function,
+            schema=self.SERVICE_SCHEMA_SET_FUNCTION,
+        )
+        async_register(
+            domain=DOMAIN,
+            service=SERVICE_SET_HUMIDITY_TARGET,
+            service_func=self.async_set_humidity_target,
+            schema=self.SERVICE_SCHEMA_SET_HUMIDITY_TARGET,
+        )
+
+    async def async_set_function(self, function: str) -> None:
+        if function == FUNCTION_PURIFICATION:
+            await self._client.set_control_value(PHILIPS_FUNCTION, "P")
+        elif function == FUNCTION_PURIFICATION_HUMIDIFICATION:
+            await self._client.set_control_value(PHILIPS_FUNCTION, "PH")
+
+    async def async_set_humidity_target(self, humidity_target: int) -> None:
+        await self._client.set_control_value(PHILIPS_HUMIDITY_TARGET, humidity_target)
 
 
 # TODO consolidate these classes as soon as we see a proper pattern
