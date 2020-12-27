@@ -104,6 +104,8 @@ from .const import (
     PHILIPS_TOTAL_VOLATILE_ORGANIC_COMPOUNDS,
     PHILIPS_TYPE,
     PHILIPS_WIFI_VERSION,
+    SERVICE_SET_CHILD_LOCK_OFF,
+    SERVICE_SET_CHILD_LOCK_ON,
     SPEED_1,
     SPEED_2,
     SPEED_3,
@@ -408,6 +410,23 @@ class PhilipsGenericCoAPFan(PhilipsGenericCoAPFanBase):
         (ATTR_INDOOR_ALLERGEN_INDEX, PHILIPS_INDOOR_ALLERGEN_INDEX),
         (ATTR_PM25, PHILIPS_PM25),
     ]
+
+    def register_services(self, async_register):
+        async_register(
+            domain=DOMAIN,
+            service=SERVICE_SET_CHILD_LOCK_ON,
+            service_func=self.async_set_child_lock_on,
+        )
+        async_register(
+            domain=DOMAIN,
+            service=SERVICE_SET_CHILD_LOCK_OFF,
+            service_func=self.async_set_child_lock_off,
+        )
+    async def async_set_child_lock_on(self):
+        await self._client.set_control_value(PHILIPS_CHILD_LOCK, True)
+
+    async def async_set_child_lock_off(self):
+        await self._client.set_control_value(PHILIPS_CHILD_LOCK, False)
 
 
 class PhilipsTVOCMixin(PhilipsGenericCoAPFanBase):

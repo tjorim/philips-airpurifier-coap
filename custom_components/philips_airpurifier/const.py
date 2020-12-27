@@ -24,6 +24,9 @@ SPEED_NIGHT = "night"
 SPEED_SLEEP = "sleep"
 SPEED_TURBO = "turbo"
 
+SERVICE_SET_CHILD_LOCK_OFF = "set_child_lock_off"
+SERVICE_SET_CHILD_LOCK_ON = "set_child_lock_on"
+
 ATTR_AIR_QUALITY_INDEX = "air_quality_index"
 ATTR_CHILD_LOCK = "child_lock"
 ATTR_DEVICE_ID = "device_id"
