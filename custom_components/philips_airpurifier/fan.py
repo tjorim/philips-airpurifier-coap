@@ -106,6 +106,8 @@ from .const import (
     PHILIPS_WIFI_VERSION,
     SERVICE_SET_CHILD_LOCK_OFF,
     SERVICE_SET_CHILD_LOCK_ON,
+    SERVICE_SET_DISPLAY_BACKLIGHT_OFF,
+    SERVICE_SET_DISPLAY_BACKLIGHT_ON,
     SPEED_1,
     SPEED_2,
     SPEED_3,
@@ -422,11 +424,28 @@ class PhilipsGenericCoAPFan(PhilipsGenericCoAPFanBase):
             service=SERVICE_SET_CHILD_LOCK_OFF,
             service_func=self.async_set_child_lock_off,
         )
+        async_register(
+            domain=DOMAIN,
+            service=SERVICE_SET_DISPLAY_BACKLIGHT_ON,
+            service_func=self.async_set_display_backlight_on,
+        )
+        async_register(
+            domain=DOMAIN,
+            service=SERVICE_SET_DISPLAY_BACKLIGHT_OFF,
+            service_func=self.async_set_display_backlight_off,
+        )
+
     async def async_set_child_lock_on(self):
         await self._client.set_control_value(PHILIPS_CHILD_LOCK, True)
 
     async def async_set_child_lock_off(self):
         await self._client.set_control_value(PHILIPS_CHILD_LOCK, False)
+
+    async def async_set_display_backlight_on(self):
+        await self._client.set_control_value(PHILIPS_DISPLAY_BACKLIGHT, "1")
+
+    async def async_set_display_backlight_off(self):
+        await self._client.set_control_value(PHILIPS_DISPLAY_BACKLIGHT, "0")
 
 
 class PhilipsTVOCMixin(PhilipsGenericCoAPFanBase):
