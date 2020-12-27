@@ -28,6 +28,7 @@ SERVICE_SET_CHILD_LOCK_OFF = "set_child_lock_off"
 SERVICE_SET_CHILD_LOCK_ON = "set_child_lock_on"
 SERVICE_SET_DISPLAY_BACKLIGHT_OFF = "set_display_backlight_off"
 SERVICE_SET_DISPLAY_BACKLIGHT_ON = "set_display_backlight_on"
+SERVICE_SET_LIGHT_BRIGHTNESS = "set_light_brightness"
 
 ATTR_AIR_QUALITY_INDEX = "air_quality_index"
 ATTR_CHILD_LOCK = "child_lock"

@@ -25,3 +25,13 @@ set_display_backlight_off:
     entity_id:
       description: Name of the fan entity
       example: "fan.philips_airpurifier"
+
+set_light_brightness:
+  description: Set the light brightness
+  fields:
+    entity_id:
+      description: Name of the fan entity
+      example: "fan.philips_airpurifier"
+    brightness:
+      description: Brightness as integer value between 0 and 100
+      example: 50

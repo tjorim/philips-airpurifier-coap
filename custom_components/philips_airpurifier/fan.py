@@ -17,6 +17,7 @@ from homeassistant.components.fan import (
     SPEED_OFF,
     SUPPORT_SET_SPEED,
 )
+from homeassistant.components.light import ATTR_BRIGHTNESS
 from homeassistant.const import (
     ATTR_ENTITY_ID,
     ATTR_TEMPERATURE,
@@ -108,6 +109,7 @@ from .const import (
     SERVICE_SET_CHILD_LOCK_ON,
     SERVICE_SET_DISPLAY_BACKLIGHT_OFF,
     SERVICE_SET_DISPLAY_BACKLIGHT_ON,
+    SERVICE_SET_LIGHT_BRIGHTNESS,
     SPEED_1,
     SPEED_2,
     SPEED_3,
@@ -413,6 +415,13 @@ class PhilipsGenericCoAPFan(PhilipsGenericCoAPFanBase):
         (ATTR_PM25, PHILIPS_PM25),
     ]
 
+    SERVICE_SCHEMA_SET_LIGHT_BRIGHTNESS = vol.Schema(
+        {
+            vol.Required(ATTR_ENTITY_ID): cv.entity_id,
+            vol.Required(ATTR_BRIGHTNESS): vol.All(vol.Coerce(int), vol.Clamp(min=0, max=100)),
+        }
+    )
+
     def register_services(self, async_register):
         async_register(
             domain=DOMAIN,
@@ -434,6 +443,12 @@ class PhilipsGenericCoAPFan(PhilipsGenericCoAPFanBase):
             service=SERVICE_SET_DISPLAY_BACKLIGHT_OFF,
             service_func=self.async_set_display_backlight_off,
         )
+        async_register(
+            domain=DOMAIN,
+            service=SERVICE_SET_LIGHT_BRIGHTNESS,
+            service_func=self.async_set_light_brightness,
+            schema=self.SERVICE_SCHEMA_SET_LIGHT_BRIGHTNESS,
+        )
 
     async def async_set_child_lock_on(self):
         await self._client.set_control_value(PHILIPS_CHILD_LOCK, True)
@@ -446,6 +461,9 @@ class PhilipsGenericCoAPFan(PhilipsGenericCoAPFanBase):
 
     async def async_set_display_backlight_off(self):
         await self._client.set_control_value(PHILIPS_DISPLAY_BACKLIGHT, "0")
+
+    async def async_set_light_brightness(self, brightness: int):
+        await self._client.set_control_value(PHILIPS_LIGHT_BRIGHTNESS, brightness)
 
 
 class PhilipsTVOCMixin(PhilipsGenericCoAPFanBase):
