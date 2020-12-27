@@ -338,6 +338,11 @@ class PhilipsAC2729(PhilipsGenericCoAPFan):
         SPEED_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
     }
 
+    AVAILABLE_ATTRIBUTES = [
+        *PhilipsGenericCoAPFan.AVAILABLE_ATTRIBUTES,
+        (ATTR_TEMPERATURE, PHILIPS_TEMPERATURE),
+        (ATTR_HUMIDITY, PHILIPS_HUMIDITY),
+    ]
 
 class PhilipsAC2889(PhilipsGenericCoAPFan):
     SPEED_MAP = {
