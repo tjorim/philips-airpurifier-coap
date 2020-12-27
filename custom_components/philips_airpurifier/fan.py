@@ -18,6 +18,7 @@ from homeassistant.components.fan import (
     SUPPORT_SET_SPEED,
 )
 from homeassistant.const import (
+    ATTR_ENTITY_ID,
     ATTR_TEMPERATURE,
     CONF_HOST,
     CONF_ICON,
@@ -61,8 +62,10 @@ from .const import (
     ATTR_TYPE,
     ATTR_WIFI_VERSION,
     CONF_MODEL,
+    DATA_KEY,
     DEFAULT_ICON,
     DEFAULT_NAME,
+    DOMAIN,
     MODEL_AC1214,
     MODEL_AC2729,
     MODEL_AC2889,
@@ -111,7 +114,6 @@ from .const import (
     SPEED_SLEEP,
     SPEED_TURBO,
 )
-from .const import DOMAIN  # noqa: F401
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -163,7 +165,34 @@ async def async_setup_platform(
     else:
         _LOGGER.error("Unsupported model: %s", model)
         return False
+
+    if DATA_KEY not in hass.data:
+        hass.data[DATA_KEY] = []
+    hass.data[DATA_KEY].append(device)
     async_add_entities([device])
+
+    def wrapped_async_register(
+        domain: str,
+        service: str,
+        service_func: Callable,
+        schema: Optional[vol.Schema] = None,
+    ):
+        async def service_func_wrapper(service_call):
+            service_data = service_call.data.copy()
+            entity_id = service_data.pop("entity_id", None)
+            devices = [d for d in hass.data[DATA_KEY] if d.entity_id == entity_id]
+            for d in devices:
+                device_service_func = getattr(d, service_func.__name__)
+                return await device_service_func(**service_data)
+
+        hass.services.async_register(
+            domain=domain,
+            service=service,
+            service_func=service_func_wrapper,
+            schema=schema,
+        )
+
+    device._register_services(wrapped_async_register)
 
 
 class PhilipsGenericFan(FanEntity):
@@ -183,6 +212,15 @@ class PhilipsGenericFan(FanEntity):
         pass
 
     async def async_will_remove_from_hass(self) -> None:
+        pass
+
+    def _register_services(self, async_register) -> None:
+        for cls in reversed(self.__class__.__mro__):
+            register_method = getattr(cls, "register_services", None)
+            if callable(register_method):
+                register_method(self, async_register)
+
+    def register_services(self, async_register) -> None:
         pass
 
     @property

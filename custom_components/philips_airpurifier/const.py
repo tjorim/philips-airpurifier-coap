@@ -1,4 +1,5 @@
 DOMAIN = "philips_airpurifier"
+DATA_KEY = "fan.philips_airpurifier"
 
 DEFAULT_NAME = "Philips AirPurifier"
 DEFAULT_ICON = "mdi:air-purifier"
