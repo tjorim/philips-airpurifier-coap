@@ -190,37 +190,20 @@ class PhilipsGenericFan(FanEntity):
         return self._available
 
 
-class PhilipsGenericCoAPFan(PhilipsGenericFan):
-    SPEED_MAP = {
-        SPEED_OFF: {PHILIPS_POWER: "0"},
-    }
-
-    AVAILABLE_ATTRIBUTES = [
-        # device information
-        (ATTR_NAME, PHILIPS_NAME),
-        (ATTR_TYPE, PHILIPS_TYPE),
-        (ATTR_MODEL_ID, PHILIPS_MODEL_ID),
-        (ATTR_PRODUCT_ID, PHILIPS_PRODUCT_ID),
-        (ATTR_DEVICE_ID, PHILIPS_DEVICE_ID),
-        (ATTR_DEVICE_VERSION, PHILIPS_DEVICE_VERSION),
-        (ATTR_SOFTWARE_VERSION, PHILIPS_SOFTWARE_VERSION),
-        (ATTR_WIFI_VERSION, PHILIPS_WIFI_VERSION),
-        # device configuration
-        (ATTR_LANGUAGE, PHILIPS_LANGUAGE),
-        (ATTR_CHILD_LOCK, PHILIPS_CHILD_LOCK),
-        (ATTR_LIGHT_BRIGHTNESS, PHILIPS_LIGHT_BRIGHTNESS),
-        (ATTR_DISPLAY_BACKLIGHT, PHILIPS_DISPLAY_BACKLIGHT, PHILIPS_DISPLAY_BACKLIGHT_MAP),
-        (ATTR_PREFERRED_INDEX, PHILIPS_PREFERRED_INDEX, PHILIPS_PREFERRED_INDEX_MAP),
-        # device sensors
-        (ATTR_RUNTIME, PHILIPS_RUNTIME, lambda x: str(timedelta(seconds=round(x / 1000)))),
-        (ATTR_AIR_QUALITY_INDEX, PHILIPS_AIR_QUALITY_INDEX),
-        (ATTR_INDOOR_ALLERGEN_INDEX, PHILIPS_INDOOR_ALLERGEN_INDEX),
-        (ATTR_PM25, PHILIPS_PM25),
-    ]
+class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
+    AVAILABLE_SPEEDS = {}
+    AVAILABLE_ATTRIBUTES = []
 
     def __init__(self, host: str, model: str, name: str, icon: str) -> None:
         super().__init__(host, model, name, icon)
-        self._device_status = dict()
+        self._device_status = {}
+
+        self._speed_list = []
+        self._available_speeds = {}
+        self._collect_available_speeds()
+
+        self._available_attributes = []
+        self._collect_available_attributes()
 
     async def init(self) -> None:
         self._client = await CoAPClient.create(self._host)
@@ -232,6 +215,21 @@ class PhilipsGenericCoAPFan(PhilipsGenericFan):
         except Exception as e:
             _LOGGER.error("Failed retrieving unique_id: %s", e)
             raise PlatformNotReady
+
+    def _collect_available_speeds(self):
+        speeds = {}
+        for cls in reversed(self.__class__.__mro__):
+            cls_speeds = getattr(cls, "AVAILABLE_SPEEDS", {})
+            speeds.update(cls_speeds)
+        self._available_speeds = speeds
+        self._speed_list = list(self._available_speeds.keys())
+
+    def _collect_available_attributes(self):
+        attributes = []
+        for cls in reversed(self.__class__.__mro__):
+            cls_attributes = getattr(cls, "AVAILABLE_ATTRIBUTES", [])
+            attributes.extend(cls_attributes)
+        self._available_attributes = attributes
 
     async def async_added_to_hass(self) -> None:
         self._observer_task = asyncio.create_task(self._observe_status())
@@ -276,11 +274,11 @@ class PhilipsGenericCoAPFan(PhilipsGenericFan):
 
     @property
     def speed_list(self) -> list:
-        return list(self.SPEED_MAP.keys())
+        return self._speed_list
 
     @property
     def speed(self) -> str:
-        for speed, status_pattern in self.SPEED_MAP.items():
+        for speed, status_pattern in self._available_speeds.items():
             for k, v in status_pattern.items():
                 if self._device_status.get(k) != v:
                     break
@@ -288,7 +286,7 @@ class PhilipsGenericCoAPFan(PhilipsGenericFan):
                 return speed
 
     async def async_set_speed(self, speed: str) -> None:
-        status_pattern = self.SPEED_MAP.get(speed)
+        status_pattern = self._available_speeds.get(speed)
         if status_pattern:
             await self._client.set_control_values(data=status_pattern)
 
@@ -309,16 +307,57 @@ class PhilipsGenericCoAPFan(PhilipsGenericFan):
                 attributes.update({key: value})
 
         device_attributes = dict()
-        for key, philips_key, *rest in self.AVAILABLE_ATTRIBUTES:
+        for key, philips_key, *rest in self._available_attributes:
             value_map = rest[0] if len(rest) else None
             append(device_attributes, key, philips_key, value_map)
         return device_attributes
 
 
+class PhilipsGenericCoAPFan(PhilipsGenericCoAPFanBase):
+    AVAILABLE_SPEEDS = {
+        SPEED_OFF: {PHILIPS_POWER: "0"},
+    }
+
+    AVAILABLE_ATTRIBUTES = [
+        # device information
+        (ATTR_NAME, PHILIPS_NAME),
+        (ATTR_TYPE, PHILIPS_TYPE),
+        (ATTR_MODEL_ID, PHILIPS_MODEL_ID),
+        (ATTR_PRODUCT_ID, PHILIPS_PRODUCT_ID),
+        (ATTR_DEVICE_ID, PHILIPS_DEVICE_ID),
+        (ATTR_DEVICE_VERSION, PHILIPS_DEVICE_VERSION),
+        (ATTR_SOFTWARE_VERSION, PHILIPS_SOFTWARE_VERSION),
+        (ATTR_WIFI_VERSION, PHILIPS_WIFI_VERSION),
+        # device configuration
+        (ATTR_LANGUAGE, PHILIPS_LANGUAGE),
+        (ATTR_CHILD_LOCK, PHILIPS_CHILD_LOCK),
+        (ATTR_LIGHT_BRIGHTNESS, PHILIPS_LIGHT_BRIGHTNESS),
+        (ATTR_DISPLAY_BACKLIGHT, PHILIPS_DISPLAY_BACKLIGHT, PHILIPS_DISPLAY_BACKLIGHT_MAP),
+        (ATTR_PREFERRED_INDEX, PHILIPS_PREFERRED_INDEX, PHILIPS_PREFERRED_INDEX_MAP),
+        # device sensors
+        (ATTR_RUNTIME, PHILIPS_RUNTIME, lambda x: str(timedelta(seconds=round(x / 1000)))),
+        (ATTR_AIR_QUALITY_INDEX, PHILIPS_AIR_QUALITY_INDEX),
+        (ATTR_INDOOR_ALLERGEN_INDEX, PHILIPS_INDOOR_ALLERGEN_INDEX),
+        (ATTR_PM25, PHILIPS_PM25),
+    ]
+
+
+class PhilipsTVOCMixin(PhilipsGenericCoAPFanBase):
+    AVAILABLE_ATTRIBUTES = [
+        (ATTR_TOTAL_VOLATILE_ORGANIC_COMPOUNDS, PHILIPS_TOTAL_VOLATILE_ORGANIC_COMPOUNDS),
+    ]
+
+
+class PhilipsHumidifierMixin(PhilipsGenericCoAPFanBase):
+    AVAILABLE_ATTRIBUTES = [
+        (ATTR_TEMPERATURE, PHILIPS_TEMPERATURE),
+        (ATTR_HUMIDITY, PHILIPS_HUMIDITY),
+    ]
+
+
 # TODO consolidate these classes as soon as we see a proper pattern
 class PhilipsAC1214(PhilipsGenericCoAPFan):
-    SPEED_MAP = {
-        **PhilipsGenericCoAPFan.SPEED_MAP,
+    AVAILABLE_SPEEDS = {
         SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
         SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
         SPEED_3: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
@@ -329,9 +368,8 @@ class PhilipsAC1214(PhilipsGenericCoAPFan):
     }
 
 
-class PhilipsAC2729(PhilipsGenericCoAPFan):
-    SPEED_MAP = {
-        **PhilipsGenericCoAPFan.SPEED_MAP,
+class PhilipsAC2729(PhilipsHumidifierMixin, PhilipsGenericCoAPFan):
+    AVAILABLE_SPEEDS = {
         SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
         SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
         SPEED_3: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
@@ -341,15 +379,9 @@ class PhilipsAC2729(PhilipsGenericCoAPFan):
         SPEED_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
     }
 
-    AVAILABLE_ATTRIBUTES = [
-        *PhilipsGenericCoAPFan.AVAILABLE_ATTRIBUTES,
-        (ATTR_TEMPERATURE, PHILIPS_TEMPERATURE),
-        (ATTR_HUMIDITY, PHILIPS_HUMIDITY),
-    ]
 
-class PhilipsAC2889(PhilipsGenericCoAPFan):
-    SPEED_MAP = {
-        **PhilipsGenericCoAPFan.SPEED_MAP,
+class PhilipsAC2889(PhilipsHumidifierMixin, PhilipsGenericCoAPFan):
+    AVAILABLE_SPEEDS = {
         SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
         SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
         SPEED_3: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
@@ -360,16 +392,9 @@ class PhilipsAC2889(PhilipsGenericCoAPFan):
         SPEED_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
     }
 
-    AVAILABLE_ATTRIBUTES = [
-        *PhilipsGenericCoAPFan.AVAILABLE_ATTRIBUTES,
-        (ATTR_TEMPERATURE, PHILIPS_TEMPERATURE),
-        (ATTR_HUMIDITY, PHILIPS_HUMIDITY),
-    ]
 
-
-class PhilipsAC3059(PhilipsGenericCoAPFan):
-    SPEED_MAP = {
-        **PhilipsGenericCoAPFan.SPEED_MAP,
+class PhilipsAC3059(PhilipsTVOCMixin, PhilipsGenericCoAPFan):
+    AVAILABLE_SPEEDS = {
         SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
         SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
         SPEED_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "AG"},
@@ -377,15 +402,9 @@ class PhilipsAC3059(PhilipsGenericCoAPFan):
         SPEED_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T", PHILIPS_SPEED: "t"},
     }
 
-    AVAILABLE_ATTRIBUTES = [
-        *PhilipsGenericCoAPFan.AVAILABLE_ATTRIBUTES,
-        (ATTR_TOTAL_VOLATILE_ORGANIC_COMPOUNDS, PHILIPS_TOTAL_VOLATILE_ORGANIC_COMPOUNDS),
-    ]
 
-
-class PhilipsAC3829(PhilipsGenericCoAPFan):
-    SPEED_MAP = {
-        **PhilipsGenericCoAPFan.SPEED_MAP,
+class PhilipsAC3829(PhilipsHumidifierMixin, PhilipsGenericCoAPFan):
+    AVAILABLE_SPEEDS = {
         SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
         SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
         SPEED_3: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
@@ -395,16 +414,9 @@ class PhilipsAC3829(PhilipsGenericCoAPFan):
         SPEED_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
     }
 
-    AVAILABLE_ATTRIBUTES = [
-        *PhilipsGenericCoAPFan.AVAILABLE_ATTRIBUTES,
-        (ATTR_TEMPERATURE, PHILIPS_TEMPERATURE),
-        (ATTR_HUMIDITY, PHILIPS_HUMIDITY),
-    ]
 
-
-class PhilipsAC3858(PhilipsGenericCoAPFan):
-    SPEED_MAP = {
-        **PhilipsGenericCoAPFan.SPEED_MAP,
+class PhilipsAC3858(PhilipsTVOCMixin, PhilipsGenericCoAPFan):
+    AVAILABLE_SPEEDS = {
         SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
         SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
         SPEED_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "AG"},
@@ -412,23 +424,12 @@ class PhilipsAC3858(PhilipsGenericCoAPFan):
         SPEED_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T", PHILIPS_SPEED: "t"},
     }
 
-    AVAILABLE_ATTRIBUTES = [
-        *PhilipsGenericCoAPFan.AVAILABLE_ATTRIBUTES,
-        (ATTR_TOTAL_VOLATILE_ORGANIC_COMPOUNDS, PHILIPS_TOTAL_VOLATILE_ORGANIC_COMPOUNDS),
-    ]
 
-
-class PhilipsAC4236(PhilipsGenericCoAPFan):
-    SPEED_MAP = {
-        **PhilipsGenericCoAPFan.SPEED_MAP,
+class PhilipsAC4236(PhilipsTVOCMixin, PhilipsGenericCoAPFan):
+    AVAILABLE_SPEEDS = {
         SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
         SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
         SPEED_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "AG"},
         SPEED_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "S", PHILIPS_SPEED: "s"},
         SPEED_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T", PHILIPS_SPEED: "t"},
     }
-
-    AVAILABLE_ATTRIBUTES = [
-        *PhilipsGenericCoAPFan.AVAILABLE_ATTRIBUTES,
-        (ATTR_TOTAL_VOLATILE_ORGANIC_COMPOUNDS, PHILIPS_TOTAL_VOLATILE_ORGANIC_COMPOUNDS),
-    ]
