@@ -63,6 +63,7 @@ from .const import (
     ATTR_SOFTWARE_VERSION,
     ATTR_TOTAL_VOLATILE_ORGANIC_COMPOUNDS,
     ATTR_TYPE,
+    ATTR_WATER_LEVEL,
     ATTR_WIFI_VERSION,
     CONF_MODEL,
     DATA_KEY,
@@ -111,6 +112,7 @@ from .const import (
     PHILIPS_TEMPERATURE,
     PHILIPS_TOTAL_VOLATILE_ORGANIC_COMPOUNDS,
     PHILIPS_TYPE,
+    PHILIPS_WATER_LEVEL,
     PHILIPS_WIFI_VERSION,
     SERVICE_SET_CHILD_LOCK_OFF,
     SERVICE_SET_CHILD_LOCK_ON,
@@ -545,6 +547,12 @@ class PhilipsHumidifierMixin(PhilipsGenericCoAPFanBase):
         await self._client.set_control_value(PHILIPS_HUMIDITY_TARGET, humidity_target)
 
 
+class PhilipsWaterLevelMixin(PhilipsGenericCoAPFanBase):
+    AVAILABLE_ATTRIBUTES = [
+        (ATTR_WATER_LEVEL, PHILIPS_WATER_LEVEL),
+    ]
+
+
 # TODO consolidate these classes as soon as we see a proper pattern
 class PhilipsAC1214(PhilipsGenericCoAPFan):
     AVAILABLE_SPEEDS = {
@@ -558,7 +566,12 @@ class PhilipsAC1214(PhilipsGenericCoAPFan):
     }
 
 
-class PhilipsAC2729(PhilipsHumidifierMixin, PhilipsFilterWickMixin, PhilipsGenericCoAPFan):
+class PhilipsAC2729(
+    PhilipsWaterLevelMixin,
+    PhilipsHumidifierMixin,
+    PhilipsFilterWickMixin,
+    PhilipsGenericCoAPFan,
+):
     AVAILABLE_SPEEDS = {
         SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
         SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
