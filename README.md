@@ -62,6 +62,8 @@ To aquire debug-logs, add the following to your `configuration.yaml`:
 logger:
   logs:
     custom_components.philips_airpurifier: debug
+    coap: debug
+    aioairctrl: debug
 ```
 
 logs should now be available in `home-assistant.log`

@@ -34,8 +34,8 @@ from homeassistant.helpers.typing import (
     HomeAssistantType,
 )
 import voluptuous as vol
+from aioairctrl import CoAPClient
 
-from .aioairctrl.coap_client import CoAPClient
 from .const import (
     ATTR_AIR_QUALITY_INDEX,
     ATTR_CHILD_LOCK,

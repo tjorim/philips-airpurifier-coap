@@ -5,7 +5,6 @@
   "dependencies": [],
   "codeowners": ["@betaboon"],
   "requirements": [
-    "aiocoap==0.4b3",
-    "pycryptodomex"
+    "aioairctrl @ git+https://github.com/betaboon/aioairctrl@v0.1.0"
   ]
 }
