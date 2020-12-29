@@ -583,7 +583,7 @@ class PhilipsAC2729(
     }
 
 
-class PhilipsAC2889(PhilipsHumidifierMixin, PhilipsGenericCoAPFan):
+class PhilipsAC2889(PhilipsGenericCoAPFan):
     AVAILABLE_SPEEDS = {
         SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
         SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
