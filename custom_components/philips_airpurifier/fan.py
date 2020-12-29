@@ -186,7 +186,7 @@ async def async_setup_platform(
     if DATA_KEY not in hass.data:
         hass.data[DATA_KEY] = []
     hass.data[DATA_KEY].append(device)
-    async_add_entities([device])
+    async_add_entities([device], update_before_add=True)
 
     def wrapped_async_register(
         domain: str,
@@ -263,7 +263,7 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
 
     def __init__(self, host: str, model: str, name: str, icon: str) -> None:
         super().__init__(host, model, name, icon)
-        self._device_status = {}
+        self._device_status = None
 
         self._speed_list = []
         self._available_speeds = {}
@@ -279,6 +279,7 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
             status = await self._client.get_status()
             device_id = status[PHILIPS_DEVICE_ID]
             self._unique_id = f"{self._model}-{device_id}"
+            self._device_status = status
         except Exception as e:
             _LOGGER.error("Failed retrieving unique_id: %s", e)
             raise PlatformNotReady
@@ -308,21 +309,20 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
 
     async def _observe_status(self) -> None:
         async for status in self._client.observe_status():
-            await self._update_status(status)
-
-    async def _update_status(self, status: dict) -> None:
-        self._available = True
-        self._state = status.get(PHILIPS_POWER) == "1"
-        self._device_status = status
-        self.schedule_update_ha_state()
+            self._device_status = status
+            self.schedule_update_ha_state()
 
     @property
     def should_poll(self) -> bool:
         return False
 
     @property
+    def available(self):
+        return self._device_status is not None
+
+    @property
     def is_on(self) -> bool:
-        return self._state
+        return self._device_status.get(PHILIPS_POWER) == "1"
 
     async def async_turn_on(self, speed: Optional[str] = None, **kwargs):
         if speed is None:
