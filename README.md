@@ -3,13 +3,47 @@
 This is a `Local Push` integration for Philips airpurifiers.
 Currently only encrypted-CoAP is implemented.
 
-## Usage:
+## Install:
+
+Add `https://github.com/betaboon/philips-airpurifier.git` as custom-repository in [HACS](https://hacs.xyz/docs/faq/custom_repositories/)
+
+
+## Setup:
+
+### Single device
+
+Add the following to your `configuration.yaml`:
+
 ```yaml
 fan:
   platform: philips_airpurifier
   host: 192.168.0.17
   model: ac4236
 ```
+
+*adapt the `host` according to your setup*
+
+### Multiple devices
+
+Add the following to your `configuration.yaml`:
+
+```yaml
+fan:
+  - platform: philips_airpurifier
+    host: 192.168.0.100
+    model: ac1214
+
+  - platform: philips_airpurifier
+    host: 192.168.0.101
+    model: ac1214
+
+  - platform: philips_airpurifier
+    host: 192.168.0.102
+    model: ac1214
+```
+
+*adapt the `host` according to your setup*
+
 
 ## Configuration variables:
 Field | Value | Necessity | Description
