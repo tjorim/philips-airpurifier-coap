@@ -14,8 +14,7 @@ from typing import (
 from homeassistant.components.fan import (
     FanEntity,
     PLATFORM_SCHEMA,
-    SPEED_OFF,
-    SUPPORT_SET_SPEED,
+    SUPPORT_PRESET_MODE,
 )
 from homeassistant.components.light import ATTR_BRIGHTNESS
 from homeassistant.const import (
@@ -121,15 +120,15 @@ from .const import (
     SERVICE_SET_FUNCTION,
     SERVICE_SET_HUMIDITY_TARGET,
     SERVICE_SET_LIGHT_BRIGHTNESS,
-    SPEED_1,
-    SPEED_2,
-    SPEED_3,
-    SPEED_ALLERGEN,
-    SPEED_AUTO,
-    SPEED_BACTERIA,
-    SPEED_NIGHT,
-    SPEED_SLEEP,
-    SPEED_TURBO,
+    PRESET_MODE_SPEED_1,
+    PRESET_MODE_SPEED_2,
+    PRESET_MODE_SPEED_3,
+    PRESET_MODE_ALLERGEN,
+    PRESET_MODE_AUTO,
+    PRESET_MODE_BACTERIA,
+    PRESET_MODE_NIGHT,
+    PRESET_MODE_SLEEP,
+    PRESET_MODE_TURBO,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -258,16 +257,16 @@ class PhilipsGenericFan(FanEntity):
 
 
 class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
-    AVAILABLE_SPEEDS = {}
+    AVAILABLE_PRESET_MODES = {}
     AVAILABLE_ATTRIBUTES = []
 
     def __init__(self, host: str, model: str, name: str, icon: str) -> None:
         super().__init__(host, model, name, icon)
         self._device_status = None
 
-        self._speed_list = []
-        self._available_speeds = {}
-        self._collect_available_speeds()
+        self._preset_modes = []
+        self._available_preset_modes = {}
+        self._collect_available_preset_modes()
 
         self._available_attributes = []
         self._collect_available_attributes()
@@ -284,13 +283,13 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
             _LOGGER.error("Failed retrieving unique_id: %s", e)
             raise PlatformNotReady
 
-    def _collect_available_speeds(self):
-        speeds = {}
+    def _collect_available_preset_modes(self):
+        preset_modes = {}
         for cls in reversed(self.__class__.__mro__):
-            cls_speeds = getattr(cls, "AVAILABLE_SPEEDS", {})
-            speeds.update(cls_speeds)
-        self._available_speeds = speeds
-        self._speed_list = list(self._available_speeds.keys())
+            cls_preset_modes = getattr(cls, "AVAILABLE_PRESET_MODES", {})
+            preset_modes.update(cls_preset_modes)
+        self._available_preset_modes = preset_modes
+        self._preset_modes = list(self._available_preset_modes.keys())
 
     def _collect_available_attributes(self):
         attributes = []
@@ -324,36 +323,41 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
     def is_on(self) -> bool:
         return self._device_status.get(PHILIPS_POWER) == "1"
 
-    async def async_turn_on(self, speed: Optional[str] = None, **kwargs):
-        if speed is None:
-            await self._client.set_control_value(PHILIPS_POWER, "1")
-        elif speed == SPEED_OFF:
-            await self.async_turn_off()
+    async def async_turn_on(
+        self,
+        speed: Optional[str] = None,
+        percentage: Optional[int] = None,
+        preset_mode: Optional[str] = None,
+        **kwargs,
+    ):
+        if preset_mode:
+            await self.async_set_preset_mode(preset_mode)
         else:
-            await self.async_set_speed(speed)
+            await self._client.set_control_value(PHILIPS_POWER, "1")
 
     async def async_turn_off(self, **kwargs) -> None:
         await self._client.set_control_value(PHILIPS_POWER, "0")
 
     @property
     def supported_features(self) -> int:
-        return SUPPORT_SET_SPEED
+        return SUPPORT_PRESET_MODE
 
     @property
-    def speed_list(self) -> list:
-        return self._speed_list
+    def preset_modes(self) -> Optional[List[str]]:
+        return self._preset_modes
 
     @property
-    def speed(self) -> str:
-        for speed, status_pattern in self._available_speeds.items():
+    def preset_mode(self) -> Optional[str]:
+        for preset_mode, status_pattern in self._available_preset_modes.items():
             for k, v in status_pattern.items():
                 if self._device_status.get(k) != v:
                     break
             else:
-                return speed
+                return preset_mode
 
-    async def async_set_speed(self, speed: str) -> None:
-        status_pattern = self._available_speeds.get(speed)
+    async def async_set_preset_mode(self, preset_mode: str) -> None:
+        """Set the preset mode of the fan."""
+        status_pattern = self._available_preset_modes.get(preset_mode)
         if status_pattern:
             await self._client.set_control_values(data=status_pattern)
 
@@ -381,9 +385,7 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
 
 
 class PhilipsGenericCoAPFan(PhilipsGenericCoAPFanBase):
-    AVAILABLE_SPEEDS = {
-        SPEED_OFF: {PHILIPS_POWER: "0"},
-    }
+    AVAILABLE_PRESET_MODES = {}
 
     AVAILABLE_ATTRIBUTES = [
         # device information
@@ -555,14 +557,14 @@ class PhilipsWaterLevelMixin(PhilipsGenericCoAPFanBase):
 
 # TODO consolidate these classes as soon as we see a proper pattern
 class PhilipsAC1214(PhilipsGenericCoAPFan):
-    AVAILABLE_SPEEDS = {
-        SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
-        SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
-        SPEED_3: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
-        SPEED_ALLERGEN: {PHILIPS_POWER: "1", PHILIPS_MODE: "A"},
-        SPEED_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "P"},
-        SPEED_NIGHT: {PHILIPS_POWER: "1", PHILIPS_MODE: "N"},
-        SPEED_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T", PHILIPS_SPEED: "t"},
+    AVAILABLE_PRESET_MODES = {
+        PRESET_MODE_SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
+        PRESET_MODE_SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
+        PRESET_MODE_SPEED_3: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
+        PRESET_MODE_ALLERGEN: {PHILIPS_POWER: "1", PHILIPS_MODE: "A"},
+        PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "P"},
+        PRESET_MODE_NIGHT: {PHILIPS_POWER: "1", PHILIPS_MODE: "N"},
+        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T", PHILIPS_SPEED: "t"},
     }
 
 
@@ -572,67 +574,67 @@ class PhilipsAC2729(
     PhilipsFilterWickMixin,
     PhilipsGenericCoAPFan,
 ):
-    AVAILABLE_SPEEDS = {
-        SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
-        SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
-        SPEED_3: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
-        SPEED_ALLERGEN: {PHILIPS_POWER: "1", PHILIPS_MODE: "A"},
-        SPEED_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "P"},
-        SPEED_NIGHT: {PHILIPS_POWER: "1", PHILIPS_MODE: "S", PHILIPS_SPEED: "s"},
-        SPEED_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
+    AVAILABLE_PRESET_MODES = {
+        PRESET_MODE_SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
+        PRESET_MODE_SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
+        PRESET_MODE_SPEED_3: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
+        PRESET_MODE_ALLERGEN: {PHILIPS_POWER: "1", PHILIPS_MODE: "A"},
+        PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "P"},
+        PRESET_MODE_NIGHT: {PHILIPS_POWER: "1", PHILIPS_MODE: "S", PHILIPS_SPEED: "s"},
+        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
     }
 
 
 class PhilipsAC2889(PhilipsGenericCoAPFan):
-    AVAILABLE_SPEEDS = {
-        SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
-        SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
-        SPEED_3: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
-        SPEED_ALLERGEN: {PHILIPS_POWER: "1", PHILIPS_MODE: "A"},
-        SPEED_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "P"},
-        SPEED_BACTERIA: {PHILIPS_POWER: "1", PHILIPS_MODE: "B"},
-        SPEED_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "s"},
-        SPEED_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
+    AVAILABLE_PRESET_MODES = {
+        PRESET_MODE_SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
+        PRESET_MODE_SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
+        PRESET_MODE_SPEED_3: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
+        PRESET_MODE_ALLERGEN: {PHILIPS_POWER: "1", PHILIPS_MODE: "A"},
+        PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "P"},
+        PRESET_MODE_BACTERIA: {PHILIPS_POWER: "1", PHILIPS_MODE: "B"},
+        PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "s"},
+        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
     }
 
 
 class PhilipsAC3059(PhilipsTVOCMixin, PhilipsGenericCoAPFan):
-    AVAILABLE_SPEEDS = {
-        SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
-        SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
-        SPEED_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "AG"},
-        SPEED_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "S", PHILIPS_SPEED: "s"},
-        SPEED_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T", PHILIPS_SPEED: "t"},
+    AVAILABLE_PRESET_MODES = {
+        PRESET_MODE_SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
+        PRESET_MODE_SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
+        PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "AG"},
+        PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "S", PHILIPS_SPEED: "s"},
+        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T", PHILIPS_SPEED: "t"},
     }
 
 
 class PhilipsAC3829(PhilipsHumidifierMixin, PhilipsFilterWickMixin, PhilipsGenericCoAPFan):
-    AVAILABLE_SPEEDS = {
-        SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
-        SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
-        SPEED_3: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
-        SPEED_ALLERGEN: {PHILIPS_POWER: "1", PHILIPS_MODE: "A"},
-        SPEED_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "P"},
-        SPEED_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "S", PHILIPS_SPEED: "s"},
-        SPEED_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
+    AVAILABLE_PRESET_MODES = {
+        PRESET_MODE_SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
+        PRESET_MODE_SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
+        PRESET_MODE_SPEED_3: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
+        PRESET_MODE_ALLERGEN: {PHILIPS_POWER: "1", PHILIPS_MODE: "A"},
+        PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "P"},
+        PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "S", PHILIPS_SPEED: "s"},
+        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
     }
 
 
 class PhilipsAC3858(PhilipsTVOCMixin, PhilipsGenericCoAPFan):
-    AVAILABLE_SPEEDS = {
-        SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
-        SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
-        SPEED_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "AG"},
-        SPEED_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "S", PHILIPS_SPEED: "s"},
-        SPEED_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T", PHILIPS_SPEED: "t"},
+    AVAILABLE_PRESET_MODES = {
+        PRESET_MODE_SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
+        PRESET_MODE_SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
+        PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "AG"},
+        PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "S", PHILIPS_SPEED: "s"},
+        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T", PHILIPS_SPEED: "t"},
     }
 
 
 class PhilipsAC4236(PhilipsTVOCMixin, PhilipsGenericCoAPFan):
-    AVAILABLE_SPEEDS = {
-        SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
-        SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
-        SPEED_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "AG"},
-        SPEED_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "S", PHILIPS_SPEED: "s"},
-        SPEED_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T", PHILIPS_SPEED: "t"},
+    AVAILABLE_PRESET_MODES = {
+        PRESET_MODE_SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
+        PRESET_MODE_SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
+        PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "AG"},
+        PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "S", PHILIPS_SPEED: "s"},
+        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T", PHILIPS_SPEED: "t"},
     }
