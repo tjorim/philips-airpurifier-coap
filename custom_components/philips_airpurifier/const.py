@@ -40,6 +40,8 @@ ATTR_CHILD_LOCK = "child_lock"
 ATTR_DEVICE_ID = "device_id"
 ATTR_DEVICE_VERSION = "device_version"
 ATTR_DISPLAY_BACKLIGHT = "display_backlight"
+ATTR_ERROR_CODE = "error_code"
+ATTR_ERROR = "error"
 ATTR_FILTER_ACTIVE_CARBON_REMAINING = "filter_active_carbon_remaining"
 ATTR_FILTER_ACTIVE_CARBON_REMAINING_RAW = "filter_active_carbon_remaining_raw"
 ATTR_FILTER_ACTIVE_CARBON_TYPE = "filter_active_carbon_type"
@@ -75,6 +77,7 @@ PHILIPS_CHILD_LOCK = "cl"
 PHILIPS_DEVICE_ID = "DeviceId"
 PHILIPS_DEVICE_VERSION = "DeviceVersion"
 PHILIPS_DISPLAY_BACKLIGHT = "uil"
+PHILIPS_ERROR_CODE = "err"
 PHILIPS_FILTER_ACTIVE_CARBON_REMAINING = "fltsts2"
 PHILIPS_FILTER_ACTIVE_CARBON_TYPE = "fltt2"
 PHILIPS_FILTER_HEPA_REMAINING = "fltsts1"
@@ -115,4 +118,10 @@ PHILIPS_DISPLAY_BACKLIGHT_MAP = {
 PHILIPS_FUNCTION_MAP = {
     "P": "Purification",
     "PH": "Purification and Humidification",
+}
+PHILIPS_ERROR_CODE_MAP = {
+    32768: "no water",
+    49153: "pre-filter must be cleaned",
+    49155: "pre-filter must be cleaned",
+    49408: "no water",
 }
