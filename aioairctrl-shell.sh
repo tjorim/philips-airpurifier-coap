@@ -1,7 +1,7 @@
 python="python3"
 pip="pip3"
 manifest=./custom_components/philips_airpurifier/manifest.json
-aioairctrl=$(grep -Po '(?<=")aioairctrl[^"]+(?=")' $manifest)
+aioairctrl=$(grep -Po 'git.*aioairctrl[^"]*' $manifest)
 
 if ! command -v $python &> /dev/null
 then
