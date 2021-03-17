@@ -375,14 +375,14 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
             attributes: dict,
             key: str,
             philips_key: str,
-            value_map: Union[dict, Callable[[Any], Any]] = None,
+            value_map: Union[dict, Callable[[Any, Any], Any]] = None,
         ):
             if philips_key in self._device_status:
                 value = self._device_status[philips_key]
                 if isinstance(value_map, dict) and value in value_map:
-                    value = value_map[value]
+                    value = value_map.get(value, "unknown")
                 elif callable(value_map):
-                    value = value_map(value)
+                    value = value_map(value, self._device_status)
                 attributes.update({key: value})
 
         device_attributes = dict()
@@ -417,25 +417,25 @@ class PhilipsGenericCoAPFan(PhilipsGenericCoAPFanBase):
         (
             ATTR_FILTER_PRE_REMAINING,
             PHILIPS_FILTER_PRE_REMAINING,
-            lambda x: str(timedelta(hours=x)),
+            lambda x, _: str(timedelta(hours=x)),
         ),
         (ATTR_FILTER_PRE_REMAINING_RAW, PHILIPS_FILTER_PRE_REMAINING),
         (ATTR_FILTER_HEPA_TYPE, PHILIPS_FILTER_HEPA_TYPE),
         (
             ATTR_FILTER_HEPA_REMAINING,
             PHILIPS_FILTER_HEPA_REMAINING,
-            lambda x: str(timedelta(hours=x)),
+            lambda x, _: str(timedelta(hours=x)),
         ),
         (ATTR_FILTER_HEPA_REMAINING_RAW, PHILIPS_FILTER_HEPA_REMAINING),
         (ATTR_FILTER_ACTIVE_CARBON_TYPE, PHILIPS_FILTER_ACTIVE_CARBON_TYPE),
         (
             ATTR_FILTER_ACTIVE_CARBON_REMAINING,
             PHILIPS_FILTER_ACTIVE_CARBON_REMAINING,
-            lambda x: str(timedelta(hours=x)),
+            lambda x, _: str(timedelta(hours=x)),
         ),
         (ATTR_FILTER_ACTIVE_CARBON_REMAINING_RAW, PHILIPS_FILTER_ACTIVE_CARBON_REMAINING),
         # device sensors
-        (ATTR_RUNTIME, PHILIPS_RUNTIME, lambda x: str(timedelta(seconds=round(x / 1000)))),
+        (ATTR_RUNTIME, PHILIPS_RUNTIME, lambda x, _: str(timedelta(seconds=round(x / 1000)))),
         (ATTR_AIR_QUALITY_INDEX, PHILIPS_AIR_QUALITY_INDEX),
         (ATTR_INDOOR_ALLERGEN_INDEX, PHILIPS_INDOOR_ALLERGEN_INDEX),
         (ATTR_PM25, PHILIPS_PM25),
@@ -503,7 +503,7 @@ class PhilipsFilterWickMixin(PhilipsGenericCoAPFanBase):
         (
             ATTR_FILTER_WICK_REMAINING,
             PHILIPS_FILTER_WICK_REMAINING,
-            lambda x: str(timedelta(hours=x)),
+            lambda x, _: str(timedelta(hours=x)),
         ),
         (ATTR_FILTER_WICK_REMAINING_RAW, PHILIPS_FILTER_WICK_REMAINING),
     ]
@@ -565,7 +565,11 @@ class PhilipsHumidifierMixin(PhilipsGenericCoAPFanBase):
 
 class PhilipsWaterLevelMixin(PhilipsGenericCoAPFanBase):
     AVAILABLE_ATTRIBUTES = [
-        (ATTR_WATER_LEVEL, PHILIPS_WATER_LEVEL),
+        (
+            ATTR_WATER_LEVEL,
+            PHILIPS_WATER_LEVEL,
+            lambda x, y: 0 if y.get("err") in [32768, 49408] else x,
+        ),
     ]
 
 
