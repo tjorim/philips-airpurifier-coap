@@ -1,11 +1,11 @@
 {
   "domain": "philips_airpurifier",
   "name": "Philips AirPurifier (with CoAP)",
-  "version": "0.4.0-pre.3",
+  "version": "0.4.0-pre.4",
   "documentation": "https://github.com/betaboon/philips-airpurifier",
   "dependencies": [],
   "codeowners": ["@betaboon"],
   "requirements": [
-    "aioairctrl @ git+https://github.com/betaboon/aioairctrl@v0.2.1"
+    "aioairctrl @ git+https://github.com/betaboon/aioairctrl@v0.2.2"
   ]
 }
