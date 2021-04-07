@@ -90,7 +90,7 @@ source aioairctrl-shell.sh
 aioairctrl --host $DEVICE_IP status --json
 ```
 
-## Debugging
+## Debugging:
 
 To aquire debug-logs, add the following to your `configuration.yaml`:
 
