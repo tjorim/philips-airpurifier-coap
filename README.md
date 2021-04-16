@@ -3,6 +3,10 @@
 This is a `Local Push` integration for Philips airpurifiers.
 Currently only encrypted-CoAP is implemented.
 
+## BREAKING CHANGE:
+
+Change of platform name from philips_airpurifier to philips_airpurifier_coap to allow parallel operation of http custom component
+
 ## Install:
 
 Add `https://github.com/betaboon/philips-airpurifier.git` as custom-repository in [HACS](https://hacs.xyz/docs/faq/custom_repositories/)
@@ -16,7 +20,7 @@ Add the following to your `configuration.yaml`:
 
 ```yaml
 fan:
-  platform: philips_airpurifier
+  platform: philips_airpurifier_coap
   host: 192.168.0.17
   model: ac4236
 ```
@@ -29,15 +33,15 @@ Add the following to your `configuration.yaml`:
 
 ```yaml
 fan:
-  - platform: philips_airpurifier
+  - platform: philips_airpurifier_coap
     host: 192.168.0.100
     model: ac1214
 
-  - platform: philips_airpurifier
+  - platform: philips_airpurifier_coap
     host: 192.168.0.101
     model: ac1214
 
-  - platform: philips_airpurifier
+  - platform: philips_airpurifier_coap
     host: 192.168.0.102
     model: ac1214
 ```
@@ -48,7 +52,7 @@ fan:
 ## Configuration variables:
 Field | Value | Necessity | Description
 --- | --- | --- | ---
-platform | `philips_airpurifier` | *Required* | The platform name.
+platform | `philips_airpurifier_coap` | *Required* | The platform name.
 host | 192.168.0.17 | *Required* | IP address of the Purifier.
 model | ac4236 | *Required* | Model of the Purifier.
 name | Philips Air Purifier | Optional | Name of the Fan.
@@ -97,7 +101,7 @@ To aquire debug-logs, add the following to your `configuration.yaml`:
 ```yaml
 logger:
   logs:
-    custom_components.philips_airpurifier: debug
+    custom_components.philips_airpurifier_coap: debug
     coap: debug
     aioairctrl: debug
 ```
