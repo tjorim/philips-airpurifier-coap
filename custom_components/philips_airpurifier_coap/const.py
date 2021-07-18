@@ -1,5 +1,8 @@
 DOMAIN = "philips_airpurifier_coap"
-DATA_KEY = "fan.philips_airpurifier"
+
+DATA_KEY_CLIENT = "client"
+DATA_KEY_COORDINATOR = "coordinator"
+DATA_KEY_FAN = "fan"
 
 DEFAULT_NAME = "Philips AirPurifier"
 DEFAULT_ICON = "mdi:air-purifier"

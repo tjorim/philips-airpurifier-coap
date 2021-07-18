@@ -1,5 +1,6 @@
 """Philips Air Purifier & Humidifier"""
-import asyncio
+from __future__ import annotations
+
 from datetime import timedelta
 import logging
 from typing import Any, Callable, Dict, List, Optional, Union
@@ -7,7 +8,7 @@ from typing import Any, Callable, Dict, List, Optional, Union
 from aioairctrl import CoAPClient
 import voluptuous as vol
 
-from homeassistant.components.fan import PLATFORM_SCHEMA, SUPPORT_PRESET_MODE, FanEntity
+from homeassistant.components.fan import SUPPORT_PRESET_MODE, FanEntity
 from homeassistant.components.light import ATTR_BRIGHTNESS
 from homeassistant.const import (
     ATTR_ENTITY_ID,
@@ -16,15 +17,13 @@ from homeassistant.const import (
     CONF_ICON,
     CONF_NAME,
 )
+from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.entity import Entity
-from homeassistant.helpers.typing import (
-    ConfigType,
-    DiscoveryInfoType,
-    HomeAssistantType,
-)
+from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
+from . import Coordinator, PhilipsEntity
 from .const import (
     ATTR_AIR_QUALITY_INDEX,
     ATTR_CHILD_LOCK,
@@ -61,9 +60,9 @@ from .const import (
     ATTR_WATER_LEVEL,
     ATTR_WIFI_VERSION,
     CONF_MODEL,
-    DATA_KEY,
-    DEFAULT_ICON,
-    DEFAULT_NAME,
+    DATA_KEY_CLIENT,
+    DATA_KEY_COORDINATOR,
+    DATA_KEY_FAN,
     DOMAIN,
     FUNCTION_PURIFICATION,
     FUNCTION_PURIFICATION_HUMIDIFICATION,
@@ -135,39 +134,21 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
-    {
-        vol.Required(CONF_HOST): cv.string,
-        vol.Required(CONF_MODEL): vol.In(
-            [
-                MODEL_AC1214,
-                MODEL_AC2729,
-                MODEL_AC2889,
-                MODEL_AC2939,
-                MODEL_AC2958,
-                MODEL_AC3033,
-                MODEL_AC3059,
-                MODEL_AC3829,
-                MODEL_AC3858,
-                MODEL_AC4236,
-            ]
-        ),
-        vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
-        vol.Optional(CONF_ICON, default=DEFAULT_ICON): cv.icon,
-    }
-)
-
 
 async def async_setup_platform(
-    hass: HomeAssistantType,
+    hass: HomeAssistant,
     config: ConfigType,
     async_add_entities: Callable[[List[Entity], bool], None],
     discovery_info: Optional[DiscoveryInfoType] = None,
 ) -> None:
-    host = config[CONF_HOST]
-    model = config[CONF_MODEL]
-    name = config[CONF_NAME]
-    icon = config[CONF_ICON]
+    if discovery_info is None:
+        return
+
+    host = discovery_info[CONF_HOST]
+    model = discovery_info[CONF_MODEL]
+    name = discovery_info[CONF_NAME]
+    icon = discovery_info[CONF_ICON]
+    data = hass.data[DOMAIN][host]
 
     model_to_class = {
         MODEL_AC1214: PhilipsAC1214,
@@ -184,15 +165,18 @@ async def async_setup_platform(
 
     model_class = model_to_class.get(model)
     if model_class:
-        device = model_class(host=host, model=model, name=name, icon=icon)
-        await device.init()
+        device = model_class(
+            data[DATA_KEY_CLIENT],
+            data[DATA_KEY_COORDINATOR],
+            model=model,
+            name=name,
+            icon=icon,
+        )
     else:
         _LOGGER.error("Unsupported model: %s", model)
         return False
 
-    if DATA_KEY not in hass.data:
-        hass.data[DATA_KEY] = []
-    hass.data[DATA_KEY].append(device)
+    data[DATA_KEY_FAN] = device
     async_add_entities([device], update_before_add=True)
 
     def wrapped_async_register(
@@ -204,7 +188,11 @@ async def async_setup_platform(
         async def service_func_wrapper(service_call):
             service_data = service_call.data.copy()
             entity_id = service_data.pop("entity_id", None)
-            devices = [d for d in hass.data[DATA_KEY] if d.entity_id == entity_id]
+            devices = [
+                d
+                for entry in hass.data[DOMAIN].values()
+                if (d := entry[DATA_KEY_FAN]).entity_id == entity_id
+            ]
             for d in devices:
                 device_service_func = getattr(d, service_func.__name__)
                 return await device_service_func(**service_data)
@@ -219,24 +207,19 @@ async def async_setup_platform(
     device._register_services(wrapped_async_register)
 
 
-class PhilipsGenericFan(FanEntity):
-    def __init__(self, host: str, model: str, name: str, icon: str) -> None:
-        self._host = host
+class PhilipsGenericFan(PhilipsEntity, FanEntity):
+    def __init__(
+        self,
+        coordinator: Coordinator,
+        model: str,
+        name: str,
+        icon: str,
+    ) -> None:
+        super().__init__(coordinator)
         self._model = model
         self._name = name
         self._icon = icon
-        self._available = False
-        self._state = None
         self._unique_id = None
-
-    async def init(self) -> None:
-        pass
-
-    async def async_added_to_hass(self) -> None:
-        pass
-
-    async def async_will_remove_from_hass(self) -> None:
-        pass
 
     def _register_services(self, async_register) -> None:
         for cls in reversed(self.__class__.__mro__):
@@ -259,18 +242,21 @@ class PhilipsGenericFan(FanEntity):
     def icon(self) -> str:
         return self._icon
 
-    @property
-    def available(self) -> bool:
-        return self._available
-
 
 class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
     AVAILABLE_PRESET_MODES = {}
     AVAILABLE_ATTRIBUTES = []
 
-    def __init__(self, host: str, model: str, name: str, icon: str) -> None:
-        super().__init__(host, model, name, icon)
-        self._device_status = None
+    def __init__(
+        self,
+        client: CoAPClient,
+        coordinator: Coordinator,
+        model: str,
+        name: str,
+        icon: str,
+    ) -> None:
+        super().__init__(coordinator, model, name, icon)
+        self._client = client
 
         self._preset_modes = []
         self._available_preset_modes = {}
@@ -279,14 +265,9 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
         self._available_attributes = []
         self._collect_available_attributes()
 
-    async def init(self) -> None:
-        self._client = await CoAPClient.create(self._host)
-        self._observer_task = None
         try:
-            status = await self._client.get_status()
-            device_id = status[PHILIPS_DEVICE_ID]
+            device_id = self._device_status[PHILIPS_DEVICE_ID]
             self._unique_id = f"{self._model}-{device_id}"
-            self._device_status = status
         except Exception as e:
             _LOGGER.error("Failed retrieving unique_id: %s", e)
             raise PlatformNotReady
@@ -305,27 +286,6 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
             cls_attributes = getattr(cls, "AVAILABLE_ATTRIBUTES", [])
             attributes.extend(cls_attributes)
         self._available_attributes = attributes
-
-    async def async_added_to_hass(self) -> None:
-        self._observer_task = asyncio.create_task(self._observe_status())
-
-    async def async_will_remove_from_hass(self) -> None:
-        self._observer_task.cancel()
-        await self._observer_task
-        await self._client.shutdown()
-
-    async def _observe_status(self) -> None:
-        async for status in self._client.observe_status():
-            self._device_status = status
-            self.schedule_update_ha_state()
-
-    @property
-    def should_poll(self) -> bool:
-        return False
-
-    @property
-    def available(self):
-        return self._device_status is not None
 
     @property
     def is_on(self) -> bool:
