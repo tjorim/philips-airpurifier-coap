@@ -1,21 +1,13 @@
 """Philips Air Purifier & Humidifier"""
 import asyncio
-import logging
 from datetime import timedelta
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    List,
-    Optional,
-    Union,
-)
+import logging
+from typing import Any, Callable, Dict, List, Optional, Union
 
-from homeassistant.components.fan import (
-    FanEntity,
-    PLATFORM_SCHEMA,
-    SUPPORT_PRESET_MODE,
-)
+from aioairctrl import CoAPClient
+import voluptuous as vol
+
+from homeassistant.components.fan import PLATFORM_SCHEMA, SUPPORT_PRESET_MODE, FanEntity
 from homeassistant.components.light import ATTR_BRIGHTNESS
 from homeassistant.const import (
     ATTR_ENTITY_ID,
@@ -32,8 +24,6 @@ from homeassistant.helpers.typing import (
     DiscoveryInfoType,
     HomeAssistantType,
 )
-import voluptuous as vol
-from aioairctrl import CoAPClient
 
 from .const import (
     ATTR_AIR_QUALITY_INDEX,
@@ -124,6 +114,16 @@ from .const import (
     PHILIPS_TYPE,
     PHILIPS_WATER_LEVEL,
     PHILIPS_WIFI_VERSION,
+    PRESET_MODE_ALLERGEN,
+    PRESET_MODE_AUTO,
+    PRESET_MODE_BACTERIA,
+    PRESET_MODE_GENTLE,
+    PRESET_MODE_NIGHT,
+    PRESET_MODE_SLEEP,
+    PRESET_MODE_SPEED_1,
+    PRESET_MODE_SPEED_2,
+    PRESET_MODE_SPEED_3,
+    PRESET_MODE_TURBO,
     SERVICE_SET_CHILD_LOCK_OFF,
     SERVICE_SET_CHILD_LOCK_ON,
     SERVICE_SET_DISPLAY_BACKLIGHT_OFF,
@@ -131,16 +131,6 @@ from .const import (
     SERVICE_SET_FUNCTION,
     SERVICE_SET_HUMIDITY_TARGET,
     SERVICE_SET_LIGHT_BRIGHTNESS,
-    PRESET_MODE_SPEED_1,
-    PRESET_MODE_SPEED_2,
-    PRESET_MODE_SPEED_3,
-    PRESET_MODE_ALLERGEN,
-    PRESET_MODE_AUTO,
-    PRESET_MODE_BACTERIA,
-    PRESET_MODE_GENTLE,
-    PRESET_MODE_NIGHT,
-    PRESET_MODE_SLEEP,
-    PRESET_MODE_TURBO,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -625,6 +615,7 @@ class PhilipsAC2889(PhilipsGenericCoAPFan):
         PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
     }
 
+
 class PhilipsAC2939(PhilipsTVOCMixin, PhilipsGenericCoAPFan):
     AVAILABLE_PRESET_MODES = {
         PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "AG"},
@@ -632,6 +623,7 @@ class PhilipsAC2939(PhilipsTVOCMixin, PhilipsGenericCoAPFan):
         PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "S"},
         PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T"},
     }
+
 
 class PhilipsAC2958(PhilipsGenericCoAPFan):
     AVAILABLE_PRESET_MODES = {
@@ -641,6 +633,7 @@ class PhilipsAC2958(PhilipsGenericCoAPFan):
         PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T"},
     }
 
+
 class PhilipsAC3033(PhilipsTVOCMixin, PhilipsGenericCoAPFan):
     AVAILABLE_PRESET_MODES = {
         PRESET_MODE_SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
@@ -649,6 +642,7 @@ class PhilipsAC3033(PhilipsTVOCMixin, PhilipsGenericCoAPFan):
         PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "S", PHILIPS_SPEED: "s"},
         PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T", PHILIPS_SPEED: "t"},
     }
+
 
 class PhilipsAC3059(PhilipsTVOCMixin, PhilipsGenericCoAPFan):
     AVAILABLE_PRESET_MODES = {
