@@ -12,7 +12,6 @@ from homeassistant.components.fan import SUPPORT_PRESET_MODE, FanEntity
 from homeassistant.components.light import ATTR_BRIGHTNESS
 from homeassistant.const import (
     ATTR_ENTITY_ID,
-    ATTR_TEMPERATURE,
     CONF_HOST,
     CONF_ICON,
     CONF_NAME,
@@ -25,39 +24,25 @@ from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
 from . import Coordinator, PhilipsEntity
 from .const import (
-    ATTR_AIR_QUALITY_INDEX,
     ATTR_CHILD_LOCK,
     ATTR_DEVICE_ID,
     ATTR_DEVICE_VERSION,
     ATTR_DISPLAY_BACKLIGHT,
     ATTR_ERROR,
     ATTR_ERROR_CODE,
-    ATTR_FILTER_ACTIVE_CARBON_REMAINING,
-    ATTR_FILTER_ACTIVE_CARBON_REMAINING_RAW,
     ATTR_FILTER_ACTIVE_CARBON_TYPE,
-    ATTR_FILTER_HEPA_REMAINING,
-    ATTR_FILTER_HEPA_REMAINING_RAW,
     ATTR_FILTER_HEPA_TYPE,
-    ATTR_FILTER_PRE_REMAINING,
-    ATTR_FILTER_PRE_REMAINING_RAW,
-    ATTR_FILTER_WICK_REMAINING,
-    ATTR_FILTER_WICK_REMAINING_RAW,
     ATTR_FUNCTION,
-    ATTR_HUMIDITY,
     ATTR_HUMIDITY_TARGET,
-    ATTR_INDOOR_ALLERGEN_INDEX,
     ATTR_LANGUAGE,
     ATTR_LIGHT_BRIGHTNESS,
     ATTR_MODEL_ID,
     ATTR_NAME,
-    ATTR_PM25,
     ATTR_PREFERRED_INDEX,
     ATTR_PRODUCT_ID,
     ATTR_RUNTIME,
     ATTR_SOFTWARE_VERSION,
-    ATTR_TOTAL_VOLATILE_ORGANIC_COMPOUNDS,
     ATTR_TYPE,
-    ATTR_WATER_LEVEL,
     ATTR_WIFI_VERSION,
     CONF_MODEL,
     DATA_KEY_CLIENT,
@@ -76,7 +61,6 @@ from .const import (
     MODEL_AC3829,
     MODEL_AC3858,
     MODEL_AC4236,
-    PHILIPS_AIR_QUALITY_INDEX,
     PHILIPS_CHILD_LOCK,
     PHILIPS_DEVICE_ID,
     PHILIPS_DEVICE_VERSION,
@@ -84,23 +68,16 @@ from .const import (
     PHILIPS_DISPLAY_BACKLIGHT_MAP,
     PHILIPS_ERROR_CODE,
     PHILIPS_ERROR_CODE_MAP,
-    PHILIPS_FILTER_ACTIVE_CARBON_REMAINING,
     PHILIPS_FILTER_ACTIVE_CARBON_TYPE,
-    PHILIPS_FILTER_HEPA_REMAINING,
     PHILIPS_FILTER_HEPA_TYPE,
-    PHILIPS_FILTER_PRE_REMAINING,
-    PHILIPS_FILTER_WICK_REMAINING,
     PHILIPS_FUNCTION,
     PHILIPS_FUNCTION_MAP,
-    PHILIPS_HUMIDITY,
     PHILIPS_HUMIDITY_TARGET,
-    PHILIPS_INDOOR_ALLERGEN_INDEX,
     PHILIPS_LANGUAGE,
     PHILIPS_LIGHT_BRIGHTNESS,
     PHILIPS_MODE,
     PHILIPS_MODEL_ID,
     PHILIPS_NAME,
-    PHILIPS_PM25,
     PHILIPS_POWER,
     PHILIPS_PREFERRED_INDEX,
     PHILIPS_PREFERRED_INDEX_MAP,
@@ -108,10 +85,7 @@ from .const import (
     PHILIPS_RUNTIME,
     PHILIPS_SOFTWARE_VERSION,
     PHILIPS_SPEED,
-    PHILIPS_TEMPERATURE,
-    PHILIPS_TOTAL_VOLATILE_ORGANIC_COMPOUNDS,
     PHILIPS_TYPE,
-    PHILIPS_WATER_LEVEL,
     PHILIPS_WIFI_VERSION,
     PRESET_MODE_ALLERGEN,
     PRESET_MODE_AUTO,
@@ -374,31 +348,10 @@ class PhilipsGenericCoAPFan(PhilipsGenericCoAPFanBase):
         (ATTR_DISPLAY_BACKLIGHT, PHILIPS_DISPLAY_BACKLIGHT, PHILIPS_DISPLAY_BACKLIGHT_MAP),
         (ATTR_PREFERRED_INDEX, PHILIPS_PREFERRED_INDEX, PHILIPS_PREFERRED_INDEX_MAP),
         # filter information
-        (
-            ATTR_FILTER_PRE_REMAINING,
-            PHILIPS_FILTER_PRE_REMAINING,
-            lambda x, _: str(timedelta(hours=x)),
-        ),
-        (ATTR_FILTER_PRE_REMAINING_RAW, PHILIPS_FILTER_PRE_REMAINING),
         (ATTR_FILTER_HEPA_TYPE, PHILIPS_FILTER_HEPA_TYPE),
-        (
-            ATTR_FILTER_HEPA_REMAINING,
-            PHILIPS_FILTER_HEPA_REMAINING,
-            lambda x, _: str(timedelta(hours=x)),
-        ),
-        (ATTR_FILTER_HEPA_REMAINING_RAW, PHILIPS_FILTER_HEPA_REMAINING),
         (ATTR_FILTER_ACTIVE_CARBON_TYPE, PHILIPS_FILTER_ACTIVE_CARBON_TYPE),
-        (
-            ATTR_FILTER_ACTIVE_CARBON_REMAINING,
-            PHILIPS_FILTER_ACTIVE_CARBON_REMAINING,
-            lambda x, _: str(timedelta(hours=x)),
-        ),
-        (ATTR_FILTER_ACTIVE_CARBON_REMAINING_RAW, PHILIPS_FILTER_ACTIVE_CARBON_REMAINING),
         # device sensors
         (ATTR_RUNTIME, PHILIPS_RUNTIME, lambda x, _: str(timedelta(seconds=round(x / 1000)))),
-        (ATTR_AIR_QUALITY_INDEX, PHILIPS_AIR_QUALITY_INDEX),
-        (ATTR_INDOOR_ALLERGEN_INDEX, PHILIPS_INDOOR_ALLERGEN_INDEX),
-        (ATTR_PM25, PHILIPS_PM25),
     ]
 
     SERVICE_SCHEMA_SET_LIGHT_BRIGHTNESS = vol.Schema(
@@ -452,29 +405,10 @@ class PhilipsGenericCoAPFan(PhilipsGenericCoAPFanBase):
         await self._client.set_control_value(PHILIPS_LIGHT_BRIGHTNESS, brightness)
 
 
-class PhilipsTVOCMixin(PhilipsGenericCoAPFanBase):
-    AVAILABLE_ATTRIBUTES = [
-        (ATTR_TOTAL_VOLATILE_ORGANIC_COMPOUNDS, PHILIPS_TOTAL_VOLATILE_ORGANIC_COMPOUNDS),
-    ]
-
-
-class PhilipsFilterWickMixin(PhilipsGenericCoAPFanBase):
-    AVAILABLE_ATTRIBUTES = [
-        (
-            ATTR_FILTER_WICK_REMAINING,
-            PHILIPS_FILTER_WICK_REMAINING,
-            lambda x, _: str(timedelta(hours=x)),
-        ),
-        (ATTR_FILTER_WICK_REMAINING_RAW, PHILIPS_FILTER_WICK_REMAINING),
-    ]
-
-
 class PhilipsHumidifierMixin(PhilipsGenericCoAPFanBase):
     AVAILABLE_ATTRIBUTES = [
         (ATTR_FUNCTION, PHILIPS_FUNCTION, PHILIPS_FUNCTION_MAP),
-        (ATTR_HUMIDITY, PHILIPS_HUMIDITY),
         (ATTR_HUMIDITY_TARGET, PHILIPS_HUMIDITY_TARGET),
-        (ATTR_TEMPERATURE, PHILIPS_TEMPERATURE),
     ]
 
     SERVICE_SCHEMA_SET_FUNCTION = vol.Schema(
@@ -523,16 +457,6 @@ class PhilipsHumidifierMixin(PhilipsGenericCoAPFanBase):
         await self._client.set_control_value(PHILIPS_HUMIDITY_TARGET, humidity_target)
 
 
-class PhilipsWaterLevelMixin(PhilipsGenericCoAPFanBase):
-    AVAILABLE_ATTRIBUTES = [
-        (
-            ATTR_WATER_LEVEL,
-            PHILIPS_WATER_LEVEL,
-            lambda x, y: 0 if y.get("err") in [32768, 49408] else x,
-        ),
-    ]
-
-
 # TODO consolidate these classes as soon as we see a proper pattern
 class PhilipsAC1214(PhilipsGenericCoAPFan):
     AVAILABLE_PRESET_MODES = {
@@ -547,9 +471,7 @@ class PhilipsAC1214(PhilipsGenericCoAPFan):
 
 
 class PhilipsAC2729(
-    PhilipsWaterLevelMixin,
     PhilipsHumidifierMixin,
-    PhilipsFilterWickMixin,
     PhilipsGenericCoAPFan,
 ):
     AVAILABLE_PRESET_MODES = {
@@ -576,7 +498,7 @@ class PhilipsAC2889(PhilipsGenericCoAPFan):
     }
 
 
-class PhilipsAC2939(PhilipsTVOCMixin, PhilipsGenericCoAPFan):
+class PhilipsAC2939(PhilipsGenericCoAPFan):
     AVAILABLE_PRESET_MODES = {
         PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "AG"},
         PRESET_MODE_GENTLE: {PHILIPS_POWER: "1", PHILIPS_MODE: "GT"},
@@ -594,7 +516,7 @@ class PhilipsAC2958(PhilipsGenericCoAPFan):
     }
 
 
-class PhilipsAC3033(PhilipsTVOCMixin, PhilipsGenericCoAPFan):
+class PhilipsAC3033(PhilipsGenericCoAPFan):
     AVAILABLE_PRESET_MODES = {
         PRESET_MODE_SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
         PRESET_MODE_SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
@@ -604,7 +526,7 @@ class PhilipsAC3033(PhilipsTVOCMixin, PhilipsGenericCoAPFan):
     }
 
 
-class PhilipsAC3059(PhilipsTVOCMixin, PhilipsGenericCoAPFan):
+class PhilipsAC3059(PhilipsGenericCoAPFan):
     AVAILABLE_PRESET_MODES = {
         PRESET_MODE_SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
         PRESET_MODE_SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
@@ -614,7 +536,7 @@ class PhilipsAC3059(PhilipsTVOCMixin, PhilipsGenericCoAPFan):
     }
 
 
-class PhilipsAC3829(PhilipsHumidifierMixin, PhilipsFilterWickMixin, PhilipsGenericCoAPFan):
+class PhilipsAC3829(PhilipsHumidifierMixin, PhilipsGenericCoAPFan):
     AVAILABLE_PRESET_MODES = {
         PRESET_MODE_SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
         PRESET_MODE_SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
@@ -626,7 +548,7 @@ class PhilipsAC3829(PhilipsHumidifierMixin, PhilipsFilterWickMixin, PhilipsGener
     }
 
 
-class PhilipsAC3858(PhilipsTVOCMixin, PhilipsGenericCoAPFan):
+class PhilipsAC3858(PhilipsGenericCoAPFan):
     AVAILABLE_PRESET_MODES = {
         PRESET_MODE_SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
         PRESET_MODE_SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
@@ -636,7 +558,7 @@ class PhilipsAC3858(PhilipsTVOCMixin, PhilipsGenericCoAPFan):
     }
 
 
-class PhilipsAC4236(PhilipsTVOCMixin, PhilipsGenericCoAPFan):
+class PhilipsAC4236(PhilipsGenericCoAPFan):
     AVAILABLE_PRESET_MODES = {
         PRESET_MODE_SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
         PRESET_MODE_SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},

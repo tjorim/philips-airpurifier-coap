@@ -70,7 +70,7 @@ CONFIG_SCHEMA = vol.Schema(
     extra=vol.ALLOW_EXTRA,
 )
 
-PLATFORMS = ["fan"]
+PLATFORMS = ["fan", "sensor"]
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
@@ -152,6 +152,7 @@ class Coordinator:
 
     async def _async_observe_status(self) -> None:
         async for status in self.client.observe_status():
+            _LOGGER.debug("Status update: %s", status)
             self.status = status
             for update_callback in self._listeners:
                 update_callback()
