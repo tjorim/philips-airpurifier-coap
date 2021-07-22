@@ -148,7 +148,7 @@ async def async_setup_platform(
         )
     else:
         _LOGGER.error("Unsupported model: %s", model)
-        return False
+        return
 
     data[DATA_KEY_FAN] = device
     async_add_entities([device], update_before_add=True)

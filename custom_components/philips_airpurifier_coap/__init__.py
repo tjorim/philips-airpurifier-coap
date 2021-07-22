@@ -35,6 +35,7 @@ from .const import (
     MODEL_AC3858,
     MODEL_AC4236,
 )
+from .model import DeviceStatus
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -113,7 +114,12 @@ class Coordinator:
     def __init__(self, client: CoAPClient) -> None:
         self.client = client
 
-        self.status: dict[str, Any] = None
+        # It's None before the first successful update.
+        # Components should call async_first_refresh  to make sure the first
+        # update was successful. Set type to just DeviceStatus to remove
+        # annoying checks that status is not None when it was already checked
+        # during setup.
+        self.status: DeviceStatus = None  # type: ignore[assignment]
 
         self._listeners: list[CALLBACK_TYPE] = []
         self._task: Task | None = None
