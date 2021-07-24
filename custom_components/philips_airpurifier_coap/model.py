@@ -23,3 +23,10 @@ class SensorDescription(_SensorDescription, total=False):
     unit: str
     state_class: str
     value: Callable[[Any, DeviceStatus], StateType]
+
+
+class FilterDescription(TypedDict):
+    """Filter description class."""
+
+    prefix: str
+    postfix: str

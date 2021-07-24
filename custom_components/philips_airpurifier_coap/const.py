@@ -1,7 +1,6 @@
 """Constants for Philips AirPurifier integration."""
 from __future__ import annotations
 
-from datetime import timedelta
 from homeassistant.components.sensor import ATTR_STATE_CLASS, STATE_CLASS_MEASUREMENT
 from homeassistant.const import (
     ATTR_DEVICE_CLASS,
@@ -10,10 +9,9 @@ from homeassistant.const import (
     CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
     DEVICE_CLASS_HUMIDITY,
     DEVICE_CLASS_TEMPERATURE,
-    PERCENTAGE,
 )
 
-from .model import SensorDescription
+from .model import FilterDescription, SensorDescription
 
 DOMAIN = "philips_airpurifier_coap"
 
@@ -66,20 +64,14 @@ ATTR_DEVICE_VERSION = "device_version"
 ATTR_DISPLAY_BACKLIGHT = "display_backlight"
 ATTR_ERROR_CODE = "error_code"
 ATTR_ERROR = "error"
-ATTR_FILTER_ACTIVE_CARBON_REMAINING = "filter_active_carbon_remaining"
-ATTR_FILTER_ACTIVE_CARBON_REMAINING_TIME = "filter_active_carbon_remaining_time"
-ATTR_FILTER_ACTIVE_CARBON_REMAINING_RAW = "filter_active_carbon_remaining_raw"
-ATTR_FILTER_ACTIVE_CARBON_TYPE = "filter_active_carbon_type"
-ATTR_FILTER_HEPA_REMAINING = "filter_hepa_remaining"
-ATTR_FILTER_HEPA_REMAINING_TIME = "filter_hepa_remaining_time"
-ATTR_FILTER_HEPA_REMAINING_RAW = "filter_hepa_remaining_raw"
-ATTR_FILTER_HEPA_TYPE = "filter_hepa_type"
-ATTR_FILTER_PRE_REMAINING = "filter_pre_remaining"
-ATTR_FILTER_PRE_REMAINING_TIME = "filter_pre_remaining_time"
-ATTR_FILTER_PRE_REMAINING_RAW = "filter_pre_remaining_raw"
-ATTR_FILTER_WICK_REMAINING = "filter_wick_remaining"
-ATTR_FILTER_WICK_REMAINING_TIME = "filter_wick_remaining_time"
-ATTR_FILTER_WICK_REMAINING_RAW = "filter_wick_remaining_raw"
+ATTR_RAW = "raw"
+ATTR_TOTAL = "total"
+ATTR_TIME_REMAINING = "time_remaining"
+ATTR_TYPE = "type"
+ATTR_FILTER_PRE = "filter_pre"
+ATTR_FILTER_HEPA = "filter_hepa"
+ATTR_FILTER_ACTIVE_CARBON = "filter_active_carbon"
+ATTR_FILTER_WICK = "wick"
 ATTR_FUNCTION = "function"
 ATTR_HUMIDITY = "humidity"
 ATTR_HUMIDITY_TARGET = "humidity_target"
@@ -102,6 +94,8 @@ ATTR_TOTAL_VOLATILE_ORGANIC_COMPOUNDS = "total_volatile_organic_compounds"
 ATTR_TYPE = "type"
 ATTR_WATER_LEVEL = "water_level"
 ATTR_WIFI_VERSION = "wifi_version"
+ATTR_PREFIX = "prefix"
+ATTR_POSTFIX = "postfix"
 
 PHILIPS_AIR_QUALITY_INDEX = "aqit"
 PHILIPS_CHILD_LOCK = "cl"
@@ -109,16 +103,11 @@ PHILIPS_DEVICE_ID = "DeviceId"
 PHILIPS_DEVICE_VERSION = "DeviceVersion"
 PHILIPS_DISPLAY_BACKLIGHT = "uil"
 PHILIPS_ERROR_CODE = "err"
-PHILIPS_FILTER_ACTIVE_CARBON_REMAINING = "fltsts2"
-PHILIPS_FILTER_ACTIVE_CARBON_TOTAL = "flttotal2"
-PHILIPS_FILTER_ACTIVE_CARBON_TYPE = "fltt2"
-PHILIPS_FILTER_HEPA_REMAINING = "fltsts1"
-PHILIPS_FILTER_HEPA_TOTAL = "flttotal1"
-PHILIPS_FILTER_HEPA_TYPE = "fltt1"
-PHILIPS_FILTER_PRE_REMAINING = "fltsts0"
-PHILIPS_FILTER_PRE_TOTAL = "flttotal0"
-PHILIPS_FILTER_WICK_REMAINING = "wicksts"
-PHILIPS_FILTER_WICK_TOTAL = "wicktotal"
+PHILIPS_FILTER_PREFIX = "flt"
+PHILIPS_FILTER_WICK_PREFIX = "wick"
+PHILIPS_FILTER_STATUS = "sts"
+PHILIPS_FILTER_TOTAL = "total"
+PHILIPS_FILTER_TYPE = "t"
 PHILIPS_FUNCTION = "func"
 PHILIPS_HUMIDITY = "rh"
 PHILIPS_HUMIDITY_TARGET = "rhset"
@@ -163,28 +152,6 @@ PHILIPS_ERROR_CODE_MAP = {
 
 SENSOR_TYPES: dict[str, SensorDescription] = {
     # filter information
-    PHILIPS_FILTER_PRE_REMAINING: {
-        ATTR_LABEL: ATTR_FILTER_PRE_REMAINING,
-        ATTR_UNIT: PERCENTAGE,
-        ATTR_VALUE: lambda value, status: 100.0 * value / status[PHILIPS_FILTER_PRE_TOTAL],
-    },
-    PHILIPS_FILTER_HEPA_REMAINING: {
-        ATTR_LABEL: ATTR_FILTER_HEPA_REMAINING,
-        ATTR_UNIT: PERCENTAGE,
-        ATTR_VALUE: lambda value, status: 100.0 * value / status[PHILIPS_FILTER_HEPA_TOTAL],
-    },
-    PHILIPS_FILTER_ACTIVE_CARBON_REMAINING: {
-        ATTR_LABEL: ATTR_FILTER_ACTIVE_CARBON_REMAINING,
-        ATTR_UNIT: PERCENTAGE,
-        ATTR_VALUE: lambda value, status: 100.0
-        * value
-        / status[PHILIPS_FILTER_ACTIVE_CARBON_TOTAL],
-    },
-    PHILIPS_FILTER_WICK_REMAINING: {
-        ATTR_LABEL: ATTR_FILTER_WICK_REMAINING,
-        ATTR_UNIT: PERCENTAGE,
-        ATTR_VALUE: lambda value, status: 100.0 * value / status[PHILIPS_FILTER_WICK_TOTAL],
-    },
     PHILIPS_WATER_LEVEL: {
         ATTR_ICON: "mdi:water",
         ATTR_LABEL: ATTR_WATER_LEVEL,
@@ -219,5 +186,24 @@ SENSOR_TYPES: dict[str, SensorDescription] = {
         ATTR_DEVICE_CLASS: DEVICE_CLASS_TEMPERATURE,
         ATTR_LABEL: ATTR_TEMPERATURE,
         ATTR_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+    },
+}
+
+FILTER_TYPES: dict[str, FilterDescription] = {
+    ATTR_FILTER_PRE: {
+        ATTR_PREFIX: PHILIPS_FILTER_PREFIX,
+        ATTR_POSTFIX: "0",
+    },
+    ATTR_FILTER_HEPA: {
+        ATTR_PREFIX: PHILIPS_FILTER_PREFIX,
+        ATTR_POSTFIX: "1",
+    },
+    ATTR_FILTER_ACTIVE_CARBON: {
+        ATTR_PREFIX: PHILIPS_FILTER_PREFIX,
+        ATTR_POSTFIX: "2",
+    },
+    ATTR_FILTER_WICK: {
+        ATTR_PREFIX: PHILIPS_FILTER_WICK_PREFIX,
+        ATTR_POSTFIX: "",
     },
 }
