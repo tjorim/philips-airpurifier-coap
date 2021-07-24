@@ -1,5 +1,6 @@
 """Philips Air Purifier & Humidifier Sensors"""
 from __future__ import annotations
+from datetime import timedelta
 
 import logging
 from typing import Any, Callable, List, cast
@@ -14,11 +15,15 @@ from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType, StateTyp
 from . import Coordinator, PhilipsEntity
 from .const import (
     ATTR_FILTER_ACTIVE_CARBON_REMAINING_RAW,
+    ATTR_FILTER_ACTIVE_CARBON_REMAINING_TIME,
     ATTR_FILTER_ACTIVE_CARBON_TYPE,
     ATTR_FILTER_HEPA_REMAINING_RAW,
+    ATTR_FILTER_HEPA_REMAINING_TIME,
     ATTR_FILTER_HEPA_TYPE,
     ATTR_FILTER_PRE_REMAINING_RAW,
+    ATTR_FILTER_PRE_REMAINING_TIME,
     ATTR_FILTER_WICK_REMAINING_RAW,
+    ATTR_FILTER_WICK_REMAINING_TIME,
     ATTR_LABEL,
     ATTR_UNIT,
     ATTR_VALUE,
@@ -94,11 +99,17 @@ class PhilipsSensor(PhilipsEntity, SensorEntity):
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
         if self.kind == PHILIPS_FILTER_PRE_REMAINING:
+            self._attrs[ATTR_FILTER_PRE_REMAINING_TIME] = str(
+                timedelta(hours=self._device_status[PHILIPS_FILTER_PRE_REMAINING])
+            )
             self._attrs[ATTR_FILTER_PRE_REMAINING_RAW] = self._device_status[
                 PHILIPS_FILTER_PRE_REMAINING
             ]
         if self.kind == PHILIPS_FILTER_HEPA_REMAINING:
             self._attrs[ATTR_FILTER_HEPA_TYPE] = self._device_status[PHILIPS_FILTER_HEPA_TYPE]
+            self._attrs[ATTR_FILTER_HEPA_REMAINING_TIME] = str(
+                timedelta(hours=self._device_status[PHILIPS_FILTER_HEPA_REMAINING])
+            )
             self._attrs[ATTR_FILTER_HEPA_REMAINING_RAW] = self._device_status[
                 PHILIPS_FILTER_HEPA_REMAINING
             ]
@@ -106,10 +117,16 @@ class PhilipsSensor(PhilipsEntity, SensorEntity):
             self._attrs[ATTR_FILTER_ACTIVE_CARBON_TYPE] = self._device_status[
                 PHILIPS_FILTER_ACTIVE_CARBON_TYPE
             ]
+            self._attrs[ATTR_FILTER_ACTIVE_CARBON_REMAINING_TIME] = str(
+                timedelta(hours=self._device_status[PHILIPS_FILTER_ACTIVE_CARBON_REMAINING])
+            )
             self._attrs[ATTR_FILTER_ACTIVE_CARBON_REMAINING_RAW] = self._device_status[
                 PHILIPS_FILTER_ACTIVE_CARBON_REMAINING
             ]
         if self.kind == PHILIPS_FILTER_WICK_REMAINING:
+            self._attrs[ATTR_FILTER_WICK_REMAINING_TIME] = str(
+                timedelta(hours=self._device_status[PHILIPS_FILTER_WICK_REMAINING])
+            )
             self._attrs[ATTR_FILTER_WICK_REMAINING_RAW] = self._device_status[
                 PHILIPS_FILTER_WICK_REMAINING
             ]

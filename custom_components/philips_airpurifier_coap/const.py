@@ -10,6 +10,7 @@ from homeassistant.const import (
     CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
     DEVICE_CLASS_HUMIDITY,
     DEVICE_CLASS_TEMPERATURE,
+    PERCENTAGE,
 )
 
 from .model import SensorDescription
@@ -66,14 +67,18 @@ ATTR_DISPLAY_BACKLIGHT = "display_backlight"
 ATTR_ERROR_CODE = "error_code"
 ATTR_ERROR = "error"
 ATTR_FILTER_ACTIVE_CARBON_REMAINING = "filter_active_carbon_remaining"
+ATTR_FILTER_ACTIVE_CARBON_REMAINING_TIME = "filter_active_carbon_remaining_time"
 ATTR_FILTER_ACTIVE_CARBON_REMAINING_RAW = "filter_active_carbon_remaining_raw"
 ATTR_FILTER_ACTIVE_CARBON_TYPE = "filter_active_carbon_type"
 ATTR_FILTER_HEPA_REMAINING = "filter_hepa_remaining"
+ATTR_FILTER_HEPA_REMAINING_TIME = "filter_hepa_remaining_time"
 ATTR_FILTER_HEPA_REMAINING_RAW = "filter_hepa_remaining_raw"
 ATTR_FILTER_HEPA_TYPE = "filter_hepa_type"
 ATTR_FILTER_PRE_REMAINING = "filter_pre_remaining"
+ATTR_FILTER_PRE_REMAINING_TIME = "filter_pre_remaining_time"
 ATTR_FILTER_PRE_REMAINING_RAW = "filter_pre_remaining_raw"
 ATTR_FILTER_WICK_REMAINING = "filter_wick_remaining"
+ATTR_FILTER_WICK_REMAINING_TIME = "filter_wick_remaining_time"
 ATTR_FILTER_WICK_REMAINING_RAW = "filter_wick_remaining_raw"
 ATTR_FUNCTION = "function"
 ATTR_HUMIDITY = "humidity"
@@ -105,11 +110,15 @@ PHILIPS_DEVICE_VERSION = "DeviceVersion"
 PHILIPS_DISPLAY_BACKLIGHT = "uil"
 PHILIPS_ERROR_CODE = "err"
 PHILIPS_FILTER_ACTIVE_CARBON_REMAINING = "fltsts2"
+PHILIPS_FILTER_ACTIVE_CARBON_TOTAL = "flttotal2"
 PHILIPS_FILTER_ACTIVE_CARBON_TYPE = "fltt2"
 PHILIPS_FILTER_HEPA_REMAINING = "fltsts1"
+PHILIPS_FILTER_HEPA_TOTAL = "flttotal1"
 PHILIPS_FILTER_HEPA_TYPE = "fltt1"
 PHILIPS_FILTER_PRE_REMAINING = "fltsts0"
+PHILIPS_FILTER_PRE_TOTAL = "flttotal0"
 PHILIPS_FILTER_WICK_REMAINING = "wicksts"
+PHILIPS_FILTER_WICK_TOTAL = "wicktotal"
 PHILIPS_FUNCTION = "func"
 PHILIPS_HUMIDITY = "rh"
 PHILIPS_HUMIDITY_TARGET = "rhset"
@@ -156,19 +165,25 @@ SENSOR_TYPES: dict[str, SensorDescription] = {
     # filter information
     PHILIPS_FILTER_PRE_REMAINING: {
         ATTR_LABEL: ATTR_FILTER_PRE_REMAINING,
-        ATTR_VALUE: lambda value, _: str(timedelta(hours=value)),
+        ATTR_UNIT: PERCENTAGE,
+        ATTR_VALUE: lambda value, status: 100.0 * value / status[PHILIPS_FILTER_PRE_TOTAL],
     },
     PHILIPS_FILTER_HEPA_REMAINING: {
         ATTR_LABEL: ATTR_FILTER_HEPA_REMAINING,
-        ATTR_VALUE: lambda value, _: str(timedelta(hours=value)),
+        ATTR_UNIT: PERCENTAGE,
+        ATTR_VALUE: lambda value, status: 100.0 * value / status[PHILIPS_FILTER_HEPA_TOTAL],
     },
     PHILIPS_FILTER_ACTIVE_CARBON_REMAINING: {
         ATTR_LABEL: ATTR_FILTER_ACTIVE_CARBON_REMAINING,
-        ATTR_VALUE: lambda value, _: str(timedelta(hours=value)),
+        ATTR_UNIT: PERCENTAGE,
+        ATTR_VALUE: lambda value, status: 100.0
+        * value
+        / status[PHILIPS_FILTER_ACTIVE_CARBON_TOTAL],
     },
     PHILIPS_FILTER_WICK_REMAINING: {
         ATTR_LABEL: ATTR_FILTER_WICK_REMAINING,
-        ATTR_VALUE: lambda value, _: str(timedelta(hours=value)),
+        ATTR_UNIT: PERCENTAGE,
+        ATTR_VALUE: lambda value, status: 100.0 * value / status[PHILIPS_FILTER_WICK_TOTAL],
     },
     PHILIPS_WATER_LEVEL: {
         ATTR_ICON: "mdi:water",
