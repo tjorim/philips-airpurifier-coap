@@ -97,6 +97,9 @@ ATTR_WIFI_VERSION = "wifi_version"
 ATTR_PREFIX = "prefix"
 ATTR_POSTFIX = "postfix"
 
+LEVEL = "Level"
+INDEX = "Index"
+
 PHILIPS_AIR_QUALITY_INDEX = "aqit"
 PHILIPS_CHILD_LOCK = "cl"
 PHILIPS_DEVICE_ID = "DeviceId"
@@ -164,6 +167,7 @@ SENSOR_TYPES: dict[str, SensorDescription] = {
     PHILIPS_INDOOR_ALLERGEN_INDEX: {
         ATTR_ICON: "mdi:blur",
         ATTR_LABEL: ATTR_INDOOR_ALLERGEN_INDEX,
+        ATTR_UNIT: INDEX,
         ATTR_STATE_CLASS: STATE_CLASS_MEASUREMENT,
     },
     PHILIPS_PM25: {
@@ -175,6 +179,7 @@ SENSOR_TYPES: dict[str, SensorDescription] = {
     PHILIPS_TOTAL_VOLATILE_ORGANIC_COMPOUNDS: {
         ATTR_ICON: "mdi:blur",
         ATTR_LABEL: ATTR_TOTAL_VOLATILE_ORGANIC_COMPOUNDS,
+        ATTR_UNIT: LEVEL,
         ATTR_STATE_CLASS: STATE_CLASS_MEASUREMENT,
     },
     PHILIPS_HUMIDITY: {
