@@ -155,7 +155,7 @@ class PhilipsFilterSensor(PhilipsEntity, SensorEntity):
 
     @property
     def _percentage(self) -> float:
-        return 100.0 * self._value / self._total
+        return round(100.0 * self._value / self._total, 2)
 
     @property
     def _time_remaining(self) -> str:
