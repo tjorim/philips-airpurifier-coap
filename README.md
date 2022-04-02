@@ -3,6 +3,7 @@
 This is a `Local Push` integration for Philips airpurifiers.
 Currently only encrypted-CoAP is implemented.
 
+
 ## BREAKING CHANGE:
 
 I've switched to the branch of Denaun. This brings a number of breaking changes:
@@ -13,10 +14,21 @@ I've switched to the branch of Denaun. This brings a number of breaking changes:
  There might be some more changes and I'll update the documentation as I come across this. The documentation below is somewhat out-of-date. I'll fix this over time.
  
  
- ## Credits
+## Word of Caution
 
- - The original work has been done by betaboon at https://github.com/betaboon/philips-airpurifier-coap but apparently this is not maintained anymore.
- - The rework has been done by Denaun at https://github.com/Denaun/philips-airpurifier-coap
+Due to a bug in the Philips devices, this integration is rather instable. It might or might not work. Even if it seems ok at first, it might stop working after a while. Sometimes, a power cycle of the Philips device helps. Do not report this as an issue here. Nobody can help right now.
+
+It all goes back to some reverse engineering by @rgerganov and you can read about it here: https://xakcop.com/post/ctrl-air-purifier/
+
+Philips has recently introduced a proper API to remote control the devices. However, this only works with the Philips cloud and it is not public (yet?) but only integrates Google Home, Alexa and IFTTT. Using IFTTT with HA might be a more stable choice: https://ifttt.com/Philips_air_purifer
+
+
+## Credits
+
+ - Original reverse engineering done by @rgerganov at https://github.com/rgerganov/py-air-control
+ - The base of the current integration has been done by @betaboon at https://github.com/betaboon/philips-airpurifier-coap but apparently this is not maintained anymore.
+ - The rework has been done by @Denaun at https://github.com/Denaun/philips-airpurifier-coap
+ - Obviously, many other people contributed, notably @Kraineff and @shexbeer
 
 
 ## Install:
