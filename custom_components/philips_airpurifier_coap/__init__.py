@@ -47,20 +47,6 @@ CONFIG_SCHEMA = vol.Schema(
                 vol.Schema(
                     {
                         vol.Required(CONF_HOST): cv.string,
-                        vol.Required(CONF_MODEL): vol.In(
-                            [
-                                MODEL_AC1214,
-                                MODEL_AC2729,
-                                MODEL_AC2889,
-                                MODEL_AC2939,
-                                MODEL_AC2958,
-                                MODEL_AC3033,
-                                MODEL_AC3059,
-                                MODEL_AC3829,
-                                MODEL_AC3858,
-                                MODEL_AC4236,
-                            ]
-                        ),
                         vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
                         vol.Optional(CONF_ICON, default=DEFAULT_ICON): cv.icon,
                     },
@@ -97,6 +83,14 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         }
 
         await coordinator.async_first_refresh()
+
+        # autodetect model and name
+        model = coordinator.status['type']
+        name = coordinator.status['name']
+        conf[CONF_MODEL] = model
+        if not CONF_NAME in conf or conf[CONF_NAME] is None:
+            conf[CONF_NAME] = name
+        _LOGGER.debug("Detected host %s as model %s with name: %s", host, model, name)
 
         for platform in PLATFORMS:
             hass.async_create_task(

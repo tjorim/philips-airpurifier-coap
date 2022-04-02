@@ -73,9 +73,10 @@ philips_airpurifier_coap:
 Field | Value | Necessity | Description
 --- | --- | --- | ---
 host | 192.168.0.17 | *Required* | IP address of the Purifier.
-model | ac4236 | *Required* | Model of the Purifier.
 name | Philips Air Purifier | Optional | Name of the Fan.
 ***
+
+The model type is detected automatically. You get a warning in the log, if it is not supported.
 
 
 ## Supported models
