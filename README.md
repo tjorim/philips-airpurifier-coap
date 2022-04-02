@@ -5,11 +5,23 @@ Currently only encrypted-CoAP is implemented.
 
 ## BREAKING CHANGE:
 
-Change of platform name from philips_airpurifier to philips_airpurifier_coap to allow parallel operation of http custom component
+I've switched to the branch of Denaun. This brings a number of breaking changes:
+ - In your configuration, you no longer configure a `fan` with platform `philips_airpurifier_coap` but you configure `philips_airpurifier_coap` directly. See below for an example.
+ - The long list of attributes is now split out to a number of sensors. If you rely on them, you need to change your frontend, scripts and automations.
+ - The speed setting is now seperated from the preset modes, more inline with how fans are treated inside HA.
+ 
+ There might be some more changes and I'll update the documentation as I come across this. The documentation below is somewhat out-of-date. I'll fix this over time.
+ 
+ 
+ ## Credits
+
+ - The original work has been done by betaboon at https://github.com/betaboon/philips-airpurifier-coap but apparently this is not maintained anymore.
+ - The rework has been done by Denaun at https://github.com/Denaun/philips-airpurifier-coap
+
 
 ## Install:
 
-Add `https://github.com/betaboon/philips-airpurifier.git` as custom-repository in [HACS](https://hacs.xyz/docs/faq/custom_repositories/)
+Add `https://github.com/kongo09/philips-airpurifier.git` as custom-repository in [HACS](https://hacs.xyz/docs/faq/custom_repositories/)
 
 
 ## Setup:
@@ -76,7 +88,7 @@ To aquire those information please follow these steps:
 ### Prepare the environment
 
 ```sh
-git clone https://github.com/betaboon/philips-airpurifier.git
+git clone https://github.com/kongo09/philips-airpurifier.git
 cd philips-airpurifier
 source aioairctrl-shell.sh
 ```
