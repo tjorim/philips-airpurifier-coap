@@ -31,12 +31,12 @@ Philips has recently introduced a proper API to remote control the devices. Howe
  - Obviously, many other people contributed, notably @Kraineff and @shexbeer
 
 
-## Install:
+## Install
 
 Add `https://github.com/kongo09/philips-airpurifier.git` as custom-repository in [HACS](https://hacs.xyz/docs/faq/custom_repositories/)
 
 
-## Setup:
+## Setup
 
 ### Single device
 
@@ -69,7 +69,7 @@ philips_airpurifier_coap:
 *adapt the `host` according to your setup*
 
 
-## Configuration variables:
+## Configuration variables
 Field | Value | Necessity | Description
 --- | --- | --- | ---
 host | 192.168.0.17 | *Required* | IP address of the Purifier.
@@ -78,12 +78,14 @@ name | Philips Air Purifier | Optional | Name of the Fan.
 ***
 
 
-## Supported models:
+## Supported models
 
 - AC1214
 - AC2729
 - AC2889
 - AC2939
+- AC2958
+- AC3033
 - AC3059
 - AC3829
 - AC3858
@@ -114,7 +116,7 @@ source aioairctrl-shell.sh
 aioairctrl --host $DEVICE_IP status --json
 ```
 
-## Debugging:
+## Debugging
 
 To aquire debug-logs, add the following to your `configuration.yaml`:
 
@@ -129,11 +131,11 @@ logger:
 logs should now be available in `home-assistant.log`
 
 
-## Usage:
+## Usage
 
 The integration provides `fan` entities for your devices which are [documented here](https://www.home-assistant.io/integrations/fan/).
 
-### Services:
+### Services
 
 `philips_airpurifier_coap` registers the following services in addition to the standard `fan`services:
 
