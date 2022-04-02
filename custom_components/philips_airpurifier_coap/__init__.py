@@ -88,8 +88,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         model = coordinator.status['type']
         name = coordinator.status['name']
         conf[CONF_MODEL] = model
-        if not CONF_NAME in conf or conf[CONF_NAME] is None:
-            conf[CONF_NAME] = name
+        conf[CONF_NAME] = name
         _LOGGER.debug("Detected host %s as model %s with name: %s", host, model, name)
 
         for platform in PLATFORMS:
