@@ -18,6 +18,7 @@ from homeassistant.const import ATTR_ENTITY_ID, CONF_HOST, CONF_ICON, CONF_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 from homeassistant.util.percentage import (
@@ -180,6 +181,10 @@ async def async_setup_platform(
         )
 
     device._register_services(wrapped_async_register)
+
+    # register device in device registry
+    device_registry = dr.async_get(hass)
+    device_registry.async_get_or_create(device.device_info())
 
 
 class PhilipsGenericFan(PhilipsEntity, FanEntity):
