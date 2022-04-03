@@ -26,7 +26,7 @@ from homeassistant.util.percentage import (
     percentage_to_ordered_list_item,
 )
 
-from . import Coordinator, PhilipsEntity
+from .philips import Coordinator, PhilipsEntity
 from .const import (
     ATTR_CHILD_LOCK,
     ATTR_DEVICE_ID,
