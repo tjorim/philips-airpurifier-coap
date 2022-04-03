@@ -158,11 +158,28 @@ class PhilipsEntity(Entity):
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__()
         self.coordinator = coordinator
+        self._serialNumber = coordinator.status["DeviceId"]
+        self._name = coordinator.status["name"]
+        self._modelName = coordinator.status["modelid"]
+        self._firmware = coordinator.status["WifiVersion"]
+        self._manufacturer = "Philips"
 
     @property
     def should_poll(self) -> bool:
         """No need to poll. Coordinator notifies entity of updates."""
         return False
+
+    @property
+    def device_info(self):
+        return {
+            "identifiers": {
+                (DOMAIN, self._serialNumber)
+            },
+            "name": self._name,
+            "model": self._modelName,
+            "manufacturer": self._manufacturer,
+            "sw_version": self._firmware,
+        }
 
     @property
     def available(self):
