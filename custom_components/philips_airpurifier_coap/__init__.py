@@ -157,6 +157,8 @@ class Coordinator:
 class PhilipsEntity(Entity):
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__()
+        _LOGGER.debug("PhilipsEntity __init__ called")
+        _LOGGER.debug(f"coordinator.status is: {coordinator.status}")
         self.coordinator = coordinator
         self._serialNumber = coordinator.status["DeviceId"]
         self._name = coordinator.status["name"]
