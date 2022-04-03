@@ -115,8 +115,6 @@ async def async_setup_platform(
     discovery_info: Optional[DiscoveryInfoType] = None,
 ) -> None:
     _LOGGER.debug("async_setup_platform called")
-    _LOGGER.debug(f"config is: {config}")
-    _LOGGER.debug(f"discovery_info is: {discovery_info}")
 
     if discovery_info is None:
         return
