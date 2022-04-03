@@ -1,6 +1,9 @@
 {
   "title": "Philips AirPurifier",
   "config": {
+    "abort": {
+      "exists": "Device already configured"
+    },
     "step": {
       "user": {
         "title": "New Philips AirPurifier",
