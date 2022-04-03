@@ -24,16 +24,6 @@ from .const import (
     DEFAULT_ICON,
     DEFAULT_NAME,
     DOMAIN,
-    MODEL_AC1214,
-    MODEL_AC2729,
-    MODEL_AC2889,
-    MODEL_AC2939,
-    MODEL_AC2958,
-    MODEL_AC3033,
-    MODEL_AC3059,
-    MODEL_AC3829,
-    MODEL_AC3858,
-    MODEL_AC4236,
 )
 from .model import DeviceStatus
 
