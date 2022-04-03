@@ -183,8 +183,15 @@ async def async_setup_platform(
     device._register_services(wrapped_async_register)
 
     # register device in device registry
+    device_info = device.device_info()
     device_registry = dr.async_get(hass)
-    device_registry.async_get_or_create(device.device_info())
+    device_registry.async_get_or_create(
+        manufacturer=device_info["manufacturer"],
+        identifiers=device_info["identifiers"],
+        name=device_info["name"],
+        model=device_info["model"],
+        sw_version=device_info["sw_version"],
+    )
 
 
 class PhilipsGenericFan(PhilipsEntity, FanEntity):
