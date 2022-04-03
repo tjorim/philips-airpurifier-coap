@@ -5,7 +5,7 @@
       "user": {
         "title": "New Philips AirPurifier",
         "data": {
-          "host": "Device hostname or IP address",
+          "host": "Device hostname or IP address"
         }
       }
     },

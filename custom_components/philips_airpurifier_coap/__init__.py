@@ -51,10 +51,21 @@ PLATFORMS = ["fan", "sensor"]
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     _LOGGER.debug("async_setup_entry called")
+    return False
+
+
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
+    """Unload a config entry."""
+    
+    for p in PLATFORMS:
+        await hass.config_entries.async_forward_entry_unload(entry, p)
+
+    hass.data[DOMAIN].pop(entry.entry_id)
+
     return True
 
 
-async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
+async def async_setup_old(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up the Philips AirPurifier integration."""
     hass.data[DOMAIN] = {}
 
