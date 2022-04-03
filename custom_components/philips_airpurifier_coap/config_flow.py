@@ -64,16 +64,20 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 if not host_valid(user_input[CONF_HOST]):
                     raise InvalidHost()
                 self.host = user_input[CONF_HOST]
+                _LOGGER.debug("trying to configure host: %s", self.host)
 
                 # let's try and connect to an AirPurifier
                 try:
                     client = await CoAPClient.create(self.host)
+                    _LOGGER.debug("got a valid client")
                 except Exception as ex:
                     _LOGGER.warning(r"Failed to connect: %s", ex)
                     raise exceptions.ConfigEntryNotReady from ex
 
                 self.coordinator = Coordinator(client)
+                _LOGGER.debug("got a coordinator")
                 await self.coordinator.async_first_refresh()
+                _LOGGER.debug("coordinator did first refresh")
 
                 # autodetect model and name
                 model = self.coordinator.status['type']
