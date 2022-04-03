@@ -16,6 +16,7 @@ from homeassistant.helpers import discovery
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.typing import ConfigType
+from homeassistant.config_entries import ConfigEntry
 
 from .const import (
     CONF_MODEL,
@@ -48,6 +49,11 @@ CONFIG_SCHEMA = vol.Schema(
 )
 
 PLATFORMS = ["fan", "sensor"]
+
+
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    _LOGGER.debug("async_setup_entry called")
+    return True
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
