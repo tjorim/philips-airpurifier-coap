@@ -183,7 +183,7 @@ async def async_setup_platform(
     device._register_services(wrapped_async_register)
 
     # register device in device registry
-    device_info = device.device_info()
+    device_info = device.device_info
     device_registry = dr.async_get(hass)
     device_registry.async_get_or_create(
         manufacturer=device_info["manufacturer"],
