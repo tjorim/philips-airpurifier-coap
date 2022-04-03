@@ -34,7 +34,7 @@ def host_valid(host: str) -> bool:
 
 
 class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Handle config flow for HHS Vertretungsplan."""
+    """Handle config flow for Philips AirPurifier."""
 
     VERSION = 1
 
