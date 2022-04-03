@@ -15,7 +15,7 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.config_entries import ConfigEntry
 
-from .philips import Coordinator
+from .philips import PhilipsEntity, Coordinator
 
 from .const import (
     CONF_MODEL,
