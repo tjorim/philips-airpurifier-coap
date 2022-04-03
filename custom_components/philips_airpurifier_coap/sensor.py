@@ -18,7 +18,7 @@ from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType, StateType
 
-from . import Coordinator, PhilipsEntity
+from .philips import Coordinator, PhilipsEntity
 from .const import (
     ATTR_LABEL,
     ATTR_POSTFIX,
