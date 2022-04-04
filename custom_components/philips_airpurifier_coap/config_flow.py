@@ -40,7 +40,6 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     def __init__(self) -> None:
         """Initialize."""
-        self.coordinator: Coordinator = None
         self.host: str = None
 
 
@@ -73,15 +72,10 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
                     status = await client.get_status()
                     _LOGGER.debug("got status")
-                    
+
                 except Exception as ex:
                     _LOGGER.warning(r"Failed to connect: %s", ex)
                     raise exceptions.ConfigEntryNotReady from ex
-
-                # self.coordinator = Coordinator(client)
-                # _LOGGER.debug("got a coordinator")
-                # await self.coordinator.async_first_refresh()
-                # _LOGGER.debug("coordinator did first refresh")
 
                 # autodetect model and name
                 model = status['type']
