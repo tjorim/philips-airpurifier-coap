@@ -74,15 +74,18 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     _LOGGER.warning(r"Failed to connect: %s", ex)
                     raise exceptions.ConfigEntryNotReady from ex
 
-                self.coordinator = Coordinator(client)
-                _LOGGER.debug("got a coordinator")
-                await self.coordinator.async_first_refresh()
-                _LOGGER.debug("coordinator did first refresh")
+                status = await client.getStatus()
+                _LOGGER.debug("got status")
+
+                # self.coordinator = Coordinator(client)
+                # _LOGGER.debug("got a coordinator")
+                # await self.coordinator.async_first_refresh()
+                # _LOGGER.debug("coordinator did first refresh")
 
                 # autodetect model and name
-                model = self.coordinator.status['type']
-                name = self.coordinator.status['name']
-                device_id = self.coordinator.status['DeviceId']
+                model = status['type']
+                name = status['name']
+                device_id = status['DeviceId']
                 user_input[CONF_MODEL] = model
                 user_input[CONF_NAME] = name
                 user_input[CONF_DEVICE_ID] = device_id
