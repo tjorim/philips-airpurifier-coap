@@ -23,6 +23,7 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
+
 PLATFORMS = ["fan", "sensor"]
 
 
