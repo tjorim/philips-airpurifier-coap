@@ -30,24 +30,6 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-# CONFIG_SCHEMA = vol.Schema(
-#     {
-#         DOMAIN: vol.All(
-#             cv.ensure_list,
-#             [
-#                 vol.Schema(
-#                     {
-#                         vol.Required(CONF_HOST): cv.string,
-#                         vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
-#                         vol.Optional(CONF_ICON, default=DEFAULT_ICON): cv.icon,
-#                     },
-#                 )
-#             ],
-#         )
-#     },
-#     extra=vol.ALLOW_EXTRA,
-# )
-
 # PLATFORMS = ["fan", "sensor"]
 PLATFORMS = ["fan"]
 
@@ -96,7 +78,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
     for p in PLATFORMS:
         await hass.config_entries.async_forward_entry_unload(entry, p)
 
-    hass.data[DOMAIN].pop(entry.entry_id)
+    hass.data[DOMAIN].pop(entry.data[CONF_HOST])
 
     return True
 
