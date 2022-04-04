@@ -66,7 +66,7 @@ async def async_setup_entry(
     sensors = []
     for sensor in SENSOR_TYPES:
         _LOGGER.debug("testing: %s", sensor)
-        if status.get(sensor):
+        if sensor in status:
             _LOGGER.debug(".. found")
             sensors.append(PhilipsSensor(coordinator, name, model, sensor))
         else:
