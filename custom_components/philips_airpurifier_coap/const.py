@@ -204,7 +204,7 @@ SENSOR_TYPES: dict[str, SensorDescription] = {
     },
 }
 
-FILTER_TYPES: dict[str, FilterDescription] = {
+DIAGNOSTIC_TYPES: dict[str, FilterDescription] = {
     ATTR_FILTER_PRE: {
         ATTR_PREFIX: PHILIPS_FILTER_PREFIX,
         ATTR_POSTFIX: "0",
