@@ -9,7 +9,9 @@ import voluptuous as vol
 from homeassistant.const import CONF_HOST, CONF_ICON, CONF_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import Entity
-from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
+from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType, HomeAssistantType
+from homeassistant.config_entries import ConfigEntry
+
 
 from .philips import model_to_class
 from .const import (
@@ -21,6 +23,15 @@ from .const import (
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+
+async def async_setup_entry(
+    hass: HomeAssistantType, 
+    entry: ConfigEntry, 
+    async_add_entities: Callable
+):
+    _LOGGER.debug("async_setup_entry called for platform fan")
+    return
 
 
 async def async_setup_platform(

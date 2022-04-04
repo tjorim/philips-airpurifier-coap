@@ -23,6 +23,7 @@ DEFAULT_NAME = "Philips AirPurifier"
 DEFAULT_ICON = "mdi:air-purifier"
 
 CONF_MODEL = "model"
+CONF_DEVICE_ID = "device_id"
 
 MODEL_AC1214 = "AC1214"
 MODEL_AC2729 = "AC2729"

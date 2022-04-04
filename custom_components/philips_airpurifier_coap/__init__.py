@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from struct import pack
 
 from aioairctrl import CoAPClient
 import voluptuous as vol
@@ -19,6 +20,7 @@ from .philips import PhilipsEntity, Coordinator
 
 from .const import (
     CONF_MODEL,
+    CONF_DEVICE_ID,
     DATA_KEY_CLIENT,
     DATA_KEY_COORDINATOR,
     DEFAULT_ICON,
@@ -50,8 +52,39 @@ PLATFORMS = ["fan", "sensor"]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Set up the Philips AirPurifier integration."""
     _LOGGER.debug("async_setup_entry called")
-    return False
+
+    # hass.data[DOMAIN] = {}
+
+    host = entry.data[CONF_HOST]
+
+    _LOGGER.debug("Setting up %s integration with %s", DOMAIN, host)
+
+    try:
+        client = await CoAPClient.create(host)
+        _LOGGER.debug("got a valid client")
+    except Exception as ex:
+        _LOGGER.warning(r"Failed to connect: %s", ex)
+        raise ConfigEntryNotReady from ex
+
+    coordinator = Coordinator(client)
+    _LOGGER.debug("got a valid coordinator")
+
+    hass.data[DOMAIN][host] = {
+        DATA_KEY_CLIENT: client,
+        DATA_KEY_COORDINATOR: coordinator,
+    }
+
+    await coordinator.async_first_refresh()
+    _LOGGER.debug("coordinator did first refresh")
+
+    for platform in PLATFORMS:
+        hass.async_create_task(
+            hass.config_entries.async_forward_entry_setup(entry, platform)
+        )
+
+    return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
