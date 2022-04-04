@@ -51,7 +51,7 @@ async def async_setup_entry(
         return
 
     data[DATA_KEY_FAN] = device
-    async_add_entities([device], update_before_add=False)
+    async_add_entities([device], update_before_add=True)
 
     def wrapped_async_register(
         domain: str,
