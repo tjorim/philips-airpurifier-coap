@@ -71,6 +71,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     coordinator = Coordinator(client)
     _LOGGER.debug("got a valid coordinator")
 
+    data = hass.data.get(DOMAIN)
+    if data == None:
+        hass.data[DOMAIN] = {}
+
     hass.data[DOMAIN][host] = {
         DATA_KEY_CLIENT: client,
         DATA_KEY_COORDINATOR: coordinator,
