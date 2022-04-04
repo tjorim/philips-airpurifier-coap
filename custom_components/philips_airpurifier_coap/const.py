@@ -167,14 +167,14 @@ PHILIPS_ERROR_CODE_MAP = {
 }
 
 SENSOR_TYPES: dict[str, SensorDescription] = {
-    # filter information
+    # diagnostic information
     PHILIPS_WATER_LEVEL: {
         ATTR_ICON: "mdi:water",
         ATTR_LABEL: ATTR_WATER_LEVEL,
         ATTR_VALUE: lambda value, status: 0 if status.get("err") in [32768, 49408] else value,
         ATTR_STATE_CLASS: STATE_CLASS_MEASUREMENT,
         ATTR_UNIT: PERCENTAGE,
-        CONF_ENTITY_CATEGORY: EntityCategory.DIAGNOSTIC
+        CONF_ENTITY_CATEGORY: EntityCategory.DIAGNOSTIC,
     },
     # device sensors
     PHILIPS_AIR_QUALITY_INDEX: {
