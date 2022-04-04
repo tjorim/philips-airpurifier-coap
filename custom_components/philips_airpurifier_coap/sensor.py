@@ -16,7 +16,7 @@ from homeassistant.const import (
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import PlatformNotReady
-from homeassistant.helpers.entity import Entity
+from homeassistant.helpers.entity import Entity, EntityCategory
 from homeassistant.helpers.typing import StateType
 from homeassistant.config_entries import ConfigEntry
 
@@ -121,6 +121,7 @@ class PhilipsFilterSensor(PhilipsEntity, SensorEntity):
         self._value_key = "".join([prefix, PHILIPS_FILTER_STATUS, postfix])
         self._total_key = "".join([prefix, PHILIPS_FILTER_TOTAL, postfix])
         self._type_key = "".join([prefix, PHILIPS_FILTER_TYPE, postfix])
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
 
         if self._has_total:
             self._attr_unit_of_measurement = PERCENTAGE
