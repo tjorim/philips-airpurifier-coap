@@ -65,9 +65,9 @@ async def async_setup_entry(
     for sensor in SENSOR_TYPES:
         if coordinator.status.get(sensor):
             sensors.append(PhilipsSensor(coordinator, name, model, sensor))
-    for filter in DIAGNOSTIC_TYPES:
-        if PhilipsFilterSensor.is_supported(coordinator.status, filter):
-            sensors.append(PhilipsFilterSensor(coordinator, name, model, filter))
+    for sensor in DIAGNOSTIC_TYPES:
+        if PhilipsFilterSensor.is_supported(coordinator.status, sensor):
+            sensors.append(PhilipsFilterSensor(coordinator, name, model, sensor))
 
     async_add_entities(sensors, update_before_add=False)
 
