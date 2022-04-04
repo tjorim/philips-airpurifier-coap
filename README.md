@@ -33,50 +33,20 @@ Philips has recently introduced a proper API to remote control the devices. Howe
 
 ## Install
 
-Add `https://github.com/kongo09/philips-airpurifier.git` as custom-repository in [HACS](https://hacs.xyz/docs/faq/custom_repositories/)
+* Go to HACS -> Integrations
+* Click the three dots on the top right and select `Custom Repositories`
+* Enter `https://github.com/kongo09/philips-airpurifier-coap.git` as repository, select the category `Integration` and click Add
+* A new custom integration shows up for installation (Philips AirPurifier CoAP) - install it
+* Restart Home Assistant
 
 
-## Setup
+## Configuration
 
-### Single device
-
-Add the following to your `configuration.yaml`:
-
-```yaml
-philips_airpurifier_coap:
-  host: 192.168.0.17
-  model: ac4236
-```
-
-*adapt the `host` according to your setup*
-
-### Multiple devices
-
-Add the following to your `configuration.yaml`:
-
-```yaml
-philips_airpurifier_coap:
-  - host: 192.168.0.100
-    model: ac1214
-
-  - host: 192.168.0.101
-    model: ac1214
-
-  - host: 192.168.0.102
-    model: ac1214
-```
-
-*adapt the `host` according to your setup*
-
-
-## Configuration variables
-Field | Value | Necessity | Description
---- | --- | --- | ---
-host | 192.168.0.17 | *Required* | IP address of the Purifier.
-name | Philips Air Purifier | Optional | Name of the Fan.
-***
-
-The model type is detected automatically. You get a warning in the log, if it is not supported.
+* Go to Configuration -> Devices & Services
+* Click `Add Integration`
+* Search for `Philips AirPurifier` and select it
+* Enter the hostname / IP address of your device
+* The model type is detected automatically. You get a warning in the log, if it is not supported.
 
 
 ## Supported models
@@ -91,6 +61,7 @@ The model type is detected automatically. You get a warning in the log, if it is
 - AC3829
 - AC3858
 - AC4236
+
 
 ## Is your model not supported yet?
 
