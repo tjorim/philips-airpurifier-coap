@@ -11,6 +11,7 @@ from homeassistant.const import (
     ATTR_ICON,
     CONF_HOST,
     CONF_NAME,
+    CONF_ENTITY_CATEGORY,
     PERCENTAGE,
     TIME_HOURS,
 )
@@ -84,6 +85,8 @@ class PhilipsSensor(PhilipsEntity, SensorEntity):
         self._attr_name = f"{name} {self._description[ATTR_LABEL].replace('_', ' ').title()}"
         self._attr_state_class = self._description.get(ATTR_STATE_CLASS)
         self._attr_unit_of_measurement = self._description.get(ATTR_UNIT)
+        self._attr_entity_category = self._description.get(CONF_ENTITY_CATEGORY)
+
         try:
             device_id = self._device_status[PHILIPS_DEVICE_ID]
             self._attr_unique_id = f"{self._model}-{device_id}-{kind.lower()}"

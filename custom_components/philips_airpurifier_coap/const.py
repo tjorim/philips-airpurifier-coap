@@ -1,7 +1,11 @@
 """Constants for Philips AirPurifier integration."""
 from __future__ import annotations
 
-from homeassistant.components.sensor import ATTR_STATE_CLASS, STATE_CLASS_MEASUREMENT
+from homeassistant.components.sensor import (
+    ATTR_STATE_CLASS,
+    STATE_CLASS_MEASUREMENT,
+)
+
 from homeassistant.const import (
     ATTR_DEVICE_CLASS,
     ATTR_ICON,
@@ -11,7 +15,11 @@ from homeassistant.const import (
     CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
     DEVICE_CLASS_HUMIDITY,
     DEVICE_CLASS_TEMPERATURE,
+    CONF_ENTITY_CATEGORY,
 )
+
+from homeassistant.helpers.entity import EntityCategory
+
 
 from .model import FilterDescription, SensorDescription
 
@@ -164,6 +172,9 @@ SENSOR_TYPES: dict[str, SensorDescription] = {
         ATTR_ICON: "mdi:water",
         ATTR_LABEL: ATTR_WATER_LEVEL,
         ATTR_VALUE: lambda value, status: 0 if status.get("err") in [32768, 49408] else value,
+        ATTR_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+        ATTR_UNIT: PERCENTAGE,
+        CONF_ENTITY_CATEGORY: EntityCategory.DIAGNOSTIC
     },
     # device sensors
     PHILIPS_AIR_QUALITY_INDEX: {
