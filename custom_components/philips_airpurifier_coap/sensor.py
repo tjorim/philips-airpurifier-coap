@@ -66,8 +66,8 @@ async def async_setup_entry(
         if coordinator.status.get(sensor):
             sensors.append(PhilipsSensor(coordinator, name, model, sensor))
     for sensor in DIAGNOSTIC_TYPES:
-        if PhilipsFilterSensor.is_supported(coordinator.status, sensor):
-            sensors.append(PhilipsFilterSensor(coordinator, name, model, sensor))
+        if PhilipsDiagnosticSensor.is_supported(coordinator.status, sensor):
+            sensors.append(PhilipsDiagnosticSensor(coordinator, name, model, sensor))
 
     async_add_entities(sensors, update_before_add=False)
 
@@ -102,8 +102,8 @@ class PhilipsSensor(PhilipsEntity, SensorEntity):
         return cast(StateType, value)
 
 
-class PhilipsFilterSensor(PhilipsEntity, SensorEntity):
-    """Define a Philips AirPurifier filter sensor."""
+class PhilipsDiagnosticSensor(PhilipsEntity, SensorEntity):
+    """Define a Philips AirPurifier diagnostic sensor, e.g. filter."""
 
     @classmethod
     def is_supported(cls, device_status: DeviceStatus, kind: str) -> bool:
