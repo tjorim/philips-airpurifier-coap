@@ -70,12 +70,13 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 try:
                     client = await CoAPClient.create(self.host)
                     _LOGGER.debug("got a valid client")
+
+                    status = await client.get_status()
+                    _LOGGER.debug("got status")
+                    
                 except Exception as ex:
                     _LOGGER.warning(r"Failed to connect: %s", ex)
                     raise exceptions.ConfigEntryNotReady from ex
-
-                status = await client.getStatus()
-                _LOGGER.debug("got status")
 
                 # self.coordinator = Coordinator(client)
                 # _LOGGER.debug("got a coordinator")
