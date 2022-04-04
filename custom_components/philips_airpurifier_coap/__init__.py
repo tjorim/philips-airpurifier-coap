@@ -48,14 +48,13 @@ CONFIG_SCHEMA = vol.Schema(
     extra=vol.ALLOW_EXTRA,
 )
 
-PLATFORMS = ["fan", "sensor"]
+# PLATFORMS = ["fan", "sensor"]
+PLATFORMS = ["fan"]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up the Philips AirPurifier integration."""
     _LOGGER.debug("async_setup_entry called")
-
-    # hass.data[DOMAIN] = {}
 
     host = entry.data[CONF_HOST]
 
