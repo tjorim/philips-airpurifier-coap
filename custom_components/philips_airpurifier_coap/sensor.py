@@ -34,7 +34,7 @@ from .const import (
     CONF_MODEL,
     DATA_KEY_COORDINATOR,
     DOMAIN,
-    DIAGNOSTIC_TYPES,
+    FILTER_TYPES,
     PHILIPS_DEVICE_ID,
     PHILIPS_FILTER_STATUS,
     PHILIPS_FILTER_TOTAL,
@@ -65,9 +65,9 @@ async def async_setup_entry(
     for sensor in SENSOR_TYPES:
         if coordinator.status.get(sensor):
             sensors.append(PhilipsSensor(coordinator, name, model, sensor))
-    for sensor in DIAGNOSTIC_TYPES:
-        if PhilipsDiagnosticSensor.is_supported(coordinator.status, sensor):
-            sensors.append(PhilipsDiagnosticSensor(coordinator, name, model, sensor))
+    for filter in FILTER_TYPES:
+        if PhilipsFilterSensor.is_supported(coordinator.status, filter):
+            sensors.append(PhilipsFilterSensor(coordinator, name, model, filter))
 
     async_add_entities(sensors, update_before_add=False)
 
@@ -102,12 +102,12 @@ class PhilipsSensor(PhilipsEntity, SensorEntity):
         return cast(StateType, value)
 
 
-class PhilipsDiagnosticSensor(PhilipsEntity, SensorEntity):
-    """Define a Philips AirPurifier diagnostic sensor, e.g. filter."""
+class PhilipsFilterSensor(PhilipsEntity, SensorEntity):
+    """Define a Philips AirPurifier filter sensor."""
 
     @classmethod
     def is_supported(cls, device_status: DeviceStatus, kind: str) -> bool:
-        description = DIAGNOSTIC_TYPES[kind]
+        description = FILTER_TYPES[kind]
         prefix = description[ATTR_PREFIX]
         postfix = description[ATTR_POSTFIX]
         return "".join([prefix, PHILIPS_FILTER_STATUS, postfix]) in device_status
@@ -115,7 +115,7 @@ class PhilipsDiagnosticSensor(PhilipsEntity, SensorEntity):
     def __init__(self, coordinator: Coordinator, name: str, model: str, kind: str) -> None:
         super().__init__(coordinator)
         self._model = model
-        description = DIAGNOSTIC_TYPES[kind]
+        description = FILTER_TYPES[kind]
         prefix = description[ATTR_PREFIX]
         postfix = description[ATTR_POSTFIX]
         self._value_key = "".join([prefix, PHILIPS_FILTER_STATUS, postfix])
