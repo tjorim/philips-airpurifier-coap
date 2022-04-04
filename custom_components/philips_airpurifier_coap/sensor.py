@@ -16,7 +16,8 @@ from homeassistant.const import (
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers.entity import Entity
-from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType, StateType
+from homeassistant.helpers.typing import StateType
+from homeassistant.config_entries import ConfigEntry
 
 from .philips import Coordinator, PhilipsEntity
 from .const import (
@@ -44,18 +45,17 @@ from .model import DeviceStatus
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup_platform(
+async def async_setup_entry(
     hass: HomeAssistant,
-    config: ConfigType,
-    async_add_entities: Callable[[List[Entity], bool], None],
-    discovery_info: DiscoveryInfoType | None = None,
+    entry: ConfigEntry,
+    async_add_entities: Callable[[List[Entity], bool], None]
 ) -> None:
-    if discovery_info is None:
-        return
+    _LOGGER.debug("async_setup_entry called for platform sensor")
 
-    host = discovery_info[CONF_HOST]
-    model = discovery_info[CONF_MODEL]
-    name = discovery_info[CONF_NAME]
+    host = entry.data[CONF_HOST]
+    model = entry.data[CONF_MODEL]
+    name = entry.data[CONF_NAME]
+
     data = hass.data[DOMAIN][host]
 
     coordinator = data[DATA_KEY_COORDINATOR]
