@@ -88,7 +88,7 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 _LOGGER.debug("Detected host %s as model %s with name: %s", self.host, model, name)
 
                 # check if model is supported
-                if not model in model_to_class.keys:
+                if not model in model_to_class.keys():
                     return self.async_abort(reason="model_unsupported")
 
                 # use the device ID as unique_id
