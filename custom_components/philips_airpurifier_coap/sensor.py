@@ -12,6 +12,7 @@ from homeassistant.const import (
     CONF_HOST,
     CONF_NAME,
     PERCENTAGE,
+    TIME_HOURS,
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import PlatformNotReady
@@ -123,6 +124,9 @@ class PhilipsFilterSensor(PhilipsEntity, SensorEntity):
 
         if self._has_total:
             self._attr_unit_of_measurement = PERCENTAGE
+        else:
+            self._attr_unit_of_measurement = TIME_HOURS
+
         self._attr_name = f"{name} {kind.replace('_', ' ').title()}"
         try:
             device_id = self._device_status[PHILIPS_DEVICE_ID]
@@ -159,7 +163,7 @@ class PhilipsFilterSensor(PhilipsEntity, SensorEntity):
 
     @property
     def _time_remaining(self) -> str:
-        return str(timedelta(hours=self._value))
+        return str(round(timedelta(hours=self._value) / timedelta(days=1), 0))
 
     @property
     def _value(self) -> int:
