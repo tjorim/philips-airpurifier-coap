@@ -2,7 +2,8 @@
   "title": "Philips AirPurifier",
   "config": {
     "abort": {
-      "already_configured": "Device already configured"
+      "already_configured": "Device already configured",
+      "model_unsupported": "Model unsupported"
     },
     "step": {
       "user": {

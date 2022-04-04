@@ -3,14 +3,12 @@ from homeassistant import config_entries, exceptions
 from homeassistant.data_entry_flow import FlowResult
 
 from homeassistant.helpers import config_validation as cv
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.const import CONF_HOST, CONF_NAME
 
-from aiohttp.client_exceptions import ClientConnectorError
 from aioairctrl import CoAPClient
 
 from .const import CONF_MODEL, CONF_DEVICE_ID, DOMAIN
-from .philips import Coordinator
+from .philips import model_to_class
 
 from typing import Any
 
@@ -88,6 +86,10 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 user_input[CONF_NAME] = name
                 user_input[CONF_DEVICE_ID] = device_id
                 _LOGGER.debug("Detected host %s as model %s with name: %s", self.host, model, name)
+
+                # check if model is supported
+                if not model in model_to_class.keys:
+                    return self.async_abort(reason="model_unsupported")
 
                 # use the device ID as unique_id
                 unique_id = device_id
