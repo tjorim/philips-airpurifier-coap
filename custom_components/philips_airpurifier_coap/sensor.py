@@ -156,7 +156,7 @@ class PhilipsFilterSensor(PhilipsEntity, SensorEntity):
     def extra_state_attributes(self) -> dict[str, Any]:
         if self._type_key in self._device_status:
             self._attrs[ATTR_TYPE] = self._device_status[self._type_key]
-        self._attrs[ATTR_RAW] = self._value
+        # self._attrs[ATTR_RAW] = self._value
         if self._has_total:
             self._attrs[ATTR_TOTAL] = self._total
             self._attrs[ATTR_TIME_REMAINING] = self._time_remaining
