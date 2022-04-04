@@ -61,17 +61,18 @@ async def async_setup_entry(
     data = hass.data[DOMAIN][host]
 
     coordinator = data[DATA_KEY_COORDINATOR]
+    status = coordinator.status
 
     sensors = []
     for sensor in SENSOR_TYPES:
         _LOGGER.debug("testing: %s", sensor)
-        if coordinator.status.get(sensor):
+        if status.get(sensor):
             _LOGGER.debug(".. found")
             sensors.append(PhilipsSensor(coordinator, name, model, sensor))
         else:
-            _LOGGER.debug(".. not found")
+            _LOGGER.debug(".. not found in status: %s", status)
     for filter in FILTER_TYPES:
-        if PhilipsFilterSensor.is_supported(coordinator.status, filter):
+        if PhilipsFilterSensor.is_supported(status, filter):
             sensors.append(PhilipsFilterSensor(coordinator, name, model, filter))
 
     async_add_entities(sensors, update_before_add=False)
