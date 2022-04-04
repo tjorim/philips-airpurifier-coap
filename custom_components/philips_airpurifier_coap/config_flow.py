@@ -73,6 +73,9 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     status = await client.get_status()
                     _LOGGER.debug("got status")
 
+                    if client is not None:
+                        await client.shutdown()
+
                 except Exception as ex:
                     _LOGGER.warning(r"Failed to connect: %s", ex)
                     raise exceptions.ConfigEntryNotReady from ex
