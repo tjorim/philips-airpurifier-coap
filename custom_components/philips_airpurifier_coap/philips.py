@@ -37,7 +37,7 @@ class Coordinator:
         self.client = client
 
         # It's None before the first successful update.
-        # Components should call async_first_refresh  to make sure the first
+        # Components should call async_first_refresh to make sure the first
         # update was successful. Set type to just DeviceStatus to remove
         # annoying checks that status is not None when it was already checked
         # during setup.
