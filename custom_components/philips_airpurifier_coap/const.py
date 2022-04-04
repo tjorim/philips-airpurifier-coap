@@ -221,4 +221,8 @@ DIAGNOSTIC_TYPES: dict[str, FilterDescription] = {
         ATTR_PREFIX: PHILIPS_FILTER_WICK_PREFIX,
         ATTR_POSTFIX: "",
     },
+    ATTR_WATER_LEVEL: {
+        ATTR_PREFIX: PHILIPS_WATER_LEVEL,
+        ATTR_POSTFIX: "",
+    }
 }
