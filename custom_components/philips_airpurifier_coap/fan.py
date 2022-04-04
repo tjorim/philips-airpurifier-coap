@@ -2,14 +2,12 @@
 from __future__ import annotations
 
 import logging
-from typing import Callable, List, Optional
+from typing import Callable, Optional
 
 import voluptuous as vol
 
-from homeassistant.const import CONF_HOST, CONF_ICON, CONF_NAME
-from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import Entity
-from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType, HomeAssistantType
+from homeassistant.const import CONF_HOST, CONF_NAME
+from homeassistant.helpers.typing import HomeAssistantType
 from homeassistant.config_entries import ConfigEntry
 
 
