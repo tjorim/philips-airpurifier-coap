@@ -19,7 +19,7 @@ from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers.entity import Entity
 from homeassistant.config_entries import ConfigEntry
 
-from .philips import Coordinator, PhilipsEntity
+from .philips import Coordinator, PhilipsEntity, model_to_class
 from .const import (
     ATTR_LABEL,
     SWITCH_ON,
@@ -50,18 +50,30 @@ async def async_setup_entry(
 
     client = data[DATA_KEY_CLIENT]
     coordinator = data[DATA_KEY_COORDINATOR]
-    status = coordinator.status
 
-    switches = []
-    for switch in SWITCH_TYPES:
-        _LOGGER.debug("testing: %s", switch)
-        if switch in status:
-            _LOGGER.debug(".. found")
-            switches.append(PhilipsSwitch(client, coordinator, name, model, switch))
-        else:
-            _LOGGER.debug(".. not found in status: %s", status)
+    model_class = model_to_class.get(model)
+    if model_class:
 
-    async_add_entities(switches, update_before_add=False)
+        available_switches = {}
+        for cls in reversed(model_class.__class__.__mro__):
+            cls_available_switches = getattr(cls, "AVAILABLE_SWITCHES", {})
+            available_switches.update(cls_available_switches)
+
+        switches = []
+
+        for switch in SWITCH_TYPES:
+            _LOGGER.debug("testing: %s", switch)
+            if switch in model_class.AVAILABLE_SWITCHES:
+                _LOGGER.debug(".. found")
+                switches.append(PhilipsSwitch(client, coordinator, name, model, switch))
+            else:
+                _LOGGER.debug(".. not found in model: %s", model)
+
+        async_add_entities(switches, update_before_add=False)
+
+    else:
+        _LOGGER.error("Unsupported model: %s", model)
+        return
 
 
 class PhilipsSwitch(PhilipsEntity, SwitchEntity):
