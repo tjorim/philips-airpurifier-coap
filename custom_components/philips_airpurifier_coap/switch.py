@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Callable, List, cast
+from typing import Any, Callable, List
 
 from aioairctrl import CoAPClient
 
@@ -16,8 +16,7 @@ from homeassistant.const import (
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import PlatformNotReady
-from homeassistant.helpers.entity import Entity, EntityCategory
-from homeassistant.helpers.typing import StateType
+from homeassistant.helpers.entity import Entity
 from homeassistant.config_entries import ConfigEntry
 
 from .philips import Coordinator, PhilipsEntity
@@ -32,7 +31,6 @@ from .const import (
     PHILIPS_DEVICE_ID,
     SWITCH_TYPES,
 )
-from .model import DeviceStatus
 
 _LOGGER = logging.getLogger(__name__)
 
