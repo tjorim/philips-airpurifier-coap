@@ -60,7 +60,7 @@ SWITCH_ON = "on"
 SWITCH_OFF = "off"
 
 FUNCTION_PURIFICATION = "purification"
-FUNCTION_PURIFICATION_HUMIDIFICATION = "purification_humidification"
+FUNCTION_PURIFICATION_HUMIDIFICATION = "humidification"
 
 SERVICE_SET_CHILD_LOCK_OFF = "set_child_lock_off"
 SERVICE_SET_CHILD_LOCK_ON = "set_child_lock_on"
