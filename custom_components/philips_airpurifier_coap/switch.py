@@ -105,11 +105,11 @@ class PhilipsSwitch(PhilipsEntity, SwitchEntity):
         return self._device_status.get(self.kind) == self._on
 
 
-    async def async_turn_on(self) -> None:
+    async def async_turn_on(self, **kwargs) -> None:
+        _LOGGER.debug("async_turn_on, kind: %s - value: %s", self.kind, self._on)
         await self._client.set_control_value(self.kind, self._on)
-        self._attr_is_on = True
 
 
-    async def async_turn_on(self) -> None:
-        await self._client.set_control_value(self.kind, self._on)
-        self._attr_is_on = False
+    async def async_turn_off(self, **kwargs) -> None:
+        _LOGGER.debug("async_turn_off, kind: %s - value: %s", self.kind, self._off)
+        await self._client.set_control_value(self.kind, self._off)
