@@ -352,6 +352,9 @@ class PhilipsGenericCoAPFan(PhilipsGenericCoAPFanBase):
         (ATTR_RUNTIME, PHILIPS_RUNTIME, lambda x, _: str(timedelta(seconds=round(x / 1000)))),
     ]
 
+    AVAILABLE_SWITCHES = []
+    AVAILABLE_LIGHTS = []
+
     SERVICE_SCHEMA_SET_LIGHT_BRIGHTNESS = vol.Schema(
         {
             vol.Required(ATTR_ENTITY_ID): cv.entity_id,
