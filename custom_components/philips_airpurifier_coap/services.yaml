@@ -1,31 +1,3 @@
-set_child_lock_on:
-  description: Turn the child lock on
-  fields:
-    entity_id:
-      description: Name of the fan entity
-      example: "fan.philips_airpurifier"
-
-set_child_lock_off:
-  description: Turn the child lock off
-  fields:
-    entity_id:
-      description: Name of the fan entity
-      example: "fan.philips_airpurifier"
-
-set_display_backlight_on:
-  description: Turn the display backlight on
-  fields:
-    entity_id:
-      description: Name of the fan entity
-      example: "fan.philips_airpurifier"
-
-set_display_backlight_off:
-  description: Turn the display backlight off
-  fields:
-    entity_id:
-      description: Name of the fan entity
-      example: "fan.philips_airpurifier"
-
 set_light_brightness:
   description: Set the light brightness
   fields:

@@ -362,26 +362,10 @@ class PhilipsGenericCoAPFan(PhilipsGenericCoAPFanBase):
     def register_services(self, async_register):
         async_register(
             domain=DOMAIN,
-            service=SERVICE_SET_DISPLAY_BACKLIGHT_ON,
-            service_func=self.async_set_display_backlight_on,
-        )
-        async_register(
-            domain=DOMAIN,
-            service=SERVICE_SET_DISPLAY_BACKLIGHT_OFF,
-            service_func=self.async_set_display_backlight_off,
-        )
-        async_register(
-            domain=DOMAIN,
             service=SERVICE_SET_LIGHT_BRIGHTNESS,
             service_func=self.async_set_light_brightness,
             schema=self.SERVICE_SCHEMA_SET_LIGHT_BRIGHTNESS,
         )
-
-    async def async_set_display_backlight_on(self):
-        await self._client.set_control_value(PHILIPS_DISPLAY_BACKLIGHT, "1")
-
-    async def async_set_display_backlight_off(self):
-        await self._client.set_control_value(PHILIPS_DISPLAY_BACKLIGHT, "0")
 
     async def async_set_light_brightness(self, brightness: int):
         await self._client.set_control_value(PHILIPS_LIGHT_BRIGHTNESS, brightness)
