@@ -59,7 +59,7 @@ async def async_setup_entry(
         _LOGGER.debug("testing: %s", switch)
         if switch in status:
             _LOGGER.debug(".. found")
-            switches.append(PhilipsSensor(client, coordinator, name, model, switch))
+            switches.append(PhilipsSwitch(client, coordinator, name, model, switch))
         else:
             _LOGGER.debug(".. not found in status: %s", status)
 
