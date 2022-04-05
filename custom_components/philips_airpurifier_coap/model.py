@@ -39,3 +39,11 @@ class SwitchDescription(TypedDict):
     icon: str
     label: str
     entity_category: str
+
+
+class LightDescription(TypedDict):
+    """Light description class."""
+
+    icon: str
+    label: str
+    entity_category: str

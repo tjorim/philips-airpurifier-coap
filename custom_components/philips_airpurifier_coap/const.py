@@ -21,7 +21,7 @@ from homeassistant.const import (
 from homeassistant.helpers.entity import EntityCategory
 
 
-from .model import FilterDescription, SensorDescription, SwitchDescription
+from .model import FilterDescription, SensorDescription, SwitchDescription, LightDescription
 
 DOMAIN = "philips_airpurifier_coap"
 
@@ -244,6 +244,9 @@ SWITCH_TYPES: dict[str, SwitchDescription] = {
         SWITCH_ON: True,
         SWITCH_OFF: False,
     },
+}
+
+LIGHT_TYPES: dict[str, LightDescription] = {
     PHILIPS_DISPLAY_BACKLIGHT: {
         ATTR_ICON: "mdi:brightness-7",
         ATTR_LABEL: ATTR_DISPLAY_BACKLIGHT,

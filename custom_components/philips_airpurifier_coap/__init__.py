@@ -24,7 +24,7 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 
-PLATFORMS = ["fan", "sensor", "switch"]
+PLATFORMS = ["fan", "sensor", "switch", "light"]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
