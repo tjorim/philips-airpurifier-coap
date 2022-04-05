@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from typing import Any, Callable, TypedDict
+from xmlrpc.client import boolean
 
 from homeassistant.helpers.typing import StateType
 
@@ -30,3 +31,11 @@ class FilterDescription(TypedDict):
 
     prefix: str
     postfix: str
+
+
+class SwitchDescription(TypedDict):
+    """Switch description class."""
+
+    icon: str
+    label: str
+    entity_category: str

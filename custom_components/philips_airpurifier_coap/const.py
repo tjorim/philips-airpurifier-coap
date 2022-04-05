@@ -21,7 +21,7 @@ from homeassistant.const import (
 from homeassistant.helpers.entity import EntityCategory
 
 
-from .model import FilterDescription, SensorDescription
+from .model import FilterDescription, SensorDescription, SwitchDescription
 
 DOMAIN = "philips_airpurifier_coap"
 
@@ -56,6 +56,8 @@ PRESET_MODE_GENTLE = "gentle"
 PRESET_MODE_NIGHT = "night"
 PRESET_MODE_SLEEP = "sleep"
 PRESET_MODE_TURBO = "turbo"
+SWITCH_ON = "on"
+SWITCH_OFF = "off"
 
 FUNCTION_PURIFICATION = "purification"
 FUNCTION_PURIFICATION_HUMIDIFICATION = "purification_humidification"
@@ -232,4 +234,14 @@ FILTER_TYPES: dict[str, FilterDescription] = {
         ATTR_PREFIX: PHILIPS_FILTER_WICK_PREFIX,
         ATTR_POSTFIX: "",
     },
+}
+
+SWITCH_TYPES: dict[str, SwitchDescription] = {
+    PHILIPS_CHILD_LOCK: {
+        ATTR_ICON: "mdi:account-lock",
+        ATTR_LABEL: ATTR_CHILD_LOCK,
+        CONF_ENTITY_CATEGORY: EntityCategory.CONFIG,
+        SWITCH_ON: True,
+        SWITCH_OFF: False,
+    }
 }
