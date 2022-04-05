@@ -383,18 +383,6 @@ class PhilipsHumidifierMixin(PhilipsGenericCoAPFanBase):
     ]
     AVAILABLE_SWITCHES = [PHILIPS_FUNCTION]
 
-    SERVICE_SCHEMA_SET_FUNCTION = vol.Schema(
-        {
-            vol.Required(ATTR_ENTITY_ID): cv.entity_id,
-            vol.Required(ATTR_FUNCTION): vol.In(
-                [
-                    FUNCTION_PURIFICATION,
-                    FUNCTION_PURIFICATION_HUMIDIFICATION,
-                ]
-            ),
-        }
-    )
-
     SERVICE_SCHEMA_SET_HUMIDITY_TARGET = vol.Schema(
         {
             vol.Required(ATTR_ENTITY_ID): cv.entity_id,
@@ -408,22 +396,10 @@ class PhilipsHumidifierMixin(PhilipsGenericCoAPFanBase):
     def register_services(self, async_register) -> None:
         async_register(
             domain=DOMAIN,
-            service=SERVICE_SET_FUNCTION,
-            service_func=self.async_set_function,
-            schema=self.SERVICE_SCHEMA_SET_FUNCTION,
-        )
-        async_register(
-            domain=DOMAIN,
             service=SERVICE_SET_HUMIDITY_TARGET,
             service_func=self.async_set_humidity_target,
             schema=self.SERVICE_SCHEMA_SET_HUMIDITY_TARGET,
         )
-
-    async def async_set_function(self, function: str) -> None:
-        if function == FUNCTION_PURIFICATION:
-            await self._client.set_control_value(PHILIPS_FUNCTION, "P")
-        elif function == FUNCTION_PURIFICATION_HUMIDIFICATION:
-            await self._client.set_control_value(PHILIPS_FUNCTION, "PH")
 
     async def async_set_humidity_target(self, humidity_target: int) -> None:
         await self._client.set_control_value(PHILIPS_HUMIDITY_TARGET, humidity_target)
