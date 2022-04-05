@@ -50,7 +50,7 @@ async def async_setup_entry(
 
     data = hass.data[DOMAIN][host]
 
-    client = data[DATA_KEY_CLIENT],
+    client = data[DATA_KEY_CLIENT]
     coordinator = data[DATA_KEY_COORDINATOR]
     status = coordinator.status
 
