@@ -180,6 +180,8 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
     AVAILABLE_PRESET_MODES = {}
     AVAILABLE_SPEEDS = {}
     AVAILABLE_ATTRIBUTES = []
+    AVAILABLE_SWITCHES = []
+    AVAILABLE_LIGHTS = []
 
     def __init__(
         self,
