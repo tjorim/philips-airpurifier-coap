@@ -53,20 +53,18 @@ async def async_setup_entry(
 
     model_class = model_to_class.get(model)
     if model_class:
-        _LOGGER.debug("working with class: %s", model_class)
 
-        available_lights = model_class.AVAILABLE_LIGHTS
-
-        _LOGGER.debug("result: %s", available_lights)
+        available_lights = []
+        
+        for cls in reversed(model_class.__mro__):
+            cls_available_lights = getattr(cls, "AVAILABLE_LIGHTS", [])          
+            available_lights.extend(cls_available_lights)
+        
         lights = []
 
         for light in LIGHT_TYPES:
-            _LOGGER.debug("testing: %s", light)
             if light in available_lights:
-                _LOGGER.debug(".. found")
                 lights.append(PhilipsLight(client, coordinator, name, model, light))
-            else:
-                _LOGGER.debug(".. not found in model: %s", model)
 
         async_add_entities(lights, update_before_add=False)
 

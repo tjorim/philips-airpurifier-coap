@@ -64,13 +64,11 @@ async def async_setup_entry(
     status = coordinator.status
 
     sensors = []
+    
     for sensor in SENSOR_TYPES:
-        _LOGGER.debug("testing: %s", sensor)
         if sensor in status:
-            _LOGGER.debug(".. found")
             sensors.append(PhilipsSensor(coordinator, name, model, sensor))
-        else:
-            _LOGGER.debug(".. not found")
+
     for filter in FILTER_TYPES:
         if PhilipsFilterSensor.is_supported(status, filter):
             sensors.append(PhilipsFilterSensor(coordinator, name, model, filter))
