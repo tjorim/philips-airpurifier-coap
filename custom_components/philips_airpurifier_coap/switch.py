@@ -63,12 +63,8 @@ async def async_setup_entry(
         switches = []
 
         for switch in SWITCH_TYPES:
-            _LOGGER.debug("testing: %s", switch)
             if switch in available_switches:
-                _LOGGER.debug(".. found")
                 switches.append(PhilipsSwitch(client, coordinator, name, model, switch))
-            else:
-                _LOGGER.debug(".. not found in model: %s", model)
 
         async_add_entities(switches, update_before_add=False)
 
