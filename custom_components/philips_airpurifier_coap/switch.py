@@ -55,13 +55,13 @@ async def async_setup_entry(
     if model_class:
         _LOGGER.debug("working with class: %s", model_class)
 
-        available_switches = {}
+        available_switches = []
         for cls in reversed(model_class.__class__.__mro__):
 
             _LOGGER.debug("testing: %s", cls)
-            cls_available_switches = getattr(cls, "AVAILABLE_SWITCHES", {})
+            cls_available_switches = getattr(cls, "AVAILABLE_SWITCHES", [])
             _LOGGER.debug("found switches: %s", cls_available_switches)
-            available_switches.update(cls_available_switches)
+            available_switches.extend(cls_available_switches)
 
         _LOGGER.debug("result: %s", available_switches)
         switches = []
