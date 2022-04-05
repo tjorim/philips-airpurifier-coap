@@ -70,7 +70,7 @@ async def async_setup_entry(
             _LOGGER.debug(".. found")
             sensors.append(PhilipsSensor(coordinator, name, model, sensor))
         else:
-            _LOGGER.debug(".. not found in status: %s", status)
+            _LOGGER.debug(".. not found")
     for filter in FILTER_TYPES:
         if PhilipsFilterSensor.is_supported(status, filter):
             sensors.append(PhilipsFilterSensor(coordinator, name, model, filter))
