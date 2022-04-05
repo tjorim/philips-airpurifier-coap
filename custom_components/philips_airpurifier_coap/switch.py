@@ -6,7 +6,7 @@ from typing import Any, Callable, List, cast
 
 from aioairctrl import CoAPClient
 
-from homeassistant.components.sensor import SwitchEntity
+from homeassistant.components.switch import SwitchEntity
 from homeassistant.const import (
     ATTR_DEVICE_CLASS,
     ATTR_ICON,
