@@ -63,7 +63,7 @@ async def async_setup_entry(
 
         for switch in SWITCH_TYPES:
             _LOGGER.debug("testing: %s", switch)
-            if switch in model_class.AVAILABLE_SWITCHES:
+            if switch in available_switches:
                 _LOGGER.debug(".. found")
                 switches.append(PhilipsSwitch(client, coordinator, name, model, switch))
             else:
