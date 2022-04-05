@@ -244,6 +244,13 @@ SWITCH_TYPES: dict[str, SwitchDescription] = {
         SWITCH_ON: True,
         SWITCH_OFF: False,
     },
+    PHILIPS_HUMIDITY: {
+        ATTR_ICON: "mdi:air-humidifier",
+        ATTR_LABEL: FUNCTION_PURIFICATION_HUMIDIFICATION,
+        CONF_ENTITY_CATEGORY: EntityCategory.CONFIG,
+        SWITCH_ON: "PH",
+        SWITCH_OFF: "P",
+    }
 }
 
 LIGHT_TYPES: dict[str, LightDescription] = {
