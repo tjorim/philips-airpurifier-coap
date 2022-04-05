@@ -243,5 +243,12 @@ SWITCH_TYPES: dict[str, SwitchDescription] = {
         CONF_ENTITY_CATEGORY: EntityCategory.CONFIG,
         SWITCH_ON: True,
         SWITCH_OFF: False,
+    },
+    PHILIPS_DISPLAY_BACKLIGHT: {
+        ATTR_ICON: "mdi:brightness-7",
+        ATTR_LABEL: ATTR_DISPLAY_BACKLIGHT,
+        CONF_ENTITY_CATEGORY: EntityCategory.CONFIG,
+        SWITCH_ON: "1",
+        SWITCH_OFF: "0",
     }
 }
