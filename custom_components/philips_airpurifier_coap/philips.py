@@ -356,6 +356,7 @@ class PhilipsGenericCoAPFan(PhilipsGenericCoAPFanBase):
 
     AVAILABLE_SWITCHES = []
     AVAILABLE_LIGHTS = []
+    AVAILABLE_SELECTS = []
 
     SERVICE_SCHEMA_SET_LIGHT_BRIGHTNESS = vol.Schema(
         {
@@ -381,7 +382,7 @@ class PhilipsHumidifierMixin(PhilipsGenericCoAPFanBase):
         (ATTR_FUNCTION, PHILIPS_FUNCTION, PHILIPS_FUNCTION_MAP),
         (ATTR_HUMIDITY_TARGET, PHILIPS_HUMIDITY_TARGET),
     ]
-    AVAILABLE_SWITCHES = [PHILIPS_FUNCTION]
+    AVAILABLE_SELECTS = [PHILIPS_FUNCTION]
 
     SERVICE_SCHEMA_SET_HUMIDITY_TARGET = vol.Schema(
         {

@@ -2,10 +2,8 @@
 from __future__ import annotations
 
 import logging
-from struct import pack
 
 from aioairctrl import CoAPClient
-import voluptuous as vol
 
 from homeassistant.const import CONF_HOST
 from homeassistant.core import HomeAssistant
@@ -24,7 +22,7 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 
-PLATFORMS = ["fan", "sensor", "switch", "light"]
+PLATFORMS = ["fan", "sensor", "switch", "light, "select"]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

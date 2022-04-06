@@ -21,7 +21,7 @@ from homeassistant.const import (
 from homeassistant.helpers.entity import EntityCategory
 
 
-from .model import FilterDescription, SensorDescription, SwitchDescription, LightDescription
+from .model import FilterDescription, SensorDescription, SwitchDescription, LightDescription, SelectDescription
 
 DOMAIN = "philips_airpurifier_coap"
 
@@ -58,9 +58,10 @@ PRESET_MODE_SLEEP = "sleep"
 PRESET_MODE_TURBO = "turbo"
 SWITCH_ON = "on"
 SWITCH_OFF = "off"
+OPTIONS = "options"
 
 FUNCTION_PURIFICATION = "purification"
-FUNCTION_PURIFICATION_HUMIDIFICATION = "humidification"
+FUNCTION_PURIFICATION_HUMIDIFICATION = "purification_humidification"
 
 SERVICE_SET_CHILD_LOCK_OFF = "set_child_lock_off"
 SERVICE_SET_CHILD_LOCK_ON = "set_child_lock_on"
@@ -251,7 +252,7 @@ SWITCH_TYPES: dict[str, SwitchDescription] = {
         CONF_ENTITY_CATEGORY: EntityCategory.CONFIG,
         SWITCH_ON: "PH",
         SWITCH_OFF: "P",
-    }
+    },
 }
 
 LIGHT_TYPES: dict[str, LightDescription] = {
@@ -261,5 +262,14 @@ LIGHT_TYPES: dict[str, LightDescription] = {
         CONF_ENTITY_CATEGORY: EntityCategory.CONFIG,
         SWITCH_ON: "1",
         SWITCH_OFF: "0",
-    }
+    },
+}
+
+SELECT_TYPES: dict[str, SelectDescription] = {
+    PHILIPS_FUNCTION: {
+        ATTR_ICON: "mdi:air-humidifier",
+        ATTR_LABEL: ATTR_FUNCTION,
+        CONF_ENTITY_CATEGORY: EntityCategory.CONFIG,
+        OPTIONS: PHILIPS_FUNCTION_MAP,
+    },
 }
