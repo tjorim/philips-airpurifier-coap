@@ -37,7 +37,7 @@ LOADER_URL = f'/{DOMAIN}/main.js'
 LOADER_PATH = f'custom_components/{DOMAIN}/main.js'
 ICONS_URL = f'/{DOMAIN}/icons'
 ICONLIST_URL = f'/{DOMAIN}/list'
-ICONS_PATH = f'custom_components/{DOMAIN}/data'
+ICONS_PATH = f'custom_components/{DOMAIN}/icons'
 
 PAP = "pap"
 
