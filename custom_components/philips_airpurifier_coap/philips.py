@@ -385,27 +385,6 @@ class PhilipsHumidifierMixin(PhilipsGenericCoAPFanBase):
     ]
     AVAILABLE_SELECTS = [PHILIPS_FUNCTION, PHILIPS_HUMIDITY_TARGET]
 
-    SERVICE_SCHEMA_SET_HUMIDITY_TARGET = vol.Schema(
-        {
-            vol.Required(ATTR_ENTITY_ID): cv.entity_id,
-            vol.Required(ATTR_HUMIDITY_TARGET): vol.All(
-                vol.Coerce(int),
-                vol.In([40, 50, 60, 70]),
-            ),
-        }
-    )
-
-    def register_services(self, async_register) -> None:
-        async_register(
-            domain=DOMAIN,
-            service=SERVICE_SET_HUMIDITY_TARGET,
-            service_func=self.async_set_humidity_target,
-            schema=self.SERVICE_SCHEMA_SET_HUMIDITY_TARGET,
-        )
-
-    async def async_set_humidity_target(self, humidity_target: int) -> None:
-        await self._client.set_control_value(PHILIPS_HUMIDITY_TARGET, humidity_target)
-
 
 # TODO consolidate these classes as soon as we see a proper pattern
 class PhilipsAC1214(PhilipsGenericCoAPFan):

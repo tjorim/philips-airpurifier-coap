@@ -7,13 +7,3 @@ set_light_brightness:
     brightness:
       description: Brightness as integer value between 0 and 100
       example: 50
-
-set_humidity_target:
-  description: Set target humidity
-  fields:
-    entity_id:
-      description: Name of the fan entity
-      example: "fan.philips_airpurifier"
-    humidity_target:
-      description: One of 40, 50, 60, 70
-      example: 40
