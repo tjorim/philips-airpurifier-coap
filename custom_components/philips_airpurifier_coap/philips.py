@@ -12,10 +12,7 @@ import voluptuous as vol
 
 from homeassistant.core import CALLBACK_TYPE, callback
 from homeassistant.helpers.entity import Entity
-from homeassistant.helpers import config_validation as cv
 from homeassistant.exceptions import ConfigEntryNotReady, PlatformNotReady
-from homeassistant.const import ATTR_ENTITY_ID
-from homeassistant.components.light import ATTR_BRIGHTNESS
 
 from homeassistant.util.percentage import (
     ordered_list_item_to_percentage,

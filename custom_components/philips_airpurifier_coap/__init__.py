@@ -8,7 +8,6 @@ from aioairctrl import CoAPClient
 from homeassistant.const import CONF_HOST
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
-import homeassistant.helpers.config_validation as cv
 from homeassistant.config_entries import ConfigEntry
 
 from .philips import Coordinator

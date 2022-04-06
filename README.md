@@ -16,7 +16,7 @@ I've switched to the branch of Denaun. This brings a number of breaking changes:
  
 ## Word of Caution
 
-Due to a bug in the Philips devices, this integration is rather instable. It might or might not work. Even if it seems ok at first, it might stop working after a while. Sometimes, a power cycle of the Philips device helps. Do not report this as an issue here. Nobody can help right now.
+Due to a bug in the Philips devices, this integration is rather instable. It might or might not work. Even if it seems ok at first, it might stop working after a while. Sometimes, a power cycle of the Philips device helps. Sometimes, only a power cycle and a Home Assistant restart together help. It is frustrating. Do not report this as an issue here. Nobody can help right now.
 
 It all goes back to some reverse engineering by @rgerganov and you can read about it here: https://xakcop.com/post/ctrl-air-purifier/
 
