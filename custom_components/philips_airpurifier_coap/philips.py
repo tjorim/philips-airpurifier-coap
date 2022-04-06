@@ -452,6 +452,18 @@ class PhilipsAC3033(PhilipsGenericCoAPFan):
     }
 
 
+class PhilipsAC3039(PhilipsGenericCoAPFan):
+    AVAILABLE_PRESET_MODES = {
+        PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "AG"},
+        PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "S", PHILIPS_SPEED: "s"},
+    }
+    AVAILABLE_SPEEDS = {
+        SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
+        SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
+        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T", PHILIPS_SPEED: "t"},
+    }
+
+
 class PhilipsAC3059(PhilipsGenericCoAPFan):
     AVAILABLE_PRESET_MODES = {
         PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "AG"},
@@ -525,6 +537,7 @@ model_to_class = {
     MODEL_AC2939: PhilipsAC2939,
     MODEL_AC2958: PhilipsAC2958,
     MODEL_AC3033: PhilipsAC3033,
+    MODEL_AC3039: PhilipsAC3039,
     MODEL_AC3059: PhilipsAC3059,
     MODEL_AC3829: PhilipsAC3829,
     MODEL_AC3858: PhilipsAC3858,
