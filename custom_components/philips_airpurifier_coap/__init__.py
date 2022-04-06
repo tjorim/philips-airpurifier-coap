@@ -19,8 +19,6 @@ from os import walk, path
 from .philips import Coordinator
 
 from .const import (
-    CUSTOM_ICONS_PATH,
-    CUSTOM_ICONS_URL,
     DATA_KEY_CLIENT,
     DATA_KEY_COORDINATOR,
     DOMAIN,
