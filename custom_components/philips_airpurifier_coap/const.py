@@ -162,6 +162,13 @@ PHILIPS_FUNCTION_MAP = {
     "P": "Purification",
     "PH": "Purification and Humidification",
 }
+PHILIPS_HUMIDITY_TARGET_MAP = {
+    "30": 30,
+    "40": 40,
+    "50": 50,
+    "60": 60,
+    "max": 70,
+}
 PHILIPS_ERROR_CODE_MAP = {
     32768: "no water",
     49153: "pre-filter must be cleaned",
@@ -264,4 +271,10 @@ SELECT_TYPES: dict[str, SelectDescription] = {
         CONF_ENTITY_CATEGORY: EntityCategory.CONFIG,
         OPTIONS: PHILIPS_FUNCTION_MAP,
     },
+    PHILIPS_HUMIDITY_TARGET: {
+        ATTR_ICON: "mdi:water-percent",
+        ATTR_LABEL: ATTR_HUMIDITY_TARGET,
+        CONF_ENTITY_CATEGORY: EntityCategory.CONFIG,
+        OPTIONS: PHILIPS_HUMIDITY_TARGET_MAP,
+    }
 }

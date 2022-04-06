@@ -353,7 +353,7 @@ class PhilipsGenericCoAPFan(PhilipsGenericCoAPFanBase):
         # device sensors
         (ATTR_RUNTIME, PHILIPS_RUNTIME, lambda x, _: str(timedelta(seconds=round(x / 1000)))),
     ]
-    
+
     AVAILABLE_LIGHTS = [PHILIPS_DISPLAY_BACKLIGHT]
 
     AVAILABLE_SWITCHES = []
@@ -383,7 +383,7 @@ class PhilipsHumidifierMixin(PhilipsGenericCoAPFanBase):
         (ATTR_FUNCTION, PHILIPS_FUNCTION, PHILIPS_FUNCTION_MAP),
         (ATTR_HUMIDITY_TARGET, PHILIPS_HUMIDITY_TARGET),
     ]
-    AVAILABLE_SELECTS = [PHILIPS_FUNCTION]
+    AVAILABLE_SELECTS = [PHILIPS_FUNCTION, PHILIPS_HUMIDITY_TARGET]
 
     SERVICE_SCHEMA_SET_HUMIDITY_TARGET = vol.Schema(
         {
