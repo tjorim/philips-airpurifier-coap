@@ -353,9 +353,10 @@ class PhilipsGenericCoAPFan(PhilipsGenericCoAPFanBase):
         # device sensors
         (ATTR_RUNTIME, PHILIPS_RUNTIME, lambda x, _: str(timedelta(seconds=round(x / 1000)))),
     ]
+    
+    AVAILABLE_LIGHTS = [PHILIPS_DISPLAY_BACKLIGHT]
 
     AVAILABLE_SWITCHES = []
-    AVAILABLE_LIGHTS = []
     AVAILABLE_SELECTS = []
 
     SERVICE_SCHEMA_SET_LIGHT_BRIGHTNESS = vol.Schema(
@@ -419,7 +420,6 @@ class PhilipsAC1214(PhilipsGenericCoAPFan):
         SPEED_3: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
         PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T", PHILIPS_SPEED: "t"},
     }
-    AVAILABLE_LIGHTS = [PHILIPS_DISPLAY_BACKLIGHT]
 
 
 class PhilipsAC2729(
@@ -438,8 +438,6 @@ class PhilipsAC2729(
         PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
     }
     AVAILABLE_SWITCHES = [PHILIPS_CHILD_LOCK]
-    AVAILABLE_LIGHTS = [PHILIPS_DISPLAY_BACKLIGHT]
-
 
 
 class PhilipsAC2889(PhilipsGenericCoAPFan):
@@ -455,7 +453,6 @@ class PhilipsAC2889(PhilipsGenericCoAPFan):
         SPEED_3: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
         PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
     }
-    AVAILABLE_LIGHTS = [PHILIPS_DISPLAY_BACKLIGHT]
 
 
 class PhilipsAC2939(PhilipsGenericCoAPFan):
@@ -465,7 +462,6 @@ class PhilipsAC2939(PhilipsGenericCoAPFan):
         PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "S"},
         PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T"},
     }
-    AVAILABLE_LIGHTS = [PHILIPS_DISPLAY_BACKLIGHT]
 
 
 class PhilipsAC2958(PhilipsGenericCoAPFan):
@@ -475,7 +471,6 @@ class PhilipsAC2958(PhilipsGenericCoAPFan):
         PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "S"},
         PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T"},
     }
-    AVAILABLE_LIGHTS = [PHILIPS_DISPLAY_BACKLIGHT]
 
 
 class PhilipsAC3033(PhilipsGenericCoAPFan):
@@ -488,7 +483,6 @@ class PhilipsAC3033(PhilipsGenericCoAPFan):
         SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
         PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T", PHILIPS_SPEED: "t"},
     }
-    AVAILABLE_LIGHTS = [PHILIPS_DISPLAY_BACKLIGHT]
 
 
 class PhilipsAC3059(PhilipsGenericCoAPFan):
@@ -501,7 +495,6 @@ class PhilipsAC3059(PhilipsGenericCoAPFan):
         SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
         PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T", PHILIPS_SPEED: "t"},
     }
-    AVAILABLE_LIGHTS = [PHILIPS_DISPLAY_BACKLIGHT]
 
 
 class PhilipsAC3829(PhilipsHumidifierMixin, PhilipsGenericCoAPFan):
@@ -516,7 +509,6 @@ class PhilipsAC3829(PhilipsHumidifierMixin, PhilipsGenericCoAPFan):
         SPEED_3: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
         PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
     }
-    AVAILABLE_LIGHTS = [PHILIPS_DISPLAY_BACKLIGHT]
 
 
 class PhilipsAC3858(PhilipsGenericCoAPFan):
@@ -529,7 +521,6 @@ class PhilipsAC3858(PhilipsGenericCoAPFan):
         SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
         PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T", PHILIPS_SPEED: "t"},
     }
-    AVAILABLE_LIGHTS = [PHILIPS_DISPLAY_BACKLIGHT]
 
 
 class PhilipsAC4236(PhilipsGenericCoAPFan):
@@ -542,7 +533,6 @@ class PhilipsAC4236(PhilipsGenericCoAPFan):
         SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
         PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T", PHILIPS_SPEED: "t"},
     }
-    AVAILABLE_LIGHTS = [PHILIPS_DISPLAY_BACKLIGHT]
 
 
 model_to_class = {
