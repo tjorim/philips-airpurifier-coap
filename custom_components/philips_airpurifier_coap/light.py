@@ -143,7 +143,10 @@ class PhilipsLight(PhilipsEntity, LightEntity):
 
     async def async_turn_on(self, **kwargs) -> None:
         if self._dimmable:
-            value = int(100 * kwargs[ATTR_BRIGHTNESS] / 255)
+            if ATTR_BRIGHTNESS in kwargs:
+                value = int(100 * kwargs[ATTR_BRIGHTNESS] / 255)
+            else:
+                value = 100
         else:
             value = self._on
 
