@@ -90,14 +90,11 @@ class PhilipsSelect(PhilipsEntity, SelectEntity):
         self._model = model
         self._description = SELECT_TYPES[select]
         self._options = self._description.get(OPTIONS)
+        self._attr_options = list(self._options.values())
         self._attr_device_class = self._description.get(ATTR_DEVICE_CLASS)
         self._attr_icon = self._description.get(ATTR_ICON)
         self._attr_name = f"{name} {self._description[ATTR_LABEL].replace('_', ' ').title()}"
         self._attr_entity_category = self._description.get(CONF_ENTITY_CATEGORY)
-
-        self._attr_options: List[str] = []
-        for key, option in self._options:
-            self._attr_options.extend(option)
 
         try:
             device_id = self._device_status[PHILIPS_DEVICE_ID]
