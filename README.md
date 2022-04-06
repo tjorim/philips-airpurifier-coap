@@ -48,6 +48,8 @@ Philips has recently introduced a proper API to remote control the devices. Howe
 * Enter the hostname / IP address of your device
 * The model type is detected automatically. You get a warning in the log, if it is not supported.
 
+Note: `configuration.yaml` is no longer supported and your configuration is not automatically migrated. You have to start fresh.
+
 
 ## Supported models
 
@@ -107,84 +109,19 @@ logs should now be available in `home-assistant.log`
 
 The integration provides `fan` entities for your devices which are [documented here](https://www.home-assistant.io/integrations/fan/).
 
+It also provides a number of `sensor` entities for the air quality and other data measured by the device, as well as some diagnostic `sensor` entities with information about the filter or water fill level for humidifiers. A `switch` entity allows you to control the child lock function, should your device have one. Finally, there are some `light` entities to control the display backlight and the brightness of the air quality display and some `select` entities to set the humidification function on the devices that have that.
+
 ### Services
 
-`philips_airpurifier_coap` registers the following services in addition to the standard `fan`services:
-
-#### Turn the child lock on
-
-```yaml
-service: set_child_lock_on
-data:
-  entity_id: fan.ac2729_bedroom
-```
-
-#### Turn the child lock off
-
-```yaml
-service: set_child_lock_off
-data:
-  entity_id: fan.ac2729_bedroom
-```
-
-#### Turn the display backlight on
-
-```yaml
-service: set_display_backlight_on
-data:
-  entity_id: fan.ac2729_bedroom
-```
-
-#### Turn the display backlight off
-
-```yaml
-service: set_display_backlight_off
-data:
-  entity_id: fan.ac2729_bedroom
-```
-
-#### Set the light brightness
-
-```yaml
-service: set_light_brightness
-data:
-  entity_id: fan.ac2729_bedroom
-  brightness: 50
-```
-
-Brightness can take values between 0 and 100
-
-#### Set function of the device
-
-```yaml
-service: set_function
-data:
-  entity_id: fan.ac2729_bedroom
-  function: purification
-```
-
-This only applies to devices which offer purification and humidification. The `function` can take the values of `purification` or `purification_humidification`.
-
-#### Set humidity target
-
-```yaml
-service: set_humidity_target
-data:
-  entity_id: fan.ac2729_bedroom
-  humidity_target: 50
-```
-
-This only applies to devices which offer humidification. The `humidity_target` can take the values of `40`, `50`, `60`, or `70`.
+Unlike the original `philips_airpurifier_coap` integration, this version does not provide any additional services anymore. Everything can be controlled through the entities provided.
 
 
 ### Attributes
 
-The available attributes depend on the model. The following list gives an overview:
+The `fan` entity has some additional attributes not captured with sensors. Specifcs depend on the model. The following list gives an overview:
 
 | attribute |content | example |
 |---|---|---|
-| preset_modes: | Available operating modes of current device | `1`, `2`, `3`, `allergen`, `auto`, `night`, `turbo` |
-| preset_mode: | State of operating mode | auto |
 | name: | Name of the device | bedroom |
 | type: | Configured model | AC2729 |
 | model_id: | Philips model ID | AC2729/10 |
@@ -194,29 +131,5 @@ The available attributes depend on the model. The following list gives an overvi
 | wifi_version: | Installed WIFI version on device | AWS_Philips_AIR\@62.1 |
 | error_code: | Philips error code | 49408 |
 | error: | Error in clear text | no water |
-| child_lock: | State of child lock setting | false |
-| light_brightness: | State of brightness level | 50 |
-| display_backlight: | State of display backlight | false |
 | preferred_index: | State of preferred air quality index | `PM2.5`, `IAI` |
-| filter_pre_remaining: | Time until pre-filter needs cleaning in readable text | 10 days, 23:00:00 |
-| filter_pre_remaining_raw: | Time until pre-filter needs cleaning in hours | 263 |
-| filter_hepa_type: | Type of installed HEPA filter | A3 |
-| filter_hepa_remaining: | Time until HEPA filter needs replacement in readable text | 47 days, 14:00:00 |
-| filter_hepa_remaining_raw: | Time until HEPA filter needs replacement in hours | 1142 |
-| filter_active_carbon_type: | Type of installed active carbon filter | C7 |
-| filter_active_carbon_remaining: | Time until active carbon filter needs replacement in readable text | 47 days, 14:00:00 |
-| filter_active_carbon_remaining_raw: | Time until active carbon filter needs replacement in hours | 1142 |
 | runtime: | Time the device is running in readable text | 9 days, 10:44:41 |
-| air_quality_index: | State of Air Quality Index | 4 |
-| indoor_allergen_index: | State of Indoor Allergen Index | 2 |
-| pm25: | State of PM2.5 measurement | 8 |
-| filter_wick_remaining: | Time until wick filter needs clearning in readable text | 47 days, 14:00:00 |
-| filter_wick_remaining_raw: | Time until wick filter needs cleaning in hours | 1142 |
-| function: | State of operating function | Purification
-| humidity: | State of humidity in percent | 40 |
-| humidity_target: | Set of target humidity in percent | 50 |
-| temperature: | State of temperature in degrees Celsius | 20 |
-| water_level: | State of water level in tank in percent | 50 |
-| friendly_name: | Configured name for device | Bedroom |
-| icon: | Configured icon | pap:fan_speed_button |
-| supported_features: | Supported features | 8 |
