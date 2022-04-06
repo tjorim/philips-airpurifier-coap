@@ -112,7 +112,7 @@ class PhilipsSensor(PhilipsEntity, SensorEntity):
 
     @property
     def icon(self) -> str:
-        if self._warn_value and self._warn_value >= self.state():
+        if self._warn_value and self._warn_value >= int(self.state()):
             return self._warn_icon
         else:
             return self._norm_icon
