@@ -26,12 +26,13 @@ from .const import (
     ATTR_LABEL,
     ATTR_POSTFIX,
     ATTR_PREFIX,
-    ATTR_RAW,
     ATTR_TIME_REMAINING,
     ATTR_TOTAL,
     ATTR_TYPE,
     ATTR_UNIT,
     ATTR_VALUE,
+    ATTR_WARN_ICON,
+    ATTR_WARN_VALUE,
     CONF_MODEL,
     DATA_KEY_COORDINATOR,
     DOMAIN,
@@ -83,8 +84,10 @@ class PhilipsSensor(PhilipsEntity, SensorEntity):
         super().__init__(coordinator)
         self._model = model
         self._description = SENSOR_TYPES[kind]
+        self._warn_icon = self._description.get(ATTR_WARN_ICON)
+        self._warn_value = self._description.get(ATTR_WARN_VALUE)
         self._attr_device_class = self._description.get(ATTR_DEVICE_CLASS)
-        self._attr_icon = self._description.get(ATTR_ICON)
+        self._norm_icon = self._description.get(ATTR_ICON)
         self._attr_name = f"{name} {self._description[ATTR_LABEL].replace('_', ' ').title()}"
         self._attr_state_class = self._description.get(ATTR_STATE_CLASS)
         self._attr_unit_of_measurement = self._description.get(ATTR_UNIT)
@@ -106,6 +109,13 @@ class PhilipsSensor(PhilipsEntity, SensorEntity):
         if convert:
             value = convert(value, self._device_status)
         return cast(StateType, value)
+
+    @property
+    def icon(self) -> str:
+        if self._warn_value and self._warn_value >= self.state():
+            return self._warn_icon
+        else:
+            return self._norm_icon
 
 
 class PhilipsFilterSensor(PhilipsEntity, SensorEntity):

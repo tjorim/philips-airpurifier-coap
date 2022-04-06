@@ -111,6 +111,8 @@ ATTR_WATER_LEVEL = "water_level"
 ATTR_WIFI_VERSION = "wifi_version"
 ATTR_PREFIX = "prefix"
 ATTR_POSTFIX = "postfix"
+ATTR_WARN_VALUE = "warn_value"
+ATTR_WARN_ICON = "warn_icon"
 
 LEVEL = "Level"
 INDEX = "Index"
@@ -222,6 +224,8 @@ SENSOR_TYPES: dict[str, SensorDescription] = {
         ATTR_STATE_CLASS: STATE_CLASS_MEASUREMENT,
         ATTR_UNIT: PERCENTAGE,
         CONF_ENTITY_CATEGORY: EntityCategory.DIAGNOSTIC,
+        ATTR_WARN_VALUE: 10,
+        ATTR_WARN_ICON: "mdi:water-alert-outline"
     },
 }
 

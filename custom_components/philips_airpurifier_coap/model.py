@@ -24,6 +24,8 @@ class SensorDescription(_SensorDescription, total=False):
     unit: str
     state_class: str
     value: Callable[[Any, DeviceStatus], StateType]
+    warn_value: int
+    warn_icon: str
 
 
 class FilterDescription(TypedDict):
