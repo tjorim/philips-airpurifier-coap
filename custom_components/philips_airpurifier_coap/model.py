@@ -47,6 +47,9 @@ class LightDescription(TypedDict):
     icon: str
     label: str
     entity_category: str
+    switch_on: Any
+    switch_off: Any
+    dimmable: boolean
     
 
 class SelectDescription(TypedDict):

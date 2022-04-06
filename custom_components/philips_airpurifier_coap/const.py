@@ -59,6 +59,7 @@ PRESET_MODE_TURBO = "turbo"
 SWITCH_ON = "on"
 SWITCH_OFF = "off"
 OPTIONS = "options"
+DIMMABLE = "dimmable"
 
 FUNCTION_PURIFICATION = "purification"
 FUNCTION_PURIFICATION_HUMIDIFICATION = "purification_humidification"
@@ -261,6 +262,14 @@ LIGHT_TYPES: dict[str, LightDescription] = {
         SWITCH_ON: "1",
         SWITCH_OFF: "0",
     },
+    PHILIPS_LIGHT_BRIGHTNESS: {
+        ATTR_ICON: "mdi:circle-outline",
+        ATTR_LABEL: ATTR_LIGHT_BRIGHTNESS,
+        CONF_ENTITY_CATEGORY: EntityCategory.CONFIG,
+        SWITCH_ON: 100,
+        SWITCH_OFF: 0,
+        DIMMABLE: True,
+    }
 }
 
 SELECT_TYPES: dict[str, SelectDescription] = {

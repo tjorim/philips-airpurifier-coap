@@ -354,28 +354,10 @@ class PhilipsGenericCoAPFan(PhilipsGenericCoAPFanBase):
         (ATTR_RUNTIME, PHILIPS_RUNTIME, lambda x, _: str(timedelta(seconds=round(x / 1000)))),
     ]
 
-    AVAILABLE_LIGHTS = [PHILIPS_DISPLAY_BACKLIGHT]
+    AVAILABLE_LIGHTS = [PHILIPS_DISPLAY_BACKLIGHT, PHILIPS_LIGHT_BRIGHTNESS]
 
     AVAILABLE_SWITCHES = []
     AVAILABLE_SELECTS = []
-
-    SERVICE_SCHEMA_SET_LIGHT_BRIGHTNESS = vol.Schema(
-        {
-            vol.Required(ATTR_ENTITY_ID): cv.entity_id,
-            vol.Required(ATTR_BRIGHTNESS): vol.All(vol.Coerce(int), vol.Clamp(min=0, max=100)),
-        }
-    )
-
-    def register_services(self, async_register):
-        async_register(
-            domain=DOMAIN,
-            service=SERVICE_SET_LIGHT_BRIGHTNESS,
-            service_func=self.async_set_light_brightness,
-            schema=self.SERVICE_SCHEMA_SET_LIGHT_BRIGHTNESS,
-        )
-
-    async def async_set_light_brightness(self, brightness: int):
-        await self._client.set_control_value(PHILIPS_LIGHT_BRIGHTNESS, brightness)
 
 
 class PhilipsHumidifierMixin(PhilipsGenericCoAPFanBase):

@@ -6,7 +6,12 @@ from typing import Any, Callable, List
 
 from aioairctrl import CoAPClient
 
-from homeassistant.components.light import LightEntity
+from homeassistant.components.light import (
+    LightEntity,
+    ATTR_BRIGHTNESS,
+    COLOR_MODE_BRIGHTNESS,
+    COLOR_MODE_ONOFF,
+)
 from homeassistant.const import (
     ATTR_DEVICE_CLASS,
     ATTR_ICON,
@@ -22,6 +27,7 @@ from homeassistant.config_entries import ConfigEntry
 from .philips import Coordinator, PhilipsEntity, model_to_class
 from .const import (
     ATTR_LABEL,
+    DIMMABLE,
     SWITCH_ON,
     SWITCH_OFF,
     CONF_MODEL,
@@ -92,10 +98,18 @@ class PhilipsLight(PhilipsEntity, LightEntity):
         self._description = LIGHT_TYPES[light]
         self._on = self._description.get(SWITCH_ON)
         self._off = self._description.get(SWITCH_OFF)
+        self._dimmable = self._description.get(DIMMABLE) | False
         self._attr_device_class = self._description.get(ATTR_DEVICE_CLASS)
         self._attr_icon = self._description.get(ATTR_ICON)
         self._attr_name = f"{name} {self._description[ATTR_LABEL].replace('_', ' ').title()}"
         self._attr_entity_category = self._description.get(CONF_ENTITY_CATEGORY)
+
+        if self._dimmable:
+            self._attr_color_mode = COLOR_MODE_BRIGHTNESS
+            self._attr_supported_color_modes = {COLOR_MODE_BRIGHTNESS}
+        else:
+            self._attr_color_mode = COLOR_MODE_ONOFF
+            self._attr_supported_color_modes = {COLOR_MODE_ONOFF}
 
         try:
             device_id = self._device_status[PHILIPS_DEVICE_ID]
@@ -109,14 +123,33 @@ class PhilipsLight(PhilipsEntity, LightEntity):
 
     @property
     def is_on(self) -> bool:
-        return self._device_status.get(self.kind) == self._on
+        if self._dimmable:
+            return self._device_status.get(self.kind) > 0
+        else:
+            return self._device_status.get(self.kind) == self._on
+
+
+    @property
+    def brightness(self) -> int | None:
+        if self._dimmable:
+            brightness = self._device_status.get(self.kind)
+            return round(255 *brightness / 100)
+        else:
+            return None
 
 
     async def async_turn_on(self, **kwargs) -> None:
-        _LOGGER.debug("async_turn_on, kind: %s - value: %s", self.kind, self._on)
-        await self._client.set_control_value(self.kind, self._on)
+        if self._dimmable:
+            value = int(100 * kwargs[ATTR_BRIGHTNESS] / 255)
+        else:
+            value = self._on
+
+        _LOGGER.debug("async_turn_on, kind: %s - value: %s", self.kind, value)
+        await self._client.set_control_value(self.kind, value)
 
 
     async def async_turn_off(self, **kwargs) -> None:
         _LOGGER.debug("async_turn_off, kind: %s - value: %s", self.kind, self._off)
         await self._client.set_control_value(self.kind, self._off)
+
+
