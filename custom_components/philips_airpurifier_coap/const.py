@@ -163,10 +163,10 @@ PHILIPS_FUNCTION_MAP = {
     "PH": "Purification and Humidification",
 }
 PHILIPS_HUMIDITY_TARGET_MAP = {
-    "40": 40,
-    "50": 50,
-    "60": 60,
-    "70": "max",
+    40: "40",
+    50: "50",
+    60: "60",
+    70: "max",
 }
 PHILIPS_ERROR_CODE_MAP = {
     32768: "no water",

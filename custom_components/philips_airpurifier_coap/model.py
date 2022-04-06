@@ -55,4 +55,4 @@ class SelectDescription(TypedDict):
     icon: str
     label: str
     entity_category: str
-    options: dict[str,str]
+    options: dict[Any,str]
