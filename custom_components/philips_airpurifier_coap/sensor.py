@@ -139,9 +139,9 @@ class PhilipsFilterSensor(PhilipsEntity, SensorEntity):
         self._type_key = "".join([prefix, PHILIPS_FILTER_TYPE, postfix])
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
 
-        self._norm_icon = self._description.get(ATTR_ICON)
-        self._warn_icon = self._description.get(ATTR_WARN_ICON)
-        self._warn_value = self._description.get(ATTR_WARN_VALUE)
+        self._norm_icon = description[ATTR_ICON]
+        self._warn_icon = description[ATTR_WARN_ICON]
+        self._warn_value = description[ATTR_WARN_VALUE]
 
         if self._has_total:
             self._attr_unit_of_measurement = PERCENTAGE
