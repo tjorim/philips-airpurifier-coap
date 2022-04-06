@@ -24,8 +24,9 @@ _LOGGER = logging.getLogger(__name__)
 PLATFORMS = ["fan", "sensor", "switch", "light", "select"]
 
 
-async def async_setup(hass: HomeAssistant, config):
+async def async_setup(hass: HomeAssistant, config) -> bool:
     _LOGGER.debug("async_setup called")
+    return True
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
