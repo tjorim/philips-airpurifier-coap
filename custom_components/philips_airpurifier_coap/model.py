@@ -33,6 +33,9 @@ class FilterDescription(TypedDict):
 
     prefix: str
     postfix: str
+    icon: str
+    warn_icon: str
+    warn_value: int
 
 
 class SwitchDescription(TypedDict):

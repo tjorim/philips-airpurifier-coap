@@ -233,18 +233,30 @@ FILTER_TYPES: dict[str, FilterDescription] = {
     ATTR_FILTER_PRE: {
         ATTR_PREFIX: PHILIPS_FILTER_PREFIX,
         ATTR_POSTFIX: "0",
+        ATTR_ICON: "mdi:eye",
+        ATTR_WARN_ICON: "mdi:flash-red-eye",
+        ATTR_WARN_VALUE: 72,
     },
     ATTR_FILTER_HEPA: {
         ATTR_PREFIX: PHILIPS_FILTER_PREFIX,
         ATTR_POSTFIX: "1",
+        ATTR_ICON: "mdi:eye",
+        ATTR_WARN_ICON: "mdi:flash-red-eye",
+        ATTR_WARN_VALUE: 72,
     },
     ATTR_FILTER_ACTIVE_CARBON: {
         ATTR_PREFIX: PHILIPS_FILTER_PREFIX,
         ATTR_POSTFIX: "2",
+        ATTR_ICON: "mdi:eye",
+        ATTR_WARN_ICON: "mdi:flash-red-eye",
+        ATTR_WARN_VALUE: 72,
     },
     ATTR_FILTER_WICK: {
         ATTR_PREFIX: PHILIPS_FILTER_WICK_PREFIX,
         ATTR_POSTFIX: "",
+        ATTR_ICON: "mdi:eye",
+        ATTR_WARN_ICON: "mdi:flash-red-eye",
+        ATTR_WARN_VALUE: 72,
     },
 }
 
