@@ -24,6 +24,10 @@ _LOGGER = logging.getLogger(__name__)
 PLATFORMS = ["fan", "sensor", "switch", "light", "select"]
 
 
+async def async_setup(hass: HomeAssistant, config):
+    _LOGGER.debug("async_setup called")
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up the Philips AirPurifier integration."""
     _LOGGER.debug("async_setup_entry called")
