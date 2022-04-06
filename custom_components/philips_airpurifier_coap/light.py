@@ -98,11 +98,14 @@ class PhilipsLight(PhilipsEntity, LightEntity):
         self._description = LIGHT_TYPES[light]
         self._on = self._description.get(SWITCH_ON)
         self._off = self._description.get(SWITCH_OFF)
-        self._dimmable = self._description.get(DIMMABLE) | False
+        self._dimmable = self._description.get(DIMMABLE)
         self._attr_device_class = self._description.get(ATTR_DEVICE_CLASS)
         self._attr_icon = self._description.get(ATTR_ICON)
         self._attr_name = f"{name} {self._description[ATTR_LABEL].replace('_', ' ').title()}"
         self._attr_entity_category = self._description.get(CONF_ENTITY_CATEGORY)
+
+        if self._dimmable == None:
+            self._dimmable = False
 
         if self._dimmable:
             self._attr_color_mode = COLOR_MODE_BRIGHTNESS
