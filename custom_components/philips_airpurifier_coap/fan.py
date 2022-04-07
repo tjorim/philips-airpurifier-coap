@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Callable, Optional
+from typing import Callable, Optional, List
 
 import voluptuous as vol
 
@@ -17,8 +17,8 @@ from .const import (
     DATA_KEY_CLIENT,
     DATA_KEY_COORDINATOR,
     DATA_KEY_FAN,
-    DEFAULT_ICON,
     DOMAIN,
+    ICON
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -44,7 +44,7 @@ async def async_setup_entry(
             data[DATA_KEY_COORDINATOR],
             model=model,
             name=name,
-            icon=DEFAULT_ICON
+            icon=ICON.POWER_BUTTON
         )
     else:
         _LOGGER.error("Unsupported model: %s", model)
