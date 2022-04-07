@@ -30,7 +30,27 @@ DATA_KEY_COORDINATOR = "coordinator"
 DATA_KEY_FAN = "fan"
 
 DEFAULT_NAME = "Philips AirPurifier"
-DEFAULT_ICON = "mdi:air-purifier"
+
+class ICON:
+    POWER_BUTTON = "pap:power_button"
+    CHILD_LOCK_BUTTON = "pap:child_lock_button"
+    AUTO_MODE_BUTTON = "pap:auto_mode_button"
+    FAN_SPEED_BUTTON = "pap:fan_speed_button"
+    HUMIDITY_BUTTON = "pap:humidity_button"
+    LIGHT_DIMMING_BUTTON = "pap:light_dimming_button"
+    TWO_IN_ONE_MODE_BUTTON = "pap:two_in_one_mode_button"
+    SLEEP_MODE = "pap:sleep_mode"
+    AUTO_MODE = "pap:auto_mode"
+    ALLERGEN_MODE = "pap:allergen_mode"
+    PURIFICATION_ONLY_MODE = "pap:purification_only_mode"
+    TWO_IN_ONE_MODE = "pap:two_in_one_mode"
+    BACTERIA_VIRUS_MODE = "pap:bacteria_virus_mode"
+    FILTER_REPLACEMENT = "pap:filter_replacement"
+    WATER_REFILL = "pap:water_refill"
+    PREFILTER_WICK_CLEANING = "pap:prefilter_wick_cleaning"
+    PM25 = "pap:pm25"
+    IAI = "pap:iai"
+
 
 DATA_EXTRA_MODULE_URL = 'frontend_extra_module_url'
 LOADER_URL = f'/{DOMAIN}/main.js'
@@ -199,13 +219,13 @@ SENSOR_TYPES: dict[str, SensorDescription] = {
         ATTR_STATE_CLASS: STATE_CLASS_MEASUREMENT,
     },
     PHILIPS_INDOOR_ALLERGEN_INDEX: {
-        ATTR_ICON: "mdi:blur",
+        ATTR_ICON: ICON.IAI,
         ATTR_LABEL: ATTR_INDOOR_ALLERGEN_INDEX,
         ATTR_UNIT: INDOOR_ALLERGEN_INDEX,
         ATTR_STATE_CLASS: STATE_CLASS_MEASUREMENT,
     },
     PHILIPS_PM25: {
-        ATTR_ICON: "mdi:blur",
+        ATTR_ICON: ICON.PM25,
         ATTR_LABEL: "PM2.5",
         ATTR_UNIT: CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
         ATTR_STATE_CLASS: STATE_CLASS_MEASUREMENT,
@@ -237,7 +257,7 @@ SENSOR_TYPES: dict[str, SensorDescription] = {
         ATTR_UNIT: PERCENTAGE,
         CONF_ENTITY_CATEGORY: EntityCategory.DIAGNOSTIC,
         ATTR_WARN_VALUE: 10,
-        ATTR_WARN_ICON: "mdi:water-alert-outline"
+        ATTR_WARN_ICON: ICON.WATER_REFILL
     },
 }
 
@@ -246,35 +266,35 @@ FILTER_TYPES: dict[str, FilterDescription] = {
         ATTR_PREFIX: PHILIPS_FILTER_PREFIX,
         ATTR_POSTFIX: "0",
         ATTR_ICON: "mdi:eye",
-        ATTR_WARN_ICON: "mdi:flash-red-eye",
+        ATTR_WARN_ICON: ICON.FILTER_REPLACEMENT,
         ATTR_WARN_VALUE: 72,
     },
     ATTR_FILTER_HEPA: {
         ATTR_PREFIX: PHILIPS_FILTER_PREFIX,
         ATTR_POSTFIX: "1",
         ATTR_ICON: "mdi:eye",
-        ATTR_WARN_ICON: "mdi:flash-red-eye",
+        ATTR_WARN_ICON: ICON.FILTER_REPLACEMENT,
         ATTR_WARN_VALUE: 72,
     },
     ATTR_FILTER_ACTIVE_CARBON: {
         ATTR_PREFIX: PHILIPS_FILTER_PREFIX,
         ATTR_POSTFIX: "2",
         ATTR_ICON: "mdi:eye",
-        ATTR_WARN_ICON: "mdi:flash-red-eye",
+        ATTR_WARN_ICON: ICON.FILTER_REPLACEMENT,
         ATTR_WARN_VALUE: 72,
     },
     ATTR_FILTER_WICK: {
         ATTR_PREFIX: PHILIPS_FILTER_WICK_PREFIX,
         ATTR_POSTFIX: "",
         ATTR_ICON: "mdi:eye",
-        ATTR_WARN_ICON: "mdi:flash-red-eye",
+        ATTR_WARN_ICON: ICON.PREFILTER_WICK_CLEANING,
         ATTR_WARN_VALUE: 72,
     },
 }
 
 SWITCH_TYPES: dict[str, SwitchDescription] = {
     PHILIPS_CHILD_LOCK: {
-        ATTR_ICON: "mdi:account-lock",
+        ATTR_ICON: ICON.CHILD_LOCK_BUTTON,
         ATTR_LABEL: ATTR_CHILD_LOCK,
         CONF_ENTITY_CATEGORY: EntityCategory.CONFIG,
         SWITCH_ON: True,
@@ -284,7 +304,7 @@ SWITCH_TYPES: dict[str, SwitchDescription] = {
 
 LIGHT_TYPES: dict[str, LightDescription] = {
     PHILIPS_DISPLAY_BACKLIGHT: {
-        ATTR_ICON: "mdi:brightness-7",
+        ATTR_ICON: ICON.LIGHT_DIMMING_BUTTON,
         ATTR_LABEL: ATTR_DISPLAY_BACKLIGHT,
         CONF_ENTITY_CATEGORY: EntityCategory.CONFIG,
         SWITCH_ON: "1",
@@ -302,13 +322,13 @@ LIGHT_TYPES: dict[str, LightDescription] = {
 
 SELECT_TYPES: dict[str, SelectDescription] = {
     PHILIPS_FUNCTION: {
-        ATTR_ICON: "mdi:air-humidifier",
+        ATTR_ICON: ICON.TWO_IN_ONE_MODE_BUTTON,
         ATTR_LABEL: ATTR_FUNCTION,
         CONF_ENTITY_CATEGORY: EntityCategory.CONFIG,
         OPTIONS: PHILIPS_FUNCTION_MAP,
     },
     PHILIPS_HUMIDITY_TARGET: {
-        ATTR_ICON: "mdi:water-percent",
+        ATTR_ICON: ICON.HUMIDITY_BUTTON,
         ATTR_LABEL: ATTR_HUMIDITY_TARGET,
         CONF_ENTITY_CATEGORY: EntityCategory.CONFIG,
         OPTIONS: PHILIPS_HUMIDITY_TARGET_MAP,
