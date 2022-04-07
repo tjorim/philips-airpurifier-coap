@@ -97,13 +97,14 @@ class PhilipsSelect(PhilipsEntity, SelectEntity):
         self._icons = {}
         options = self._description.get(OPTIONS)
         _LOGGER.debug(f"select found options: {options}")
-        for option in options.values():
-            _LOGGER.debug(f"option is: {option}")
-            key, icon = option
-            _LOGGER.debug(f"  key: {key}")
+        for key, option_tuple in options:
+            _LOGGER.debug(f"option is: {option_tuple}")
+            option_name, icon = option_tuple
+            _LOGGER.debug(f"  option_name: {option_name}")
             _LOGGER.debug(f"  icon: {icon}")
-            self._attr_options.append(key)
-            self._icons[option] = icon
+            self._attr_options.append(option_name)
+            self._icons[option_tuple] = icon
+            self._options[key] = option_name
 
         try:
             device_id = self._device_status[PHILIPS_DEVICE_ID]
@@ -118,14 +119,14 @@ class PhilipsSelect(PhilipsEntity, SelectEntity):
     @property
     def current_option(self) -> str:
         option = self._device_status.get(self.kind)
-        if option in self._attr_options:
-            return self._attr_options[option]
+        if option in self._options:
+            return self._options[option]
         return None
 
 
     async def async_select_option(self, option: str) -> None:
         try:
-            option_key = next(key for key, value in self._attr_options.items() if value == option)
+            option_key = next(key for key, value in self._options.items() if value == option)
             _LOGGER.debug("async_selection_option, kind: %s - option: %s - value: %s", self.kind, option, option_key)
             await self._client.set_control_value(self.kind, option_key)
         except Exception as e:
