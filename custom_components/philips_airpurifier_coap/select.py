@@ -97,9 +97,13 @@ class PhilipsSelect(PhilipsEntity, SelectEntity):
         self._icons = {}
         options = self._description.get(OPTIONS)
         _LOGGER.debug(f"select found options: {options}")
-        for option, value in options:
-            self._attr_options.append(value[0])
-            self._icons[option] = value[1]
+        for option in options:
+            _LOGGER.debug(f"option is: {option}")
+            key, icon = option
+            _LOGGER.debug(f"  key: {key}")
+            _LOGGER.debug(f"  icon: {icon}")
+            self._attr_options.append(key)
+            self._icons[option] = icon
 
         try:
             device_id = self._device_status[PHILIPS_DEVICE_ID]
