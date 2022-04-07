@@ -89,15 +89,14 @@ class PhilipsSelect(PhilipsEntity, SelectEntity):
         self._client = client
         self._model = model
         self._description = SELECT_TYPES[select]
-        self._attr_options = list(self._options.values())
         self._attr_device_class = self._description.get(ATTR_DEVICE_CLASS)
         self._attr_name = f"{name} {self._description[ATTR_LABEL].replace('_', ' ').title()}"
         self._attr_entity_category = self._description.get(CONF_ENTITY_CATEGORY)
 
-        self._options = []
+        self._attr_options = []
         self._icons = {}
         for option, icon in self._description.get(OPTIONS):
-            self._options.append(option)
+            self._attr_options.append(option)
             self._icons[option] = icon
 
         try:
@@ -113,14 +112,14 @@ class PhilipsSelect(PhilipsEntity, SelectEntity):
     @property
     def current_option(self) -> str:
         option = self._device_status.get(self.kind)
-        if option in self._options:
-            return self._options[option]
+        if option in self._attr_options:
+            return self._attr_options[option]
         return None
 
 
     async def async_select_option(self, option: str) -> None:
         try:
-            option_key = next(key for key, value in self._options.items() if value == option)
+            option_key = next(key for key, value in self._attr_options.items() if value == option)
             _LOGGER.debug("async_selection_option, kind: %s - option: %s - value: %s", self.kind, option, option_key)
             await self._client.set_control_value(self.kind, option_key)
         except Exception as e:
