@@ -95,6 +95,7 @@ class PhilipsSelect(PhilipsEntity, SelectEntity):
 
         self._attr_options = []
         self._icons = {}
+        self._options = {}
         options = self._description.get(OPTIONS)
         _LOGGER.debug(f"select found options: {options}")
         for key, option_tuple in options.items():
