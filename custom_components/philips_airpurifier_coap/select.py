@@ -89,12 +89,16 @@ class PhilipsSelect(PhilipsEntity, SelectEntity):
         self._client = client
         self._model = model
         self._description = SELECT_TYPES[select]
-        self._options = self._description.get(OPTIONS)
         self._attr_options = list(self._options.values())
         self._attr_device_class = self._description.get(ATTR_DEVICE_CLASS)
-        self._attr_icon = self._description.get(ATTR_ICON)
         self._attr_name = f"{name} {self._description[ATTR_LABEL].replace('_', ' ').title()}"
         self._attr_entity_category = self._description.get(CONF_ENTITY_CATEGORY)
+
+        self._options = []
+        self._icons = {}
+        for option, icon in self._description.get(OPTIONS):
+            self._options.append(option)
+            self._icons[option] = icon
 
         try:
             device_id = self._device_status[PHILIPS_DEVICE_ID]
@@ -121,3 +125,8 @@ class PhilipsSelect(PhilipsEntity, SelectEntity):
             await self._client.set_control_value(self.kind, option_key)
         except Exception as e:
             _LOGGER.error(f"Failed setting option: '{option}' with error: {e}")
+
+
+    @property
+    def icon(self) -> str:
+        return self._icons.get(self.current_option)

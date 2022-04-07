@@ -1,5 +1,6 @@
 """Constants for Philips AirPurifier integration."""
 from __future__ import annotations
+from typing import Tuple
 
 from homeassistant.components.sensor import (
     ATTR_STATE_CLASS,
@@ -203,14 +204,14 @@ PHILIPS_DISPLAY_BACKLIGHT_MAP = {
     "1": True,
 }
 PHILIPS_FUNCTION_MAP = {
-    "P": "Purification",
-    "PH": "Purification and Humidification",
+    "P": ("Purification", ICON.PURIFICATION_ONLY_MODE),
+    "PH": ("Purification and Humidification", ICON.TWO_IN_ONE_MODE),
 }
 PHILIPS_HUMIDITY_TARGET_MAP = {
-    40: "40%",
-    50: "50%",
-    60: "60%",
-    70: "max",
+    40: ("40%", ICON.HUMIDITY_BUTTON),
+    50: ("50%", ICON.HUMIDITY_BUTTON),
+    60: ("60%", ICON.HUMIDITY_BUTTON),
+    70: ("max", ICON.HUMIDITY_BUTTON),
 }
 PHILIPS_ERROR_CODE_MAP = {
     32768: "no water",
@@ -331,13 +332,11 @@ LIGHT_TYPES: dict[str, LightDescription] = {
 
 SELECT_TYPES: dict[str, SelectDescription] = {
     PHILIPS_FUNCTION: {
-        ATTR_ICON: ICON.TWO_IN_ONE_MODE_BUTTON,
         ATTR_LABEL: ATTR_FUNCTION,
         CONF_ENTITY_CATEGORY: EntityCategory.CONFIG,
         OPTIONS: PHILIPS_FUNCTION_MAP,
     },
     PHILIPS_HUMIDITY_TARGET: {
-        ATTR_ICON: ICON.HUMIDITY_BUTTON,
         ATTR_LABEL: ATTR_HUMIDITY_TARGET,
         CONF_ENTITY_CATEGORY: EntityCategory.CONFIG,
         OPTIONS: PHILIPS_HUMIDITY_TARGET_MAP,

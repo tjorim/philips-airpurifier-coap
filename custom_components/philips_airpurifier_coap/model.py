@@ -1,7 +1,7 @@
 """Type definitions for Philips AirPurifier integration."""
 from __future__ import annotations
 
-from typing import Any, Callable, TypedDict, List
+from typing import Any, Callable, Tuple, TypedDict, List
 from xmlrpc.client import boolean
 
 from homeassistant.helpers.typing import StateType
@@ -60,7 +60,6 @@ class LightDescription(TypedDict):
 class SelectDescription(TypedDict):
     """Select description class."""
 
-    icon: str
     label: str
     entity_category: str
-    options: dict[Any,str]
+    options: dict[Any,Tuple[str,str]]
