@@ -97,7 +97,7 @@ class PhilipsSelect(PhilipsEntity, SelectEntity):
         self._icons = {}
         options = self._description.get(OPTIONS)
         _LOGGER.debug(f"select found options: {options}")
-        for option in options:
+        for option in options.values():
             _LOGGER.debug(f"option is: {option}")
             key, icon = option
             _LOGGER.debug(f"  key: {key}")
