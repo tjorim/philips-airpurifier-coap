@@ -56,13 +56,16 @@ Note: `configuration.yaml` is no longer supported and your configuration is not 
 - AC1214
 - AC2729
 - AC2889
+- AC2936
 - AC2939
 - AC2958
 - AC3033
+- AC3039
 - AC3059
 - AC3829
 - AC3858
 - AC4236
+- AC5659
 
 
 ## Is your model not supported yet?
