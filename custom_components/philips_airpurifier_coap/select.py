@@ -104,7 +104,7 @@ class PhilipsSelect(PhilipsEntity, SelectEntity):
             _LOGGER.debug(f"  option_name: {option_name}")
             _LOGGER.debug(f"  icon: {icon}")
             self._attr_options.append(option_name)
-            self._icons[option_tuple] = icon
+            self._icons[option_name] = icon
             self._options[key] = option_name
 
         try:
