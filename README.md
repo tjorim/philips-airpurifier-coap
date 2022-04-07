@@ -110,9 +110,12 @@ logs should now be available in `home-assistant.log`
 
 ## Usage
 
+### Entities
+
 The integration provides `fan` entities for your devices which are [documented here](https://www.home-assistant.io/integrations/fan/).
 
 It also provides a number of `sensor` entities for the air quality and other data measured by the device, as well as some diagnostic `sensor` entities with information about the filter or water fill level for humidifiers. A `switch` entity allows you to control the child lock function, should your device have one. Finally, there are some `light` entities to control the display backlight and the brightness of the air quality display and some `select` entities to set the humidification function on the devices that have that.
+
 
 ### Services
 
@@ -136,3 +139,32 @@ The `fan` entity has some additional attributes not captured with sensors. Speci
 | error: | Error in clear text | no water |
 | preferred_index: | State of preferred air quality index | `PM2.5`, `IAI` |
 | runtime: | Time the device is running in readable text | 9 days, 10:44:41 |
+
+
+### Icons
+
+The integration also provides the original Philips icons for your use in the frontend. The icons can be accessed with the prefix `pap:` and should be visible in the icon picker. Credit for this part of the code goes to @thomasloven
+
+![Preview](./custom_components/philips_airpurifier_coap/icons/pap/power_button.svg) power_button<br />
+![Preview](./custom_components/philips_airpurifier_coap/icons/pap/child_lock_button.svg) child_lock_button<br />
+![Preview](./custom_components/philips_airpurifier_coap/icons/pap/auto_mode_button.svg) auto_mode_button<br />
+![Preview](./custom_components/philips_airpurifier_coap/icons/pap/fan_speed_button.svg) fan_speed_button<br />
+![Preview](./custom_components/philips_airpurifier_coap/icons/pap/humidity_button.svg) humidity_button<br />
+![Preview](./custom_components/philips_airpurifier_coap/icons/pap/light_dimming_button.svg) light_dimming_button<br />
+![Preview](./custom_components/philips_airpurifier_coap/icons/pap/two_in_one_mode_button.svg) two_in_one_mode_button<br />
+![Preview](./custom_components/philips_airpurifier_coap/icons/pap/timer_reset_button.svg) timer_reset_button<br />
+![Preview](./custom_components/philips_airpurifier_coap/icons/pap/sleep_mode.svg) sleep_mode<br />
+![Preview](./custom_components/philips_airpurifier_coap/icons/pap/auto_mode.svg) auto_mode<br />
+![Preview](./custom_components/philips_airpurifier_coap/icons/pap/allergen_mode.svg) allergen_mode<br />
+![Preview](./custom_components/philips_airpurifier_coap/icons/pap/purification_only_mode.svg) purification_only_mode<br />
+![Preview](./custom_components/philips_airpurifier_coap/icons/pap/two_in_one_mode.svg) two_in_one_mode<br />
+![Preview](./custom_components/philips_airpurifier_coap/icons/pap/bacteria_virus_mode.svg) bacteria_virus_mode<br />
+![Preview](./custom_components/philips_airpurifier_coap/icons/pap/filter_replacement.svg) filter_replacement<br />
+![Preview](./custom_components/philips_airpurifier_coap/icons/pap/water_refill.svg) water_refill<br />
+![Preview](./custom_components/philips_airpurifier_coap/icons/pap/prefilter_wick_cleaning.svg) prefilter_wick_cleaning<br />
+![Preview](./custom_components/philips_airpurifier_coap/icons/pap/pm25.svg) pm25<br />
+![Preview](./custom_components/philips_airpurifier_coap/icons/pap/iai.svg) iai<br />
+![Preview](./custom_components/philips_airpurifier_coap/icons/pap/wifi.svg) wifi<br />
+![Preview](./custom_components/philips_airpurifier_coap/icons/pap/reset.svg) reset<br />
+
+Note: you might have to clear your browser cache after installation to see the icons.
