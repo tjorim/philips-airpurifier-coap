@@ -9,7 +9,6 @@ from aioairctrl import CoAPClient
 from homeassistant.components.select import SelectEntity
 from homeassistant.const import (
     ATTR_DEVICE_CLASS,
-    ATTR_ICON,
     CONF_HOST,
     CONF_NAME,
     CONF_ENTITY_CATEGORY,

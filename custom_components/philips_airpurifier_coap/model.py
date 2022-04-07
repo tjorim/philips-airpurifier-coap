@@ -1,7 +1,7 @@
 """Type definitions for Philips AirPurifier integration."""
 from __future__ import annotations
 
-from typing import Any, Callable, Tuple, TypedDict, List
+from typing import Any, Callable, Tuple, TypedDict
 from xmlrpc.client import boolean
 
 from homeassistant.helpers.typing import StateType
