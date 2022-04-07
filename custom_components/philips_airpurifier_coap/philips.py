@@ -143,12 +143,10 @@ class PhilipsGenericFan(PhilipsEntity, FanEntity):
         coordinator: Coordinator,
         model: str,
         name: str,
-        icon: str,
     ) -> None:
         super().__init__(coordinator)
         self._model = model
         self._name = name
-        self._icon = icon
         self._unique_id = None
 
     def _register_services(self, async_register) -> None:
@@ -186,9 +184,8 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
         coordinator: Coordinator,
         model: str,
         name: str,
-        icon: str,
     ) -> None:
-        super().__init__(coordinator, model, name, icon)
+        super().__init__(coordinator, model, name)
         self._client = client
 
         self._preset_modes = []
@@ -324,6 +321,20 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
             append(device_attributes, key, philips_key, value_map)
         return device_attributes
 
+    @property
+    def icon(self) -> str:
+        if not self.is_on:
+            return ICON.POWER_BUTTON
+
+        preset_mode = self.preset_mode
+        if preset_mode == None:
+            return ICON.FAN_SPEED_BUTTON
+        if preset_mode in PRESET_MODE_ICON_MAP:
+            return PRESET_MODE_ICON_MAP[preset_mode]
+        
+        return ICON.FAN_SPEED_BUTTON
+        
+
 
 class PhilipsGenericCoAPFan(PhilipsGenericCoAPFanBase):
     AVAILABLE_PRESET_MODES = {}
@@ -355,10 +366,6 @@ class PhilipsGenericCoAPFan(PhilipsGenericCoAPFanBase):
 
 
 class PhilipsHumidifierMixin(PhilipsGenericCoAPFanBase):
-    AVAILABLE_ATTRIBUTES = [
-        (ATTR_FUNCTION, PHILIPS_FUNCTION, PHILIPS_FUNCTION_MAP),
-        (ATTR_HUMIDITY_TARGET, PHILIPS_HUMIDITY_TARGET),
-    ]
     AVAILABLE_SELECTS = [PHILIPS_FUNCTION, PHILIPS_HUMIDITY_TARGET]
 
 

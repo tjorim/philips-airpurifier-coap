@@ -93,6 +93,15 @@ SWITCH_OFF = "off"
 OPTIONS = "options"
 DIMMABLE = "dimmable"
 
+PRESET_MODE_ICON_MAP = {
+    PRESET_MODE_ALLERGEN: "pap:allergen_mode",
+    PRESET_MODE_AUTO: "pap:auto_mode",
+    PRESET_MODE_BACTERIA: "pap:bacteria_virus_mode",
+    PRESET_MODE_GENTLE: "pap:sleep_mode",
+    PRESET_MODE_NIGHT: "pap:sleep_mode",
+    PRESET_MODE_SLEEP: "pap:sleep_mode",
+}
+
 FUNCTION_PURIFICATION = "purification"
 FUNCTION_PURIFICATION_HUMIDIFICATION = "purification_humidification"
 
@@ -265,28 +274,28 @@ FILTER_TYPES: dict[str, FilterDescription] = {
     ATTR_FILTER_PRE: {
         ATTR_PREFIX: PHILIPS_FILTER_PREFIX,
         ATTR_POSTFIX: "0",
-        ATTR_ICON: "mdi:eye",
+        ATTR_ICON: "mdi:dots-grid",
         ATTR_WARN_ICON: ICON.FILTER_REPLACEMENT,
         ATTR_WARN_VALUE: 72,
     },
     ATTR_FILTER_HEPA: {
         ATTR_PREFIX: PHILIPS_FILTER_PREFIX,
         ATTR_POSTFIX: "1",
-        ATTR_ICON: "mdi:eye",
+        ATTR_ICON: "mdi:dots-grid",
         ATTR_WARN_ICON: ICON.FILTER_REPLACEMENT,
         ATTR_WARN_VALUE: 72,
     },
     ATTR_FILTER_ACTIVE_CARBON: {
         ATTR_PREFIX: PHILIPS_FILTER_PREFIX,
         ATTR_POSTFIX: "2",
-        ATTR_ICON: "mdi:eye",
+        ATTR_ICON: "mdi:dots-grid",
         ATTR_WARN_ICON: ICON.FILTER_REPLACEMENT,
         ATTR_WARN_VALUE: 72,
     },
     ATTR_FILTER_WICK: {
         ATTR_PREFIX: PHILIPS_FILTER_WICK_PREFIX,
         ATTR_POSTFIX: "",
-        ATTR_ICON: "mdi:eye",
+        ATTR_ICON: "mdi:dots-grid",
         ATTR_WARN_ICON: ICON.PREFILTER_WICK_CLEANING,
         ATTR_WARN_VALUE: 72,
     },

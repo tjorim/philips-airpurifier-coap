@@ -18,7 +18,6 @@ from .const import (
     DATA_KEY_COORDINATOR,
     DATA_KEY_FAN,
     DOMAIN,
-    ICON
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -44,7 +43,6 @@ async def async_setup_entry(
             data[DATA_KEY_COORDINATOR],
             model=model,
             name=name,
-            icon=ICON.POWER_BUTTON
         )
     else:
         _LOGGER.error("Unsupported model: %s", model)
