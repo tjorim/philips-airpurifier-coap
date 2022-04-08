@@ -48,22 +48,39 @@ class Coordinator:
 
         self._reconnect_task: Task | None = None
 
-        self._timer_disconnected = Timer(timeout=67, callback=self.reconnect, autostart=True)
+        #Timeout = MAX_AGE * 3 Packet losses
+        self._timer_disconnected = Timer(timeout=180, callback=self.reconnect, autostart=True)
         self._timer_disconnected._auto_restart = True 
 
-    async def reconnect(self):
+    async def shutdown(self):
         if self._reconnect_task is not None:
-            # Reconnect stuck
             self._reconnect_task.cancel()
-            self._reconnect_task = None
-        # Reconnect in new Task, keep timer watching
-        self._reconnect_task = asyncio.create_task(self._reconnect())
+        self._timer_disconnected._cancel()
+        if self.client is not None:
+            await self.client.shutdown()
+
+    async def reconnect(self):
+        try:
+            if self._reconnect_task is not None:
+                # Reconnect stuck
+                self._reconnect_task.cancel()
+                self._reconnect_task = None
+            # Reconnect in new Task, keep timer watching
+            self._reconnect_task = asyncio.create_task(self._reconnect())
+        except:
+            _LOGGER.exception("Exception on starting reconnect!")
 
     async def _reconnect(self):
-        _LOGGER.debug("Reconnecting...")
-        await self.client.shutdown()
-        self.client = await CoAPClient.create(self._host)
-        self._start_observing()
+        try:
+            _LOGGER.debug("Reconnecting...")
+            try:
+                await self.client.shutdown()
+            except:
+                pass
+            self.client = await CoAPClient.create(self._host)
+            self._start_observing()
+        except:
+            _LOGGER.exception("_reconnect error")
 
     async def async_first_refresh(self) -> None:
         try:
@@ -101,6 +118,7 @@ class Coordinator:
         async for status in self.client.observe_status():
             _LOGGER.debug("Status update: %s", status)
             self.status = status
+            self._timer_disconnected.reset()
             for update_callback in self._listeners:
                 update_callback()
 

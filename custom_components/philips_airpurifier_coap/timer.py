@@ -13,7 +13,7 @@ class Timer:
         self._timeout = timeout
         self._callback = callback
         self._task = None
-
+        
         if autostart:
             self.start()
 
@@ -49,4 +49,5 @@ class Timer:
         self.start()
 
     def start(self):
-        self._task = asyncio.ensure_future(self._job())
+        if self._task is None:
+            self._task = asyncio.ensure_future(self._job())
