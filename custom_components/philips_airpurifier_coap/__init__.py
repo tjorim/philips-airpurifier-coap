@@ -97,7 +97,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         raise ConfigEntryNotReady from ex
 
     coordinator = Coordinator(client, host)
-    _LOGGER.exception("got a valid coordinator")
+    _LOGGER.debug("got a valid coordinator")
 
     data = hass.data.get(DOMAIN)
     if data == None:
