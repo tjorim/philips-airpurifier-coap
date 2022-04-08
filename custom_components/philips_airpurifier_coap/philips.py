@@ -1,4 +1,5 @@
 from __future__ import annotations
+from subprocess import call
 
 from typing import Any, Callable, Dict, List, Optional, Union
 
@@ -26,12 +27,14 @@ from homeassistant.components.fan import (
 )
 
 from .const import *
+from .timer import Timer
 
 _LOGGER = logging.getLogger(__name__)
 
 class Coordinator:
-    def __init__(self, client: CoAPClient) -> None:
+    def __init__(self, client: CoAPClient, host: str) -> None:
         self.client = client
+        self._host = host
 
         # It's None before the first successful update.
         # Components should call async_first_refresh to make sure the first
@@ -42,6 +45,25 @@ class Coordinator:
 
         self._listeners: list[CALLBACK_TYPE] = []
         self._task: Task | None = None
+
+        self._reconnect_task: Task | None = None
+
+        self._timer_disconnected = Timer(timeout=67, callback=self.reconnect, autostart=True)
+        self._timer_disconnected._auto_restart = True 
+
+    async def reconnect(self):
+        if self._reconnect_task is not None:
+            # Reconnect stuck
+            self._reconnect_task.cancel()
+            self._reconnect_task = None
+        # Reconnect in new Task, keep timer watching
+        self._reconnect_task = asyncio.create_task(self._reconnect())
+
+    async def _reconnect(self):
+        _LOGGER.debug("Reconnecting...")
+        await self.client.shutdown()
+        self.client = await CoAPClient.create(self._host)
+        self._start_observing()
 
     async def async_first_refresh(self) -> None:
         try:
@@ -88,7 +110,7 @@ class Coordinator:
             self._task.cancel()
             self._task = None
         self._task = asyncio.create_task(self._async_observe_status())
-
+        self._timer_disconnected.reset()
 
 class PhilipsEntity(Entity):
     def __init__(self, coordinator: Coordinator) -> None:
@@ -180,13 +202,11 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
 
     def __init__(
         self,
-        client: CoAPClient,
         coordinator: Coordinator,
         model: str,
         name: str,
     ) -> None:
         super().__init__(coordinator, model, name)
-        self._client = client
 
         self._preset_modes = []
         self._available_preset_modes = {}
@@ -246,10 +266,10 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
         if percentage:
             await self.async_set_percentage(percentage)
             return
-        await self._client.set_control_value(PHILIPS_POWER, "1")
+        await self.coordinator.client.set_control_value(PHILIPS_POWER, "1")
 
     async def async_turn_off(self, **kwargs) -> None:
-        await self._client.set_control_value(PHILIPS_POWER, "0")
+        await self.coordinator.client.set_control_value(PHILIPS_POWER, "0")
 
     @property
     def supported_features(self) -> int:
@@ -275,7 +295,7 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
         """Set the preset mode of the fan."""
         status_pattern = self._available_preset_modes.get(preset_mode)
         if status_pattern:
-            await self._client.set_control_values(data=status_pattern)
+            await self.coordinator.client.set_control_values(data=status_pattern)
 
     @property
     def speed_count(self) -> int:
@@ -297,7 +317,7 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
             speed = percentage_to_ordered_list_item(self._speeds, percentage)
             status_pattern = self._available_speeds.get(speed)
             if status_pattern:
-                await self._client.set_control_values(data=status_pattern)
+                await self.coordinator.client.set_control_values(data=status_pattern)
 
     @property
     def extra_state_attributes(self) -> Optional[Dict[str, Any]]:

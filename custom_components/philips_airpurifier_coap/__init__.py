@@ -96,7 +96,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         _LOGGER.warning(r"Failed to connect: %s", ex)
         raise ConfigEntryNotReady from ex
 
-    coordinator = Coordinator(client)
+    coordinator = Coordinator(client, host)
     _LOGGER.debug("got a valid coordinator")
 
     data = hass.data.get(DOMAIN)

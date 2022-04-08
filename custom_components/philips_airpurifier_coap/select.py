@@ -62,7 +62,7 @@ async def async_setup_entry(
 
         for select in SELECT_TYPES:
             if select in available_selects:
-                selects.append(PhilipsSelect(client, coordinator, name, model, select))
+                selects.append(PhilipsSelect(coordinator, name, model, select))
 
         async_add_entities(selects, update_before_add=False)
 
@@ -78,14 +78,12 @@ class PhilipsSelect(PhilipsEntity, SelectEntity):
 
     def __init__(
         self,
-        client: CoAPClient,
         coordinator: Coordinator,
         name: str,
         model: str,
         select: str
     ) -> None:
         super().__init__(coordinator)
-        self._client = client
         self._model = model
         self._description = SELECT_TYPES[select]
         self._attr_device_class = self._description.get(ATTR_DEVICE_CLASS)
@@ -124,7 +122,7 @@ class PhilipsSelect(PhilipsEntity, SelectEntity):
         try:
             option_key = next(key for key, value in self._options.items() if value == option)
             _LOGGER.debug("async_selection_option, kind: %s - option: %s - value: %s", self.kind, option, option_key)
-            await self._client.set_control_value(self.kind, option_key)
+            await self.coordinator.client.set_control_value(self.kind, option_key)
         except Exception as e:
             _LOGGER.error(f"Failed setting option: '{option}' with error: {e}")
 

@@ -54,7 +54,6 @@ async def async_setup_entry(
 
     data = hass.data[DOMAIN][host]
 
-    client = data[DATA_KEY_CLIENT]
     coordinator = data[DATA_KEY_COORDINATOR]
 
     model_class = model_to_class.get(model)
@@ -70,7 +69,7 @@ async def async_setup_entry(
 
         for light in LIGHT_TYPES:
             if light in available_lights:
-                lights.append(PhilipsLight(client, coordinator, name, model, light))
+                lights.append(PhilipsLight(coordinator, name, model, light))
 
         async_add_entities(lights, update_before_add=False)
 
@@ -86,14 +85,12 @@ class PhilipsLight(PhilipsEntity, LightEntity):
 
     def __init__(
         self,
-        client: CoAPClient,
         coordinator: Coordinator,
         name: str,
         model: str,
         light: str
     ) -> None:
         super().__init__(coordinator)
-        self._client = client
         self._model = model
         self._description = LIGHT_TYPES[light]
         self._on = self._description.get(SWITCH_ON)
@@ -151,11 +148,11 @@ class PhilipsLight(PhilipsEntity, LightEntity):
             value = self._on
 
         _LOGGER.debug("async_turn_on, kind: %s - value: %s", self.kind, value)
-        await self._client.set_control_value(self.kind, value)
+        await self.coordinator.client.set_control_value(self.kind, value)
 
 
     async def async_turn_off(self, **kwargs) -> None:
         _LOGGER.debug("async_turn_off, kind: %s - value: %s", self.kind, self._off)
-        await self._client.set_control_value(self.kind, self._off)
+        await self.coordinator.client.set_control_value(self.kind, self._off)
 
 
