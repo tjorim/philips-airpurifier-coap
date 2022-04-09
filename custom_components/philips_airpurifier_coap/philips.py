@@ -83,9 +83,12 @@ class Coordinator:
             _LOGGER.exception("_reconnect error")
 
     async def async_first_refresh(self) -> None:
+        _LOGGER.debug("async_first_refresh for host %s", self._host)
         try:
             self.status = await self.client.get_status()
+            _LOGGER.debug("finished first refresh for host %s", self._host)
         except Exception as ex:
+            _LOGGER.error("config not ready, first refresh failed for host %s", self._host)
             raise ConfigEntryNotReady from ex
 
     @callback

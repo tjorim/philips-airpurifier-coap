@@ -83,21 +83,19 @@ async def async_setup(hass: HomeAssistant, config) -> bool:
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up the Philips AirPurifier integration."""
-    _LOGGER.debug("async_setup_entry called")
-
     host = entry.data[CONF_HOST]
 
-    _LOGGER.debug("Setting up %s integration with %s", DOMAIN, host)
+    _LOGGER.debug("async_setup_entry called for host %s", host)
 
     try:
         client = await CoAPClient.create(host)
-        _LOGGER.debug("got a valid client")
+        _LOGGER.debug("got a valid client for host %s", host)
     except Exception as ex:
-        _LOGGER.warning(r"Failed to connect: %s", ex)
+        _LOGGER.warning(r"Failed to connect to host %s: %s", host, ex)
         raise ConfigEntryNotReady from ex
 
     coordinator = Coordinator(client, host)
-    _LOGGER.debug("got a valid coordinator")
+    _LOGGER.debug("got a valid coordinator for host %s", host)
 
     data = hass.data.get(DOMAIN)
     if data == None:
@@ -109,7 +107,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     }
 
     await coordinator.async_first_refresh()
-    _LOGGER.debug("coordinator did first refresh")
+    _LOGGER.debug("coordinator did first refresh for host %s", host)
 
     for platform in PLATFORMS:
         hass.async_create_task(
