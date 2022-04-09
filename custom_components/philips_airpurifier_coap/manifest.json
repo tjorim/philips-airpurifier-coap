@@ -10,5 +10,5 @@
     "requirements": [
         "aioairctrl @ git+https://github.com/kongo09/aioairctrl"
     ],
-    "version": "0.9.1"
+    "version": "0.9.2"
 }

@@ -7,7 +7,6 @@ Currently only encrypted-CoAP is implemented.
 ## BREAKING CHANGE:
 
 I've switched to the branch of Denaun. This brings a number of breaking changes:
- - In your configuration, you no longer configure a `fan` with platform `philips_airpurifier_coap` but you configure `philips_airpurifier_coap` directly. See below for an example.
  - The long list of attributes is now split out to a number of sensors. If you rely on them, you need to change your frontend, scripts and automations.
  - The speed setting is now seperated from the preset modes, more inline with how fans are treated inside HA.
  
@@ -60,6 +59,7 @@ Note: `configuration.yaml` is no longer supported and your configuration is not 
 - AC2939
 - AC2958
 - AC3033
+- AC3036
 - AC3039
 - AC3059
 - AC3259
