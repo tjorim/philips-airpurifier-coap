@@ -64,7 +64,7 @@ async def async_setup_entry(
 
         for switch in SWITCH_TYPES:
             if switch in available_switches:
-                switches.append(PhilipsSwitch(client, coordinator, name, model, switch))
+                switches.append(PhilipsSwitch(coordinator, name, model, switch))
 
         async_add_entities(switches, update_before_add=False)
 
@@ -80,14 +80,12 @@ class PhilipsSwitch(PhilipsEntity, SwitchEntity):
 
     def __init__(
         self,
-        client: CoAPClient,
         coordinator: Coordinator,
         name: str,
         model: str,
         switch: str
     ) -> None:
         super().__init__(coordinator)
-        self._client = client
         self._model = model
         self._description = SWITCH_TYPES[switch]
         self._on = self._description.get(SWITCH_ON)
@@ -114,9 +112,9 @@ class PhilipsSwitch(PhilipsEntity, SwitchEntity):
 
     async def async_turn_on(self, **kwargs) -> None:
         _LOGGER.debug("async_turn_on, kind: %s - value: %s", self.kind, self._on)
-        await self._client.set_control_value(self.kind, self._on)
+        await self.coordinator.client.set_control_value(self.kind, self._on)
 
 
     async def async_turn_off(self, **kwargs) -> None:
         _LOGGER.debug("async_turn_off, kind: %s - value: %s", self.kind, self._off)
-        await self._client.set_control_value(self.kind, self._off)
+        await self.coordinator.client.set_control_value(self.kind, self._off)

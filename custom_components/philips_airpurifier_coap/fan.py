@@ -39,7 +39,6 @@ async def async_setup_entry(
     model_class = model_to_class.get(model)
     if model_class:
         device = model_class(
-            data[DATA_KEY_CLIENT],
             data[DATA_KEY_COORDINATOR],
             model=model,
             name=name,

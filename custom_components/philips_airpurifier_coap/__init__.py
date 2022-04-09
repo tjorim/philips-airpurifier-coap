@@ -96,7 +96,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         _LOGGER.warning(r"Failed to connect: %s", ex)
         raise ConfigEntryNotReady from ex
 
-    coordinator = Coordinator(client)
+    coordinator = Coordinator(client, host)
     _LOGGER.debug("got a valid coordinator")
 
     data = hass.data.get(DOMAIN)
@@ -124,6 +124,10 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
     
     for p in PLATFORMS:
         await hass.config_entries.async_forward_entry_unload(entry, p)
+
+
+    coord: Coordinator = hass.data[DOMAIN][entry.data[CONF_HOST]][DATA_KEY_COORDINATOR]
+    await coord.shutdown()
 
     hass.data[DOMAIN].pop(entry.data[CONF_HOST])
 
