@@ -62,6 +62,7 @@ Note: `configuration.yaml` is no longer supported and your configuration is not 
 - AC3033
 - AC3039
 - AC3059
+- AC3259
 - AC3829
 - AC3858
 - AC4236
