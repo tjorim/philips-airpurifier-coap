@@ -119,6 +119,9 @@ class PhilipsSelect(PhilipsEntity, SelectEntity):
 
 
     async def async_select_option(self, option: str) -> None:
+        if option == None or option.count() == 0:
+            _LOGGER.error(f"Cannot set empty option '{option}'")
+            return
         try:
             option_key = next(key for key, value in self._options.items() if value == option)
             _LOGGER.debug("async_selection_option, kind: %s - option: %s - value: %s", self.kind, option, option_key)
