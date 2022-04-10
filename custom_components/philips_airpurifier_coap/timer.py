@@ -21,7 +21,7 @@ class Timer:
         while True:
             try:
                 self._in_callback = False
-                _LOGGER.debug(f"Starte Timer {self._timeout}s.")
+                _LOGGER.debug(f"Starting Timer {self._timeout}s.")
                 await asyncio.sleep(self._timeout)
                 self._in_callback = True
                 _LOGGER.info("Calling timeout callback...")
