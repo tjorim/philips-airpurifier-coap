@@ -49,23 +49,30 @@ class Coordinator:
         self._reconnect_task: Task | None = None
 
         #Timeout = MAX_AGE * 3 Packet losses
+        _LOGGER.debug(f"init: Creating and autostarting timer for host {self._host}")
         self._timer_disconnected = Timer(timeout=180, callback=self.reconnect, autostart=True)
         self._timer_disconnected._auto_restart = True 
+        _LOGGER.debug(f"init: finished for host {self._host}")
 
     async def shutdown(self):
+        _LOGGER.debug(f"shutdown: called for host {self._host}")
         if self._reconnect_task is not None:
+            _LOGGER.debug(f"shutdown: cancelling reconnect task for host {self._host}")
             self._reconnect_task.cancel()
         self._timer_disconnected._cancel()
         if self.client is not None:
             await self.client.shutdown()
 
     async def reconnect(self):
+        _LOGGER.debug(f"reconnect: called for host {self._host}")
         try:
             if self._reconnect_task is not None:
                 # Reconnect stuck
+                _LOGGER.debug(f"reconnect: cancelling reconnect task for host {self._host}")
                 self._reconnect_task.cancel()
                 self._reconnect_task = None
             # Reconnect in new Task, keep timer watching
+            _LOGGER.debug(f"reconnect: creating new reconnect task for host {self._host}")
             self._reconnect_task = asyncio.create_task(self._reconnect())
         except:
             _LOGGER.exception("Exception on starting reconnect!")
@@ -132,6 +139,8 @@ class Coordinator:
             self._task = None
         self._task = asyncio.create_task(self._async_observe_status())
         self._timer_disconnected.reset()
+
+
 
 class PhilipsEntity(Entity):
     def __init__(self, coordinator: Coordinator) -> None:
