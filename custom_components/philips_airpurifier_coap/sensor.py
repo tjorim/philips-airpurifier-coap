@@ -90,7 +90,7 @@ class PhilipsSensor(PhilipsEntity, SensorEntity):
         self._norm_icon = self._description.get(ATTR_ICON)
         self._attr_name = f"{name} {self._description[ATTR_LABEL].replace('_', ' ').title()}"
         self._attr_state_class = self._description.get(ATTR_STATE_CLASS)
-        self._attr_unit_of_measurement = self._description.get(ATTR_UNIT)
+        self._attr_native_unit_of_measurement = self._description.get(ATTR_UNIT)
         self._attr_entity_category = self._description.get(CONF_ENTITY_CATEGORY)
 
         try:
@@ -103,7 +103,7 @@ class PhilipsSensor(PhilipsEntity, SensorEntity):
         self.kind = kind
 
     @property
-    def state(self) -> StateType:
+    def native_value(self) -> StateType:
         value = self._device_status[self.kind]
         convert = self._description.get(ATTR_VALUE)
         if convert:
@@ -112,7 +112,7 @@ class PhilipsSensor(PhilipsEntity, SensorEntity):
 
     @property
     def icon(self) -> str:
-        if self._warn_value and self._warn_value >= int(self.state):
+        if self._warn_value and self._warn_value >= int(self.native_value):
             return self._warn_icon
         else:
             return self._norm_icon
@@ -144,9 +144,9 @@ class PhilipsFilterSensor(PhilipsEntity, SensorEntity):
         self._warn_value = description[ATTR_WARN_VALUE]
 
         if self._has_total:
-            self._attr_unit_of_measurement = PERCENTAGE
+            self._attr_native_unit_of_measurement = PERCENTAGE
         else:
-            self._attr_unit_of_measurement = TIME_HOURS
+            self._attr_native_unit_of_measurement = TIME_HOURS
 
         self._attr_name = f"{name} {kind.replace('_', ' ').title()}"
         try:
@@ -158,7 +158,7 @@ class PhilipsFilterSensor(PhilipsEntity, SensorEntity):
         self._attrs: dict[str, Any] = {}
 
     @property
-    def state(self) -> StateType:
+    def native_value(self) -> StateType:
         if self._has_total:
             return self._percentage
         else:
@@ -196,7 +196,7 @@ class PhilipsFilterSensor(PhilipsEntity, SensorEntity):
 
     @property
     def icon(self) -> str:
-        if self._warn_value and self._warn_value >= int(self.state):
+        if self._warn_value and self._warn_value >= int(self.native_value):
             return self._warn_icon
         else:
             return self._norm_icon
