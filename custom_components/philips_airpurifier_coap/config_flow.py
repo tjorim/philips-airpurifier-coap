@@ -1,5 +1,6 @@
 """The Philips AirPurifier component."""
 from homeassistant import config_entries, exceptions
+from homeassistant.components import dhcp
 from homeassistant.data_entry_flow import FlowResult
 
 from homeassistant.helpers import config_validation as cv
@@ -47,6 +48,11 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             vol.Required(CONF_HOST, default=user_input.get(CONF_HOST, '')): cv.string
         })
         return schema
+
+
+    async def async_step_dhcp(self, discovery_info: dhcp.DhcpServiceInfo) -> FlowResult:
+        _LOGGER.debug(f"async_step_dhcp: called, found: {discovery_info}")
+        return self.async_abort(reason="no_ready")
 
 
     async def async_step_user(self, user_input: dict[str, Any] = None) -> FlowResult:
