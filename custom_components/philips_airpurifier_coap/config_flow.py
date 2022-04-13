@@ -1,4 +1,6 @@
 """The Philips AirPurifier component."""
+import multiprocessing
+from queue import Queue
 from homeassistant import config_entries, exceptions
 from homeassistant.components import dhcp
 from homeassistant.data_entry_flow import FlowResult
@@ -12,11 +14,13 @@ from .const import CONF_MODEL, CONF_DEVICE_ID, DOMAIN
 from .philips import model_to_class
 
 from typing import Any
+from multiprocessing import Process
 
 import logging
 import voluptuous as vol
 import ipaddress
 import re
+import time
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -65,11 +69,32 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             client = await CoAPClient.create(self._host)
             _LOGGER.debug("got a valid client")
 
-            status = await client.get_status()
-            _LOGGER.debug("got status")
+            # we give it 10s to get a status, otherwise we abort
+            # wrap the query for status
+            def get_status(client: CoAPClient, queue: Queue):
+                _LOGGER.debug(f"trying to get status")
+                status = client.get_status()
+                queue.put(status)
+                _LOGGER.debug("got status")
+
+            # now make this a process for 10s
+            queue = multiprocessing.Queue()
+            proc = Process(target=get_status, args=(client,), name='Process_get_status')
+            proc.start()
+            proc.join(timeout=10)
+            proc.terminate()
 
             if client is not None:
                 await client.shutdown()
+
+            # check if we got a status or timed out
+            if proc.exitcode == None:
+                _LOGGER.debug(f"timeout, no status, aborting")
+                raise exceptions.ConfigEntryNotReady
+
+            # get the status out of the queue
+            status = queue.get()
+            _LOGGER.debug(f"status is: {status}")
 
         except Exception as ex:
             _LOGGER.warning(r"Failed to connect: %s", ex)
@@ -93,6 +118,13 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         # set the unique id for the entry, abort if it already exists
         await self.async_set_unique_id(unique_id)
         self._abort_if_unique_id_configured()
+
+        # store the data for the next step to get confirmation
+        self.context.update({
+            "title_placeholders": {
+                CONF_NAME: self._name,
+            }
+        })
 
         # show the confirmation form to the user
         _LOGGER.debug(f"waiting for async_step_dhcp_confirm")
