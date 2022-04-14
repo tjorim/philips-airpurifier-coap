@@ -65,7 +65,7 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         # let's try and connect to an AirPurifier
         try:
             client = await CoAPClient.create(self._host)
-            _LOGGER.debug("got a valid client")
+            _LOGGER.debug(f"got a valid client for host {self._host}")
 
             # we give it 10s to get a status, otherwise we abort
             # wrap the query for status
@@ -83,10 +83,10 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 await client.shutdown()
 
             # get the status out of the queue
-            _LOGGER.debug(f"status is: {status}")
+            _LOGGER.debug(f"status for host {self._host} is: {status}")
 
         except asyncio.TimeoutError:
-            _LOGGER.warning(r"Host %s doesn't answer like a supported Philips AirPurifier, aborting")
+            _LOGGER.warning(r"Host %s doesn't answer like a supported Philips AirPurifier, aborting", self._host)
             raise exceptions.ConfigEntryNotReady
 
         except Exception as ex:
@@ -115,7 +115,7 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         # store the data for the next step to get confirmation
         self.context.update({
             "title_placeholders": {
-                CONF_NAME: self._name,
+                CONF_NAME: self._model + " " + self._name,
             }
         })
 
@@ -133,10 +133,11 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         # user input was provided, so check and save it
         if user_input is not None:
-            _LOGGER.debug(f"entered creation")
+            _LOGGER.debug(f"entered creation for model {self._model} with name '{self._name}' at {self._host}")
             user_input[CONF_MODEL] = self._model
             user_input[CONF_NAME] = self._name
             user_input[CONF_DEVICE_ID] = self._device_id
+            user_input[CONF_HOST] = self._host
 
             return self.async_create_entry(
                 title=self._model + " " + self._name,
