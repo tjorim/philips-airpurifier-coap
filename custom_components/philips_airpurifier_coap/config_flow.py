@@ -1,6 +1,6 @@
 """The Philips AirPurifier component."""
-import multiprocessing
-from queue import Queue
+import asyncio
+import async_timeout
 from homeassistant import config_entries, exceptions
 from homeassistant.components import dhcp
 from homeassistant.data_entry_flow import FlowResult
@@ -14,13 +14,11 @@ from .const import CONF_MODEL, CONF_DEVICE_ID, DOMAIN
 from .philips import model_to_class
 
 from typing import Any
-from multiprocessing import Process
 
 import logging
 import voluptuous as vol
 import ipaddress
 import re
-import time
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -71,30 +69,25 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
             # we give it 10s to get a status, otherwise we abort
             # wrap the query for status
-            def get_status(client: CoAPClient, queue: Queue):
+            def get_status(client: CoAPClient):
                 _LOGGER.debug(f"trying to get status")
                 status = client.get_status()
-                queue.put(status)
                 _LOGGER.debug("got status")
+                return status
 
             # now make this a process for 10s
-            queue = multiprocessing.Queue()
-            proc = Process(target=get_status, args=(client,), name='Process_get_status')
-            proc.start()
-            proc.join(timeout=10)
-            proc.terminate()
+            async with async_timeout.timeout(10):
+                status = await get_status(client)
 
             if client is not None:
                 await client.shutdown()
 
-            # check if we got a status or timed out
-            if proc.exitcode == None:
-                _LOGGER.debug(f"timeout, no status, aborting")
-                raise exceptions.ConfigEntryNotReady
-
             # get the status out of the queue
-            status = queue.get()
             _LOGGER.debug(f"status is: {status}")
+
+        except asyncio.TimeoutError:
+            _LOGGER.warning(r"Host %s doesn't answer like a supported Philips AirPurifier, aborting")
+            raise exceptions.ConfigEntryNotReady
 
         except Exception as ex:
             _LOGGER.warning(r"Failed to connect: %s", ex)
