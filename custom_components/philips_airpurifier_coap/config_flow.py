@@ -64,8 +64,12 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         # let's try and connect to an AirPurifier
         try:
-            client = await CoAPClient.create(self._host)
-            _LOGGER.debug(f"got a valid client for host {self._host}")
+            client = None
+
+            # try for 10s to get a valid client
+            async with async_timeout.timeout(10):
+                client = await CoAPClient.create(self._host)
+                _LOGGER.debug(f"got a valid client for host {self._host}")
 
             # we give it 10s to get a status, otherwise we abort
             # wrap the query for status
@@ -87,7 +91,7 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         except asyncio.TimeoutError:
             _LOGGER.warning(r"Host %s doesn't answer like a supported Philips AirPurifier, aborting", self._host)
-            raise exceptions.ConfigEntryNotReady
+            self.async_abort(reason="model_unsupported")
 
         except Exception as ex:
             _LOGGER.warning(r"Failed to connect: %s", ex)
@@ -148,10 +152,6 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         # show the form to the user
         return self.async_show_form(
             step_id="dhcp_confirm",
-            # data_schema=vol.Schema({}),
-            # description_placeholders={
-            #     CONF_HOST: self.host
-            # }
         )
 
 
