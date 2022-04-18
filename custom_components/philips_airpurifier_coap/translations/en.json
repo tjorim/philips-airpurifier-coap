@@ -1,5 +1,4 @@
 {
-  "title": "Philips AirPurifier",
   "config": {
     "abort": {
       "already_configured": "Device already configured",
@@ -10,7 +9,10 @@
         "title": "New Philips AirPurifier",
         "data": {
           "host": "Device hostname or IP address"
-        }
+        },
+      "dhcp_confirm": {
+        "title": "New Philips AirPurifier detected, please confirm configuration"
+      }
       }
     },
     "error": {
