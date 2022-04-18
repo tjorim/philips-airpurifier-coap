@@ -149,6 +149,15 @@ class PhilipsGenericFan(PhilipsEntity, FanEntity):
         self._name = name
         self._unique_id = None
 
+    def _register_services(self, async_register) -> None:
+        for cls in reversed(self.__class__.__mro__):
+            register_method = getattr(cls, "register_services", None)
+            if callable(register_method):
+                register_method(self, async_register)
+
+    def register_services(self, async_register) -> None:
+        pass
+
     @property
     def unique_id(self) -> Optional[str]:
         return self._unique_id
