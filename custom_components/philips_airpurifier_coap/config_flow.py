@@ -84,8 +84,8 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             _LOGGER.debug(f"status for host {self._host} is: {status}")
 
         except asyncio.TimeoutError:
-            _LOGGER.warning(r"Host %s doesn't answer like a supported Philips AirPurifier, aborting", self._host)
-            self.async_abort(reason="model_unsupported")
+            _LOGGER.warning(r"Timeout, host %s doesn't answer like a supported Philips AirPurifier, aborting", self._host)
+            return self.async_abort(reason="model_unsupported")
 
         except Exception as ex:
             _LOGGER.warning(r"Failed to connect: %s", ex)
