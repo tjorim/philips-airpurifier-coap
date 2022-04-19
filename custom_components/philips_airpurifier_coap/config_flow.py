@@ -1,12 +1,12 @@
 """The Philips AirPurifier component."""
 import asyncio
-import async_timeout
 
 from homeassistant.components import dhcp
 from homeassistant import config_entries, exceptions
 from homeassistant.data_entry_flow import FlowResult
 
 from homeassistant.helpers import config_validation as cv
+from homeassistant.util.timeout import TimeoutManager
 from homeassistant.const import CONF_HOST, CONF_NAME
 
 from aioairctrl import CoAPClient
@@ -63,23 +63,19 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         # let's try and connect to an AirPurifier
         try:
             client = None
+            timeout = TimeoutManager()
 
             # try for 10s to get a valid client
-            async with async_timeout.timeout(10):
+            async with timeout.async_timeout(10):
                 client = await CoAPClient.create(self._host)
                 _LOGGER.debug(f"got a valid client for host {self._host}")
 
             # we give it 10s to get a status, otherwise we abort
-            # wrap the query for status
-            def get_status(client: CoAPClient):
-                _LOGGER.debug(f"trying to get status")
-                status = client.get_status()
-                _LOGGER.debug("got status")
-                return status
-
             # now make this a process for 10s
-            async with async_timeout.timeout(10):
-                status = await get_status(client)
+            async with timeout.async_timeout(10):
+                _LOGGER.debug(f"trying to get status")
+                status = await client.get_status()
+                _LOGGER.debug("got status")
 
             if client is not None:
                 await client.shutdown()
@@ -148,6 +144,7 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         _LOGGER.debug(f"showing form")
         # show the form to the user
+        self._set_confirm_only()
         return self.async_show_form(
             step_id="dhcp_confirm",
         )
