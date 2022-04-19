@@ -119,10 +119,10 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         # show the confirmation form to the user
         _LOGGER.debug(f"waiting for async_step_dhcp_confirm")
-        return await self.async_step_dhcp_confirm()
+        return await self.async_step_confirm()
 
 
-    async def async_step_dhcp_confirm(
+    async def async_step_confirm(
         self,
         user_input: dict[str, Any] = None
     ) -> FlowResult:
@@ -142,12 +142,10 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 data=user_input
             )
 
-        _LOGGER.debug(f"showing form")
+        _LOGGER.debug(f"showing confirmation form")
         # show the form to the user
         self._set_confirm_only()
-        return self.async_show_form(
-            step_id="dhcp_confirm",
-        )
+        return self.async_show_form(step_id="confirm")
 
 
     async def async_step_user(self, user_input: dict[str, Any] = None) -> FlowResult:
