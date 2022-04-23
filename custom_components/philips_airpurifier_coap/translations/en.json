@@ -11,6 +11,9 @@
         "data": {
           "host": "Device hostname or IP address"
         }
+      },
+      "confirm": {
+        "description": "Do you want to start set up?"
       }
     },
     "error": {
