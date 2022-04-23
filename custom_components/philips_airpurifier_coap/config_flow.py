@@ -126,7 +126,7 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         user_input: dict[str, Any] = None
     ) -> FlowResult:
         """Confirm the dhcp discovered data."""
-        _LOGGER.debug(f"async_step_dhcp_confirm called with user_input: {user_input}")
+        _LOGGER.debug(f"async_step_confirm called with user_input: {user_input}")
 
         # user input was provided, so check and save it
         if user_input is not None:
@@ -144,7 +144,13 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         _LOGGER.debug(f"showing confirmation form")
         # show the form to the user
         self._set_confirm_only()
-        return self.async_show_form(step_id="confirm")
+        return self.async_show_form(
+            step_id="confirm",
+            description_placeholders={
+                "model": self._model,
+                "name": self._name
+            }
+        )
 
 
     async def async_step_user(self, user_input: dict[str, Any] = None) -> FlowResult:
