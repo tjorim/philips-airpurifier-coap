@@ -70,9 +70,8 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 client = await CoAPClient.create(self._host)
                 _LOGGER.debug(f"got a valid client for host {self._host}")
 
-            # we give it 10s to get a status, otherwise we abort
-            # now make this a process for 10s
-            async with timeout.async_timeout(10):
+            # we give it 30s to get a status, otherwise we abort
+            async with timeout.async_timeout(30):
                 _LOGGER.debug(f"trying to get status")
                 status = await client.get_status()
                 _LOGGER.debug("got status")
@@ -84,7 +83,7 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             _LOGGER.debug(f"status for host {self._host} is: {status}")
 
         except asyncio.TimeoutError:
-            _LOGGER.warning(r"Timeout, host %s doesn't answer like a supported Philips AirPurifier, aborting", self._host)
+            _LOGGER.warning(r"Timeout, host %s looks like a Philips AirPurifier but doesn't answer, aborting", self._host)
             return self.async_abort(reason="model_unsupported")
 
         except Exception as ex:
@@ -118,7 +117,7 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         })
 
         # show the confirmation form to the user
-        _LOGGER.debug(f"waiting for async_step_dhcp_confirm")
+        _LOGGER.debug(f"waiting for async_step_confirm")
         return await self.async_step_confirm()
 
 
