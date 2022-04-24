@@ -1,5 +1,6 @@
 """Support for Philips AirPurifier with CoAP."""
 from __future__ import annotations
+import asyncio
 
 import logging
 
@@ -88,7 +89,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     _LOGGER.debug("async_setup_entry called for host %s", host)
 
     try:
-        client = await CoAPClient.create(host)
+        future_client = CoAPClient.create(host)
+        client = await asyncio.wait_for(future_client, timeout=25)
         _LOGGER.debug("got a valid client for host %s", host)
     except Exception as ex:
         _LOGGER.warning(r"Failed to connect to host %s: %s", host, ex)
