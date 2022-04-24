@@ -186,6 +186,7 @@ class PhilipsEntity(Entity):
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
+        _LOGGER.debug(f"_handle_coordinator_update called")
         self.async_write_ha_state()
 
 
