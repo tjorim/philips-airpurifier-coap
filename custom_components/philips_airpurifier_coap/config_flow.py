@@ -65,8 +65,8 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             client = None
             timeout = TimeoutManager()
 
-            # try for 10s to get a valid client
-            async with timeout.async_timeout(10):
+            # try for 30s to get a valid client
+            async with timeout.async_timeout(30):
                 client = await CoAPClient.create(self._host)
                 _LOGGER.debug(f"got a valid client for host {self._host}")
 
@@ -164,35 +164,47 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 # first some sanitycheck on the host input
                 if not host_valid(user_input[CONF_HOST]):
                     raise InvalidHost()
-                self.host = user_input[CONF_HOST]
-                _LOGGER.debug("trying to configure host: %s", self.host)
+                self._host = user_input[CONF_HOST]
+                _LOGGER.debug("trying to configure host: %s", self._host)
 
                 # let's try and connect to an AirPurifier
                 try:
-                    client = await CoAPClient.create(self.host)
-                    _LOGGER.debug("got a valid client")
+                    client = None
+                    timeout = TimeoutManager()
 
-                    status = await client.get_status()
-                    _LOGGER.debug("got status")
+                    # try for 30s to get a valid client
+                    async with timeout.async_timeout(30):
+                        client = await CoAPClient.create(self._host)
+                        _LOGGER.debug("got a valid client")
+
+                    # we give it 30s to get a status, otherwise we abort
+                    async with timeout.async_timeout(30):
+                        _LOGGER.debug(f"trying to get status")
+                        status = await client.get_status()
+                        _LOGGER.debug("got status")
 
                     if client is not None:
                         await client.shutdown()
+
+                except asyncio.TimeoutError:
+                    _LOGGER.warning(r"Timeout, host %s doesn't answer, aborting", self._host)
+                    return self.async_abort(reason="timeout")
 
                 except Exception as ex:
                     _LOGGER.warning(r"Failed to connect: %s", ex)
                     raise exceptions.ConfigEntryNotReady from ex
 
                 # autodetect model and name
-                model = status['type']
-                name = status['name']
+                self._model = status['type']
+                self._name = status['name']
                 device_id = status['DeviceId']
-                user_input[CONF_MODEL] = model
-                user_input[CONF_NAME] = name
+                user_input[CONF_MODEL] = self._model
+                user_input[CONF_NAME] = self._name
                 user_input[CONF_DEVICE_ID] = device_id
-                _LOGGER.debug("Detected host %s as model %s with name: %s", self.host, model, name)
+                _LOGGER.debug("Detected host %s as model %s with name: %s", self._host, self._model, self._name)
 
                 # check if model is supported
-                if not model in model_to_class.keys():
+                if not self._model in model_to_class.keys():
                     return self.async_abort(reason="model_unsupported")
 
                 # use the device ID as unique_id
@@ -205,7 +217,7 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
                 # compile a name and return the config entry
                 return self.async_create_entry(
-                    title=model + " " + name,
+                    title=self._model + " " + self._name,
                     data=user_input
                 )
 
