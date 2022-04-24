@@ -13,7 +13,7 @@
         }
       },
       "confirm": {
-        "description": "Do you want to setup model {model} named {name}?"
+        "description": "Do you want to setup {model} {name}?"
       }
     },
     "error": {
