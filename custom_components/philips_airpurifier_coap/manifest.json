@@ -2,6 +2,17 @@
     "codeowners": ["@kongo09"],
     "config_flow": true,
     "dependencies": ["frontend", "http"],
+    "dhcp": [
+        {
+          "macaddress": "B0F893*"
+        },
+        {
+          "macaddress": "047863*"
+        },
+        {
+          "hostname": "mxchip*"
+        }
+      ],
     "documentation": "https://github.com/kongo09/philips-airpurifier-coap",
     "domain": "philips_airpurifier_coap",
     "iot_class": "local_push",
@@ -10,5 +21,5 @@
     "requirements": [
         "aioairctrl @ git+https://github.com/kongo09/aioairctrl"
     ],
-    "version": "0.9.3"
+    "version": "0.9.8"
 }
