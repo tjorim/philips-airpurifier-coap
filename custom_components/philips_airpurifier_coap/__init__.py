@@ -1,5 +1,6 @@
 """Support for Philips AirPurifier with CoAP."""
 from __future__ import annotations
+import asyncio
 
 import logging
 
@@ -83,21 +84,20 @@ async def async_setup(hass: HomeAssistant, config) -> bool:
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up the Philips AirPurifier integration."""
-    _LOGGER.debug("async_setup_entry called")
-
     host = entry.data[CONF_HOST]
 
-    _LOGGER.debug("Setting up %s integration with %s", DOMAIN, host)
+    _LOGGER.debug("async_setup_entry called for host %s", host)
 
     try:
-        client = await CoAPClient.create(host)
-        _LOGGER.debug("got a valid client")
+        future_client = CoAPClient.create(host)
+        client = await asyncio.wait_for(future_client, timeout=25)
+        _LOGGER.debug("got a valid client for host %s", host)
     except Exception as ex:
-        _LOGGER.warning(r"Failed to connect: %s", ex)
+        _LOGGER.warning(r"Failed to connect to host %s: %s", host, ex)
         raise ConfigEntryNotReady from ex
 
-    coordinator = Coordinator(client)
-    _LOGGER.debug("got a valid coordinator")
+    coordinator = Coordinator(client, host)
+    _LOGGER.debug("got a valid coordinator for host %s", host)
 
     data = hass.data.get(DOMAIN)
     if data == None:
@@ -109,7 +109,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     }
 
     await coordinator.async_first_refresh()
-    _LOGGER.debug("coordinator did first refresh")
+    _LOGGER.debug("coordinator did first refresh for host %s", host)
 
     for platform in PLATFORMS:
         hass.async_create_task(
@@ -124,6 +124,10 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
     
     for p in PLATFORMS:
         await hass.config_entries.async_forward_entry_unload(entry, p)
+
+
+    coord: Coordinator = hass.data[DOMAIN][entry.data[CONF_HOST]][DATA_KEY_COORDINATOR]
+    await coord.shutdown()
 
     hass.data[DOMAIN].pop(entry.data[CONF_HOST])
 

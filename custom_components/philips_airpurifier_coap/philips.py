@@ -1,4 +1,5 @@
 from __future__ import annotations
+from subprocess import call
 
 from typing import Any, Callable, Dict, List, Optional, Union
 
@@ -26,12 +27,14 @@ from homeassistant.components.fan import (
 )
 
 from .const import *
+from .timer import Timer
 
 _LOGGER = logging.getLogger(__name__)
 
 class Coordinator:
-    def __init__(self, client: CoAPClient) -> None:
+    def __init__(self, client: CoAPClient, host: str) -> None:
         self.client = client
+        self._host = host
 
         # It's None before the first successful update.
         # Components should call async_first_refresh to make sure the first
@@ -43,10 +46,56 @@ class Coordinator:
         self._listeners: list[CALLBACK_TYPE] = []
         self._task: Task | None = None
 
+        self._reconnect_task: Task | None = None
+
+        #Timeout = MAX_AGE * 3 Packet losses
+        _LOGGER.debug(f"init: Creating and autostarting timer for host {self._host}")
+        self._timer_disconnected = Timer(timeout=180, callback=self.reconnect, autostart=True)
+        self._timer_disconnected._auto_restart = True 
+        _LOGGER.debug(f"init: finished for host {self._host}")
+
+    async def shutdown(self):
+        _LOGGER.debug(f"shutdown: called for host {self._host}")
+        if self._reconnect_task is not None:
+            _LOGGER.debug(f"shutdown: cancelling reconnect task for host {self._host}")
+            self._reconnect_task.cancel()
+        self._timer_disconnected._cancel()
+        if self.client is not None:
+            await self.client.shutdown()
+
+    async def reconnect(self):
+        _LOGGER.debug(f"reconnect: called for host {self._host}")
+        try:
+            if self._reconnect_task is not None:
+                # Reconnect stuck
+                _LOGGER.debug(f"reconnect: cancelling reconnect task for host {self._host}")
+                self._reconnect_task.cancel()
+                self._reconnect_task = None
+            # Reconnect in new Task, keep timer watching
+            _LOGGER.debug(f"reconnect: creating new reconnect task for host {self._host}")
+            self._reconnect_task = asyncio.create_task(self._reconnect())
+        except:
+            _LOGGER.exception("Exception on starting reconnect!")
+
+    async def _reconnect(self):
+        try:
+            _LOGGER.debug("Reconnecting...")
+            try:
+                await self.client.shutdown()
+            except:
+                pass
+            self.client = await CoAPClient.create(self._host)
+            self._start_observing()
+        except:
+            _LOGGER.exception("_reconnect error")
+
     async def async_first_refresh(self) -> None:
+        _LOGGER.debug("async_first_refresh for host %s", self._host)
         try:
             self.status = await self.client.get_status()
+            _LOGGER.debug("finished first refresh for host %s", self._host)
         except Exception as ex:
+            _LOGGER.error("config not ready, first refresh failed for host %s", self._host)
             raise ConfigEntryNotReady from ex
 
     @callback
@@ -79,6 +128,7 @@ class Coordinator:
         async for status in self.client.observe_status():
             _LOGGER.debug("Status update: %s", status)
             self.status = status
+            self._timer_disconnected.reset()
             for update_callback in self._listeners:
                 update_callback()
 
@@ -88,6 +138,8 @@ class Coordinator:
             self._task.cancel()
             self._task = None
         self._task = asyncio.create_task(self._async_observe_status())
+        self._timer_disconnected.reset()
+
 
 
 class PhilipsEntity(Entity):
@@ -134,6 +186,7 @@ class PhilipsEntity(Entity):
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
+        _LOGGER.debug(f"_handle_coordinator_update called")
         self.async_write_ha_state()
 
 
@@ -180,13 +233,11 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
 
     def __init__(
         self,
-        client: CoAPClient,
         coordinator: Coordinator,
         model: str,
         name: str,
     ) -> None:
         super().__init__(coordinator, model, name)
-        self._client = client
 
         self._preset_modes = []
         self._available_preset_modes = {}
@@ -246,10 +297,10 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
         if percentage:
             await self.async_set_percentage(percentage)
             return
-        await self._client.set_control_value(PHILIPS_POWER, "1")
+        await self.coordinator.client.set_control_value(PHILIPS_POWER, "1")
 
     async def async_turn_off(self, **kwargs) -> None:
-        await self._client.set_control_value(PHILIPS_POWER, "0")
+        await self.coordinator.client.set_control_value(PHILIPS_POWER, "0")
 
     @property
     def supported_features(self) -> int:
@@ -275,7 +326,7 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
         """Set the preset mode of the fan."""
         status_pattern = self._available_preset_modes.get(preset_mode)
         if status_pattern:
-            await self._client.set_control_values(data=status_pattern)
+            await self.coordinator.client.set_control_values(data=status_pattern)
 
     @property
     def speed_count(self) -> int:
@@ -297,7 +348,7 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
             speed = percentage_to_ordered_list_item(self._speeds, percentage)
             status_pattern = self._available_speeds.get(speed)
             if status_pattern:
-                await self._client.set_control_values(data=status_pattern)
+                await self.coordinator.client.set_control_values(data=status_pattern)
 
     @property
     def extra_state_attributes(self) -> Optional[Dict[str, Any]]:
