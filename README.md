@@ -15,7 +15,7 @@ I've switched to the branch of Denaun. This brings a number of breaking changes:
  
 ## Word of Caution
 
-Due to a bug in the Philips devices, this integration is rather instable. It might or might not work. Even if it seems ok at first, it might stop working after a while. Sometimes, a power cycle of the Philips device helps. Sometimes, only a power cycle and a Home Assistant restart together help. It is frustrating. Do not report this as an issue here. Nobody can help right now.
+Due to a bug in the Philips devices, this integration is rather instable. It might or might not work. Even if it seems ok at first, it might stop working after a while. Sometimes, a power cycle of the Philips device helps. Sometimes, only a power cycle and a Home Assistant restart together help. It is frustrating. Do not report this as an issue here. Nobody can help right now. @mhetzi contributed timer code to attempt reconnects if the device is not responsive. Sometimes, that helps. But not always. You've been warned.
 
 It all goes back to some reverse engineering by @rgerganov and you can read about it here: https://xakcop.com/post/ctrl-air-purifier/
 
@@ -27,7 +27,7 @@ Philips has recently introduced a proper API to remote control the devices. Howe
  - Original reverse engineering done by @rgerganov at https://github.com/rgerganov/py-air-control
  - The base of the current integration has been done by @betaboon at https://github.com/betaboon/philips-airpurifier-coap but apparently this is not maintained anymore.
  - The rework has been done by @Denaun at https://github.com/Denaun/philips-airpurifier-coap
- - Obviously, many other people contributed, notably @Kraineff and @shexbeer
+ - Obviously, many other people contributed, notably @mhetzi, @Kraineff and @shexbeer
 
 
 ## Install
