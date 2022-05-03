@@ -1,5 +1,4 @@
 from __future__ import annotations
-from subprocess import call
 
 from typing import Any, Callable, Dict, List, Optional, Union
 
@@ -9,7 +8,6 @@ from asyncio.tasks import Task
 from datetime import timedelta
 
 from aioairctrl import CoAPClient
-import voluptuous as vol
 
 from homeassistant.core import CALLBACK_TYPE, callback
 from homeassistant.helpers.entity import Entity
@@ -30,6 +28,8 @@ from .const import *
 from .timer import Timer
 
 _LOGGER = logging.getLogger(__name__)
+
+
 
 class Coordinator:
     def __init__(self, client: CoAPClient, host: str) -> None:
@@ -190,6 +190,7 @@ class PhilipsEntity(Entity):
         self.async_write_ha_state()
 
 
+
 class PhilipsGenericFan(PhilipsEntity, FanEntity):
     def __init__(
         self,
@@ -224,12 +225,14 @@ class PhilipsGenericFan(PhilipsEntity, FanEntity):
         return self._icon
 
 
+
 class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
     AVAILABLE_PRESET_MODES = {}
     AVAILABLE_SPEEDS = {}
     AVAILABLE_ATTRIBUTES = []
     AVAILABLE_SWITCHES = []
     AVAILABLE_LIGHTS = []
+    SERIALIZE_POWER_CALL = False
 
     def __init__(
         self,
@@ -282,25 +285,28 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
 
     @property
     def is_on(self) -> bool:
-        return self._device_status.get(PHILIPS_POWER) == "1"
+        return self._device_status.get(PHILIPS_POWER) == PHILIPS_POWER_MAP[SWITCH_ON]
 
     async def async_turn_on(
         self,
-        speed: Optional[str] = None,
         percentage: Optional[int] = None,
         preset_mode: Optional[str] = None,
         **kwargs,
     ):
+        # some devices don't like it if we set a preset mode to switch on the device (like the AC1214),
+        # so it needs to be done in sequence
+        if self.SERIALIZE_POWER_CALL and not self.is_on:
+            await self.coordinator.client.set_control_value(PHILIPS_POWER, PHILIPS_POWER_MAP[SWITCH_ON])
+            await asyncio.sleep(1)
         if preset_mode:
             await self.async_set_preset_mode(preset_mode)
             return
         if percentage:
             await self.async_set_percentage(percentage)
             return
-        await self.coordinator.client.set_control_value(PHILIPS_POWER, "1")
 
     async def async_turn_off(self, **kwargs) -> None:
-        await self.coordinator.client.set_control_value(PHILIPS_POWER, "0")
+        await self.coordinator.client.set_control_value(PHILIPS_POWER, PHILIPS_POWER_MAP[SWITCH_OFF])
 
     @property
     def supported_features(self) -> int:
@@ -416,28 +422,34 @@ class PhilipsGenericCoAPFan(PhilipsGenericCoAPFanBase):
     AVAILABLE_SELECTS = []
 
 
+
 class PhilipsHumidifierMixin(PhilipsGenericCoAPFanBase):
     AVAILABLE_SELECTS = [PHILIPS_FUNCTION, PHILIPS_HUMIDITY_TARGET]
 
 
+
 # TODO consolidate these classes as soon as we see a proper pattern
+
 class PhilipsAC1214(PhilipsGenericCoAPFan):
+    # the AC1214 doesn't seem to like a power on call when the mode or speed is set,
+    # so this needs to be handled separately
+    SERIALIZE_POWER_CALL = True
     AVAILABLE_PRESET_MODES = {
-        PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "P"},
-        PRESET_MODE_ALLERGEN: {PHILIPS_POWER: "1", PHILIPS_MODE: "A"},
+        PRESET_MODE_AUTO: {PHILIPS_MODE: "P"},
+        PRESET_MODE_ALLERGEN: {PHILIPS_MODE: "A"},
         # make speeds available as preset
-        PRESET_MODE_NIGHT: {PHILIPS_POWER: "1", PHILIPS_MODE: "N"},
-        SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
-        SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
-        SPEED_3: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
-        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
+        PRESET_MODE_NIGHT: {PHILIPS_MODE: "N"},
+        SPEED_1: {PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
+        SPEED_2: {PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
+        SPEED_3: {PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
+        PRESET_MODE_TURBO: {PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
     }
     AVAILABLE_SPEEDS = {
-        PRESET_MODE_NIGHT: {PHILIPS_POWER: "1", PHILIPS_MODE: "N"},
-        SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
-        SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
-        SPEED_3: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
-        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
+        PRESET_MODE_NIGHT: {PHILIPS_MODE: "N"},
+        SPEED_1: {PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
+        SPEED_2: { PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
+        SPEED_3: {PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
+        PRESET_MODE_TURBO: {PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
     }
     AVAILABLE_SWITCHES = [PHILIPS_CHILD_LOCK]
 
@@ -467,6 +479,7 @@ class PhilipsAC2729(
     AVAILABLE_SWITCHES = [PHILIPS_CHILD_LOCK]
 
 
+
 class PhilipsAC2889(PhilipsGenericCoAPFan):
     AVAILABLE_PRESET_MODES = {
         PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "P"},
@@ -488,6 +501,7 @@ class PhilipsAC2889(PhilipsGenericCoAPFan):
     }
 
 
+
 class PhilipsAC29xx(PhilipsGenericCoAPFan):
     AVAILABLE_PRESET_MODES = {
         PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "AG"},
@@ -502,6 +516,7 @@ class PhilipsAC29xx(PhilipsGenericCoAPFan):
     }
 
 
+
 class PhilipsAC2936(PhilipsAC29xx):
     pass
 
@@ -512,6 +527,7 @@ class PhilipsAC2939(PhilipsAC29xx):
 
 class PhilipsAC2958(PhilipsAC29xx):
     pass
+
 
 
 class PhilipsAC30xx(PhilipsGenericCoAPFan):
@@ -531,6 +547,7 @@ class PhilipsAC30xx(PhilipsGenericCoAPFan):
     }
 
 
+
 class PhilipsAC3033(PhilipsAC30xx):
     pass
 
@@ -542,6 +559,7 @@ class PhilipsAC3039(PhilipsAC30xx):
 
 class PhilipsAC3059(PhilipsAC30xx):
     pass
+
 
 
 class PhilipsAC3259(PhilipsGenericCoAPFan):
@@ -563,6 +581,7 @@ class PhilipsAC3259(PhilipsGenericCoAPFan):
         SPEED_3: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
         PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
     }
+
 
 
 class PhilipsAC3829(PhilipsHumidifierMixin, PhilipsGenericCoAPFan):
@@ -604,6 +623,7 @@ class PhilipsAC3858(PhilipsGenericCoAPFan):
     }
 
 
+
 class PhilipsAC4236(PhilipsGenericCoAPFan):
     AVAILABLE_PRESET_MODES = {
         PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "AG"},
@@ -619,6 +639,7 @@ class PhilipsAC4236(PhilipsGenericCoAPFan):
         SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
         PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T", PHILIPS_SPEED: "t"},
     }
+
 
 
 class PhilipsAC5659(PhilipsGenericCoAPFan):
@@ -640,6 +661,7 @@ class PhilipsAC5659(PhilipsGenericCoAPFan):
         SPEED_3: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
         PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
     }
+
 
 
 model_to_class = {

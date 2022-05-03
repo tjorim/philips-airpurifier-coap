@@ -196,6 +196,11 @@ PHILIPS_TYPE = "type"
 PHILIPS_WATER_LEVEL = "wl"
 PHILIPS_WIFI_VERSION = "WifiVersion"
 
+PHILIPS_POWER_MAP = {
+    SWITCH_ON: "1",
+    SWITCH_OFF: "0",
+}
+
 PHILIPS_PREFERRED_INDEX_MAP = {
     "0": "Indoor Allergen Index",
     "1": "PM2.5",
