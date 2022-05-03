@@ -25,7 +25,7 @@ async def async_setup_entry(
     entry: ConfigEntry, 
     async_add_entities: AddEntitiesCallback,
 ):
-    _LOGGER.debug("async_setup_entry called for platform fan")
+    _LOGGER.info("async_setup_entry called for platform fan")
 
     host = entry.data[CONF_HOST]
     model = entry.data[CONF_MODEL]

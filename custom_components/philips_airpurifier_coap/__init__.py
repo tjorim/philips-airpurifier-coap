@@ -57,7 +57,7 @@ class ListingView(HomeAssistantView):
 
 async def async_setup(hass: HomeAssistant, config) -> bool:
     """Set up the icons for the Philips AirPurifier integration."""
-    _LOGGER.debug("async_setup called")
+    _LOGGER.info("async_setup called")
 
     hass.http.register_static_path(
             LOADER_URL,
@@ -86,18 +86,18 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up the Philips AirPurifier integration."""
     host = entry.data[CONF_HOST]
 
-    _LOGGER.debug("async_setup_entry called for host %s", host)
+    _LOGGER.info("async_setup_entry called for host %s", host)
 
     try:
         future_client = CoAPClient.create(host)
         client = await asyncio.wait_for(future_client, timeout=25)
-        _LOGGER.debug("got a valid client for host %s", host)
+        _LOGGER.info("got a valid client for host %s", host)
     except Exception as ex:
         _LOGGER.warning(r"Failed to connect to host %s: %s", host, ex)
         raise ConfigEntryNotReady from ex
 
     coordinator = Coordinator(client, host)
-    _LOGGER.debug("got a valid coordinator for host %s", host)
+    _LOGGER.info("got a valid coordinator for host %s", host)
 
     data = hass.data.get(DOMAIN)
     if data == None:
@@ -109,7 +109,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     }
 
     await coordinator.async_first_refresh()
-    _LOGGER.debug("coordinator did first refresh for host %s", host)
+    _LOGGER.info("coordinator did first refresh for host %s", host)
 
     hass.config_entries.async_setup_platforms(entry, PLATFORMS)
 
