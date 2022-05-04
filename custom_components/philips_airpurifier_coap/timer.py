@@ -29,6 +29,11 @@ class Timer:
                 _LOGGER.debug("Timeout callback finished!")
             except asyncio.exceptions.CancelledError:
                 _LOGGER.debug("Timer cancelled")
+            except RuntimeError:
+                _LOGGER.info("Event loop stopped")
+                self._cancel()
+                self._auto_restart = False
+                break
             except:
                 _LOGGER.exception("Timer callback failure")
             self._in_callback = False

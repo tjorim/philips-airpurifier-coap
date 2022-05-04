@@ -30,6 +30,8 @@ from .timer import Timer
 
 _LOGGER = logging.getLogger(__name__)
 
+TIMEOUT = 30
+
 class Coordinator:
     def __init__(self, client: CoAPClient, host: str) -> None:
         self.client = client
@@ -48,37 +50,37 @@ class Coordinator:
         self._reconnect_task: Task | None = None
 
         #Timeout = MAX_AGE * 3 Packet losses
-        _LOGGER.debug(f"init: Creating and autostarting timer for host {self._host}")
-        self._timer_disconnected = Timer(timeout=180, callback=self.reconnect, autostart=True)
+        _LOGGER.info(f"init: Creating and autostarting timer for host {self._host}")
+        self._timer_disconnected = Timer(timeout=TIMEOUT, callback=self.reconnect, autostart=True)
         self._timer_disconnected._auto_restart = True 
-        _LOGGER.debug(f"init: finished for host {self._host}")
+        _LOGGER.info(f"init: finished for host {self._host}")
 
     async def shutdown(self):
-        _LOGGER.debug(f"shutdown: called for host {self._host}")
+        _LOGGER.info(f"shutdown: called for host {self._host}")
         if self._reconnect_task is not None:
-            _LOGGER.debug(f"shutdown: cancelling reconnect task for host {self._host}")
+            _LOGGER.info(f"shutdown: cancelling reconnect task for host {self._host}")
             self._reconnect_task.cancel()
         self._timer_disconnected._cancel()
         if self.client is not None:
             await self.client.shutdown()
 
     async def reconnect(self):
-        _LOGGER.debug(f"reconnect: called for host {self._host}")
+        _LOGGER.info(f"reconnect: called for host {self._host}")
         try:
             if self._reconnect_task is not None:
                 # Reconnect stuck
-                _LOGGER.debug(f"reconnect: cancelling reconnect task for host {self._host}")
+                _LOGGER.info(f"reconnect: cancelling reconnect task for host {self._host}")
                 self._reconnect_task.cancel()
                 self._reconnect_task = None
             # Reconnect in new Task, keep timer watching
-            _LOGGER.debug(f"reconnect: creating new reconnect task for host {self._host}")
+            _LOGGER.info(f"reconnect: creating new reconnect task for host {self._host}")
             self._reconnect_task = asyncio.create_task(self._reconnect())
         except:
             _LOGGER.exception("Exception on starting reconnect!")
 
     async def _reconnect(self):
         try:
-            _LOGGER.debug("Reconnecting...")
+            _LOGGER.info("Reconnecting...")
             try:
                 await self.client.shutdown()
             except:
@@ -89,10 +91,10 @@ class Coordinator:
             _LOGGER.exception("_reconnect error")
 
     async def async_first_refresh(self) -> None:
-        _LOGGER.debug("async_first_refresh for host %s", self._host)
+        _LOGGER.info("async_first_refresh for host %s", self._host)
         try:
             self.status = await self.client.get_status()
-            _LOGGER.debug("finished first refresh for host %s", self._host)
+            _LOGGER.info("finished first refresh for host %s", self._host)
         except Exception as ex:
             _LOGGER.error("config not ready, first refresh failed for host %s", self._host)
             raise ConfigEntryNotReady from ex
@@ -125,7 +127,9 @@ class Coordinator:
 
     async def _async_observe_status(self) -> None:
         async for status in self.client.observe_status():
-            _LOGGER.debug("Status update: %s", status)
+            _LOGGER.info("Status update received")
+            _LOGGER.debug(status)
+
             self.status = status
             self._timer_disconnected.reset()
             for update_callback in self._listeners:
@@ -185,7 +189,6 @@ class PhilipsEntity(Entity):
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
-        _LOGGER.debug(f"_handle_coordinator_update called")
         self.async_write_ha_state()
 
 
