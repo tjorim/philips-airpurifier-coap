@@ -21,5 +21,5 @@
     "requirements": [
         "aioairctrl @ https://github.com/kongo09/aioairctrl@timeout"
     ],
-    "version": "0.10.1-beta"
+    "version": "0.10.1-beta2"
 }
