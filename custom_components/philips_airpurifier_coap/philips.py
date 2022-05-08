@@ -540,6 +540,9 @@ class PhilipsAC3036(PhilipsAC30xx):
 class PhilipsAC3039(PhilipsAC30xx):
     pass
 
+class PhilipsAC3055(PhilipsAC30xx):
+    pass
+
 class PhilipsAC3059(PhilipsAC30xx):
     pass
 
