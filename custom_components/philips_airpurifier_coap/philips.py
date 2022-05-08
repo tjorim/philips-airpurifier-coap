@@ -232,7 +232,6 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
     AVAILABLE_ATTRIBUTES = []
     AVAILABLE_SWITCHES = []
     AVAILABLE_LIGHTS = []
-    SERIALIZE_POWER_CALL = False
 
     def __init__(
         self,
@@ -293,17 +292,13 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
         preset_mode: Optional[str] = None,
         **kwargs,
     ):
-        # some devices don't like it if we set a preset mode to switch on the device (like the AC1214),
-        # so it needs to be done in sequence
-        if self.SERIALIZE_POWER_CALL and not self.is_on:
-            await self.coordinator.client.set_control_value(PHILIPS_POWER, PHILIPS_POWER_MAP[SWITCH_ON])
-            await asyncio.sleep(1)
         if preset_mode:
             await self.async_set_preset_mode(preset_mode)
             return
         if percentage:
             await self.async_set_percentage(percentage)
             return
+        await self.coordinator.client.set_control_value(PHILIPS_POWER, PHILIPS_POWER_MAP[SWITCH_ON])
 
     async def async_turn_off(self, **kwargs) -> None:
         await self.coordinator.client.set_control_value(PHILIPS_POWER, PHILIPS_POWER_MAP[SWITCH_OFF])
@@ -433,7 +428,6 @@ class PhilipsHumidifierMixin(PhilipsGenericCoAPFanBase):
 class PhilipsAC1214(PhilipsGenericCoAPFan):
     # the AC1214 doesn't seem to like a power on call when the mode or speed is set,
     # so this needs to be handled separately
-    SERIALIZE_POWER_CALL = True
     AVAILABLE_PRESET_MODES = {
         PRESET_MODE_AUTO: {PHILIPS_MODE: "P"},
         PRESET_MODE_ALLERGEN: {PHILIPS_MODE: "A"},
@@ -452,6 +446,48 @@ class PhilipsAC1214(PhilipsGenericCoAPFan):
         PRESET_MODE_TURBO: {PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
     }
     AVAILABLE_SWITCHES = [PHILIPS_CHILD_LOCK]
+
+    async def async_turn_on(
+        self,
+        percentage: Optional[int] = None,
+        preset_mode: Optional[str] = None,
+        **kwargs,
+    ):
+        # the AC1214 doesn't like it if we set a preset mode to switch on the device,
+        # so it needs to be done in sequence
+        if not self.is_on:
+            _LOGGER.debug(f"AC1214 is switched on without setting a mode")
+            await self.coordinator.client.set_control_value(PHILIPS_POWER, PHILIPS_POWER_MAP[SWITCH_ON])
+            await asyncio.sleep(1)
+
+        # the AC1214 also doesn't seem to like switching to mode 'M' without cycling through mode 'A'
+        current_pattern = self._available_preset_modes.get(self.preset_mode)
+        _LOGGER.debug(f"AC1214 is currently on mode: {current_pattern}")
+        if preset_mode:
+            _LOGGER.debug(f"AC1214 preset mode requested: {preset_mode}")
+            status_pattern = self._available_preset_modes.get(preset_mode)
+            _LOGGER.debug(f"this corresponds to status pattern: {status_pattern}")
+            if status_pattern.get(PHILIPS_MODE) != 'A' and current_pattern.get(PHILIPS_MODE) != 'M':
+                _LOGGER.debug(f"AC1214 switches to mode 'A' first")
+                await self.async_set_preset_mode(PRESET_MODE_ALLERGEN)
+                await asyncio.sleep(1)
+            _LOGGER.debug(f"AC1214 sets preset mode to: {preset_mode}")
+            await self.async_set_preset_mode(preset_mode)
+            return
+
+        if percentage:
+            if percentage > 0:
+                _LOGGER.debug(f"AC1214 speed change requested: {percentage}")
+                speed = percentage_to_ordered_list_item(self._speeds, percentage)
+                status_pattern = self._available_speeds.get(speed)
+                _LOGGER.debug(f"this corresponds to status pattern: {status_pattern}")
+                if status_pattern.get(PHILIPS_MODE) != 'A' and current_pattern.get(PHILIPS_MODE) != 'M':
+                    _LOGGER.debug(f"AC1214 switches to mode 'A' first")
+                    await self.async_set_preset_mode(PRESET_MODE_ALLERGEN)
+                    await asyncio.sleep(1)
+            _LOGGER.debug(f"AC1214 sets speed percentage to: {percentage}")
+            await self.async_set_percentage(percentage)
+            return
 
 
 
