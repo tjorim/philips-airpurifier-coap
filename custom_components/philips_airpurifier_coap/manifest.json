@@ -19,7 +19,7 @@
     "issue_tracker": "https://github.com/kongo09/philips-airpurifier-coap/issues",
     "name": "Philips AirPurifier (with CoAP)",
     "requirements": [
-        "aioairctrl @ git+https://github.com/kongo09/aioairctrl"
+        "aioairctrl @ https://github.com/kongo09/aioairctrl@timeout"
     ],
     "version": "0.10.1"
 }

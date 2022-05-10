@@ -31,6 +31,8 @@ from .timer import Timer
 
 _LOGGER = logging.getLogger(__name__)
 
+MISSED_PACKAGE_COUNT = 3
+
 class Coordinator:
     def __init__(self, client: CoAPClient, host: str) -> None:
         self.client = client
@@ -47,10 +49,11 @@ class Coordinator:
         self._task: Task | None = None
 
         self._reconnect_task: Task | None = None
+        self._timeout: int = 60
 
         #Timeout = MAX_AGE * 3 Packet losses
         _LOGGER.debug(f"init: Creating and autostarting timer for host {self._host}")
-        self._timer_disconnected = Timer(timeout=180, callback=self.reconnect, autostart=True)
+        self._timer_disconnected = Timer(timeout=self._timeout * MISSED_PACKAGE_COUNT, callback=self.reconnect, autostart=True)
         self._timer_disconnected._auto_restart = True 
         _LOGGER.debug(f"init: finished for host {self._host}")
 
@@ -92,7 +95,10 @@ class Coordinator:
     async def async_first_refresh(self) -> None:
         _LOGGER.debug("async_first_refresh for host %s", self._host)
         try:
-            self.status = await self.client.get_status()
+            self.status, timeout = await self.client.get_status()
+            self._timeout = timeout
+            if self._timer_disconnected is not None:
+                self._timer_disconnected.setTimeout(timeout * MISSED_PACKAGE_COUNT)
             _LOGGER.debug("finished first refresh for host %s", self._host)
         except Exception as ex:
             _LOGGER.error("config not ready, first refresh failed for host %s", self._host)
