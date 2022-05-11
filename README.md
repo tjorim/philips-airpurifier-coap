@@ -82,8 +82,8 @@ To aquire those information please follow these steps:
 ### Prepare the environment
 
 ```sh
-git clone https://github.com/kongo09/philips-airpurifier.git
-cd philips-airpurifier
+git clone https://github.com/kongo09/philips-airpurifier-coap.git
+cd philips-airpurifier-coap
 source aioairctrl-shell.sh
 ```
 
