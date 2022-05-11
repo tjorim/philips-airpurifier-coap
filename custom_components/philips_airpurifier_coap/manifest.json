@@ -18,13 +18,6 @@
     "iot_class": "local_push",
     "issue_tracker": "https://github.com/kongo09/philips-airpurifier-coap/issues",
     "name": "Philips AirPurifier (with CoAP)",
-<<<<<<< Updated upstream
-    "requirements": [
-        "aioairctrl @ https://github.com/kongo09/aioairctrl@timeout"
-    ],
-    "version": "0.10.1"
-=======
     "requirements": ["aioairctrl==0.2.1"],
     "version": "0.10.2"
->>>>>>> Stashed changes
 }
