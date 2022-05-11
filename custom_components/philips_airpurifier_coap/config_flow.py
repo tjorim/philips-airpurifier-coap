@@ -73,7 +73,7 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             # we give it 30s to get a status, otherwise we abort
             async with timeout.async_timeout(30):
                 _LOGGER.debug(f"trying to get status")
-                status, _ = await client.get_status()
+                status = await client.get_status()
                 _LOGGER.debug("got status")
 
             if client is not None:
