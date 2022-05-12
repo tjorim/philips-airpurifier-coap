@@ -652,6 +652,7 @@ model_to_class = {
     MODEL_AC3033: PhilipsAC3033,
     MODEL_AC3036: PhilipsAC3036,
     MODEL_AC3039: PhilipsAC3039,
+    MODEL_AC3055: PhilipsAC3055,
     MODEL_AC3059: PhilipsAC3059,
     MODEL_AC3259: PhilipsAC3259,
     MODEL_AC3829: PhilipsAC3829,
