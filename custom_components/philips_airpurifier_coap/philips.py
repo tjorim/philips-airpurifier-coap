@@ -89,6 +89,10 @@ class Coordinator:
                 pass
             self.client = await CoAPClient.create(self._host)
             self._start_observing()
+        except asyncio.CancelledError:
+            # Silently drop this exception, because we are responsible for it.
+            # Reconnect took to long
+            pass
         except:
             _LOGGER.exception("_reconnect error")
 
