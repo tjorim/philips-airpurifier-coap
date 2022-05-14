@@ -29,6 +29,17 @@ class Timer:
                 _LOGGER.debug("Timeout callback finished!")
             except asyncio.exceptions.CancelledError:
                 _LOGGER.debug("Timer cancelled")
+                break
+            except RuntimeError:
+                try:
+                    #Ensure that the runtime error, is because hass is going down!
+                    asyncio.get_running_loop()
+                except RuntimeError:
+                    #Yes seems like hass is going down, stepping out
+                    _LOGGER.warning("RuntimeError! Stopping Timer...")
+                    self._auto_restart = False
+                    self._task = None
+                    return
             except:
                 _LOGGER.exception("Timer callback failure")
             self._in_callback = False
