@@ -39,7 +39,7 @@ class Timer:
                     asyncio.get_running_loop()
                 except RuntimeError:
                     #Yes seems like hass is going down, stepping out
-                    _LOGGER.exception("RuntimeError! Stopping Timer...")
+                    _LOGGER.warning("RuntimeError! Stopping Timer...")
                     self._auto_restart = False
                     self._task = None
                     return
