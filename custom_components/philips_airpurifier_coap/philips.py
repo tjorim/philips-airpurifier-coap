@@ -62,7 +62,9 @@ class Coordinator:
         if self._reconnect_task is not None:
             _LOGGER.debug(f"shutdown: cancelling reconnect task for host {self._host}")
             self._reconnect_task.cancel()
-        self._timer_disconnected._cancel()
+        if self._timer_disconnected is not None:
+            _LOGGER.debug(f"shutdown: cancelling timeout task for host {self._host}")
+            self._timer_disconnected._cancel()
         if self.client is not None:
             await self.client.shutdown()
 
