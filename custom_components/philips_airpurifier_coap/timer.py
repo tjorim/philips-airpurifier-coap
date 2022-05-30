@@ -5,6 +5,9 @@ import logging
 
 _LOGGER = logging.getLogger(__name__)
 
+class CallbackRunningException(Exception):
+    pass
+
 class Timer:
     _in_callback: bool = False
     _auto_restart:bool = False
@@ -27,8 +30,8 @@ class Timer:
                 _LOGGER.info("Calling timeout callback...")
                 await self._callback()
                 _LOGGER.debug("Timeout callback finished!")
-            except asyncio.exceptions.CancelledError:
-                _LOGGER.debug("Timer cancelled")
+            except asyncio.exceptions.CancelledError as e:
+                _LOGGER.debug(f"Timer cancelled: {e.args}")
                 break
             except RuntimeError:
                 try:
@@ -48,15 +51,23 @@ class Timer:
 
     def setTimeout(self, timeout):
         self._timeout = timeout
+        # Set new Timeout immediatly effective
+        self.reset()
 
-    def _cancel(self):
+    def _cancel(self, msg="STOP"):
         if self._in_callback:
-            raise Exception("Timedout too late to cancel!")
+            raise CallbackRunningException("Timedout too late to cancel!")
         if self._task is not None:
-            self._task.cancel()
+            self._task.cancel(msg=msg)
+            self._task = None
 
     def reset(self):
-        self._cancel()
+        #_LOGGER.debug("Cancel current timer...")
+        try:
+            self._cancel(msg="RESET")
+        except CallbackRunningException:
+            pass
+        #_LOGGER.debug("Staring new timer...")
         self.start()
 
     def start(self):
