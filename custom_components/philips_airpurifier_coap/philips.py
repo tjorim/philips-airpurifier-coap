@@ -29,7 +29,7 @@ from .timer import Timer
 
 _LOGGER = logging.getLogger(__name__)
 
-
+MISSED_PACKAGE_COUNT = 3
 
 class Coordinator:
     def __init__(self, client: CoAPClient, host: str) -> None:
@@ -47,10 +47,11 @@ class Coordinator:
         self._task: Task | None = None
 
         self._reconnect_task: Task | None = None
+        self._timeout: int = 60
 
         #Timeout = MAX_AGE * 3 Packet losses
         _LOGGER.debug(f"init: Creating and autostarting timer for host {self._host}")
-        self._timer_disconnected = Timer(timeout=180, callback=self.reconnect, autostart=True)
+        self._timer_disconnected = Timer(timeout=self._timeout * MISSED_PACKAGE_COUNT, callback=self.reconnect, autostart=True)
         self._timer_disconnected._auto_restart = True 
         _LOGGER.debug(f"init: finished for host {self._host}")
 
@@ -59,7 +60,9 @@ class Coordinator:
         if self._reconnect_task is not None:
             _LOGGER.debug(f"shutdown: cancelling reconnect task for host {self._host}")
             self._reconnect_task.cancel()
-        self._timer_disconnected._cancel()
+        if self._timer_disconnected is not None:
+            _LOGGER.debug(f"shutdown: cancelling timeout task for host {self._host}")
+            self._timer_disconnected._cancel()
         if self.client is not None:
             await self.client.shutdown()
 
@@ -86,13 +89,20 @@ class Coordinator:
                 pass
             self.client = await CoAPClient.create(self._host)
             self._start_observing()
+        except asyncio.CancelledError:
+            # Silently drop this exception, because we are responsible for it.
+            # Reconnect took to long
+            pass
         except:
             _LOGGER.exception("_reconnect error")
 
     async def async_first_refresh(self) -> None:
         _LOGGER.debug("async_first_refresh for host %s", self._host)
         try:
-            self.status = await self.client.get_status()
+            self.status, timeout = await self.client.get_status()
+            self._timeout = timeout
+            if self._timer_disconnected is not None:
+                self._timer_disconnected.setTimeout(timeout * MISSED_PACKAGE_COUNT)
             _LOGGER.debug("finished first refresh for host %s", self._host)
         except Exception as ex:
             _LOGGER.error("config not ready, first refresh failed for host %s", self._host)
@@ -186,7 +196,6 @@ class PhilipsEntity(Entity):
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
-        _LOGGER.debug(f"_handle_coordinator_update called")
         self.async_write_ha_state()
 
 
@@ -202,15 +211,6 @@ class PhilipsGenericFan(PhilipsEntity, FanEntity):
         self._model = model
         self._name = name
         self._unique_id = None
-
-    def _register_services(self, async_register) -> None:
-        for cls in reversed(self.__class__.__mro__):
-            register_method = getattr(cls, "register_services", None)
-            if callable(register_method):
-                register_method(self, async_register)
-
-    def register_services(self, async_register) -> None:
-        pass
 
     @property
     def unique_id(self) -> Optional[str]:
@@ -680,6 +680,21 @@ class PhilipsAC4236(PhilipsGenericCoAPFan):
     }
 
 
+class PhilipsAC4558(PhilipsGenericCoAPFan):
+    AVAILABLE_PRESET_MODES = {
+        # there doesn't seem to be a manual mode, so no speed setting as part of preset
+        PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "AG"},
+        PRESET_MODE_GAS: {PHILIPS_POWER: "1", PHILIPS_MODE: "F"},
+        PRESET_MODE_POLLUTION: {PHILIPS_POWER: "1", PHILIPS_MODE: "p"},
+        PRESET_MODE_ALLERGEN: {PHILIPS_POWER: "1", PHILIPS_MODE: "A"},
+    }
+    AVAILABLE_SPEEDS = {
+        PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_SPEED: "s"},
+        SPEED_1: {PHILIPS_POWER: "1", PHILIPS_SPEED: "1"},
+        SPEED_2: {PHILIPS_POWER: "1", PHILIPS_SPEED: "2"},
+        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_SPEED: "t"},
+    }
+
 
 class PhilipsAC5659(PhilipsGenericCoAPFan):
     AVAILABLE_PRESET_MODES = {
@@ -713,10 +728,12 @@ model_to_class = {
     MODEL_AC3033: PhilipsAC3033,
     MODEL_AC3036: PhilipsAC3036,
     MODEL_AC3039: PhilipsAC3039,
+    MODEL_AC3055: PhilipsAC3055,
     MODEL_AC3059: PhilipsAC3059,
     MODEL_AC3259: PhilipsAC3259,
     MODEL_AC3829: PhilipsAC3829,
     MODEL_AC3858: PhilipsAC3858,
     MODEL_AC4236: PhilipsAC4236,
+    MODEL_AC4558: PhilipsAC4558,
     MODEL_AC5659: PhilipsAC5659,
 }

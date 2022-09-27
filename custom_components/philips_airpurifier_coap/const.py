@@ -80,6 +80,7 @@ MODEL_AC3259 = "AC3259"
 MODEL_AC3829 = "AC3829"
 MODEL_AC3858 = "AC3858"
 MODEL_AC4236 = "AC4236"
+MODEL_AC4558 = "AC4558"
 MODEL_AC5659 = "AC5659"
 
 SPEED_1 = "speed 1"
@@ -92,18 +93,24 @@ PRESET_MODE_GENTLE = "gentle"
 PRESET_MODE_NIGHT = "night"
 PRESET_MODE_SLEEP = "sleep"
 PRESET_MODE_TURBO = "turbo"
+PRESET_MODE_GAS = "gas"
+PRESET_MODE_POLLUTION = "pollution"
 SWITCH_ON = "on"
 SWITCH_OFF = "off"
 OPTIONS = "options"
 DIMMABLE = "dimmable"
 
 PRESET_MODE_ICON_MAP = {
-    PRESET_MODE_ALLERGEN: "pap:allergen_mode",
-    PRESET_MODE_AUTO: "pap:auto_mode",
-    PRESET_MODE_BACTERIA: "pap:bacteria_virus_mode",
-    PRESET_MODE_GENTLE: "pap:sleep_mode",
-    PRESET_MODE_NIGHT: "pap:sleep_mode",
-    PRESET_MODE_SLEEP: "pap:sleep_mode",
+    PRESET_MODE_ALLERGEN: ICON.ALLERGEN_MODE,
+    PRESET_MODE_AUTO: ICON.AUTO_MODE,
+    PRESET_MODE_BACTERIA: ICON.BACTERIA_VIRUS_MODE,
+    # we use the sleep mode icon for all related modes
+    PRESET_MODE_GENTLE: ICON.SLEEP_MODE,
+    PRESET_MODE_NIGHT: ICON.SLEEP_MODE,
+    PRESET_MODE_SLEEP: ICON.SLEEP_MODE,
+    # some devices have a gas and a pollution mode, but there doesn't seem to be a Philips icon for that
+    PRESET_MODE_POLLUTION: ICON.AUTO_MODE,
+    PRESET_MODE_GAS: ICON.AUTO_MODE,
 }
 
 FUNCTION_PURIFICATION = "purification"

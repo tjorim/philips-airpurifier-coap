@@ -53,7 +53,7 @@ Note: `configuration.yaml` is no longer supported and your configuration is not 
 
 ## Supported models
 
-- AC1214
+- AC1214 (*)
 - AC2729
 - AC2889
 - AC2936
@@ -68,7 +68,10 @@ Note: `configuration.yaml` is no longer supported and your configuration is not 
 - AC3829
 - AC3858
 - AC4236
+- AC4558
 - AC5659
+
+(*) there are a number of open bug reports for this model. Some stuff might work, while some might not.
 
 
 ## Is your model not supported yet?
@@ -81,19 +84,32 @@ To aquire those information please follow these steps:
 
 ### Prepare the environment
 
+Create yourself a virtual environment
+
 ```sh
-git clone https://github.com/kongo09/philips-airpurifier.git
-cd philips-airpurifier
-source aioairctrl-shell.sh
+python -m venv env
+source ./env/bin/activate
+```
+
+Install `aioairctrl` package inside the virtual environment
+
+```sh
+python -m pip install aioairctrl
 ```
 
 ### Aquire raw status-data
 
 - Use the philips-app to activate a mode or speed
-- run the following command to aquire the raw data (still in the venv)
+- run the following command to aquire the raw data (still in the virtual environment)
 
 ```sh
 aioairctrl --host $DEVICE_IP status --json
+```
+
+to exit the virtual environment, simply type
+
+```sh
+deactivate
 ```
 
 ## Debugging
