@@ -14,7 +14,6 @@ from homeassistant.config_entries import ConfigEntry
 from .philips import model_to_class
 from .const import (
     CONF_MODEL,
-    DATA_KEY_CLIENT,
     DATA_KEY_COORDINATOR,
     DATA_KEY_FAN,
     DOMAIN,
