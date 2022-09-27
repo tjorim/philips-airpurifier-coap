@@ -8,6 +8,7 @@ import voluptuous as vol
 
 from homeassistant.const import CONF_HOST, CONF_NAME
 from homeassistant.helpers.typing import HomeAssistantType
+from homeassistant.helpers.entity import Entity
 from homeassistant.config_entries import ConfigEntry
 
 
