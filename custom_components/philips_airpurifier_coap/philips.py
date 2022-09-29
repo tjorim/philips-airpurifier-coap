@@ -683,10 +683,10 @@ class PhilipsAC4236(PhilipsGenericCoAPFan):
 class PhilipsAC4558(PhilipsGenericCoAPFan):
     AVAILABLE_PRESET_MODES = {
         # there doesn't seem to be a manual mode, so no speed setting as part of preset
-        PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "AG"},
-        PRESET_MODE_GAS: {PHILIPS_POWER: "1", PHILIPS_MODE: "F"},
-        PRESET_MODE_POLLUTION: {PHILIPS_POWER: "1", PHILIPS_MODE: "p"},
-        PRESET_MODE_ALLERGEN: {PHILIPS_POWER: "1", PHILIPS_MODE: "A"},
+        PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "AG", PHILIPS_SPEED: "a"},
+        PRESET_MODE_GAS: {PHILIPS_POWER: "1", PHILIPS_MODE: "F", PHILIPS_SPEED: "a"},
+        PRESET_MODE_POLLUTION: {PHILIPS_POWER: "1", PHILIPS_MODE: "p", PHILIPS_SPEED: "a"},
+        PRESET_MODE_ALLERGEN: {PHILIPS_POWER: "1", PHILIPS_MODE: "A", PHILIPS_SPEED: "a"},
     }
     AVAILABLE_SPEEDS = {
         PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_SPEED: "s"},
