@@ -422,6 +422,22 @@ class PhilipsHumidifierMixin(PhilipsGenericCoAPFanBase):
     AVAILABLE_SELECTS = [PHILIPS_FUNCTION, PHILIPS_HUMIDITY_TARGET]
 
 
+# the AC1715 seems to be a new class of devices that follows some patterns of its own
+class PhilipsAC1715(PhilipsGenericCoAPFan):
+    async def async_turn_on(
+        self,
+        speed: Optional[str] = None,
+        percentage: Optional[int] = None,
+        preset_mode: Optional[str] = None,
+        **kwargs,
+    ):
+        await self.coordinator.client.set_control_value(PHILIPS_NEW_POWER, "ON")
+
+    async def async_turn_off(self, **kwargs) -> None:
+        await self.coordinator.client.set_control_value(PHILIPS_NEW_POWER, "OFF")
+
+
+
 # TODO consolidate these classes as soon as we see a proper pattern
 class PhilipsAC1214(PhilipsGenericCoAPFan):
     AVAILABLE_PRESET_MODES = {
@@ -666,6 +682,7 @@ class PhilipsAC5659(PhilipsGenericCoAPFan):
 
 model_to_class = {
     MODEL_AC1214: PhilipsAC1214,
+    MODEL_AC1715: PhilipsAC1715,
     MODEL_AC2729: PhilipsAC2729,
     MODEL_AC2889: PhilipsAC2889,
     MODEL_AC2936: PhilipsAC2936,
