@@ -4,15 +4,6 @@ This is a `Local Push` integration for Philips airpurifiers.
 Currently only encrypted-CoAP is implemented.
 
 
-## BREAKING CHANGE:
-
-I've switched to the branch of Denaun. This brings a number of breaking changes:
- - The long list of attributes is now split out to a number of sensors. If you rely on them, you need to change your frontend, scripts and automations.
- - The speed setting is now seperated from the preset modes, more inline with how fans are treated inside HA.
- 
- There might be some more changes and I'll update the documentation as I come across this. The documentation below is somewhat out-of-date. I'll fix this over time.
- 
- 
 ## Word of Caution
 
 Due to a bug in the Philips devices, this integration is rather instable. It might or might not work. Even if it seems ok at first, it might stop working after a while. Sometimes, a power cycle of the Philips device helps. Sometimes, only a power cycle and a Home Assistant restart together help. It is frustrating. Do not report this as an issue here. Nobody can help right now. @mhetzi contributed timer code to attempt reconnects if the device is not responsive. Sometimes, that helps. But not always. You've been warned.
