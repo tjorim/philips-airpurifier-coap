@@ -447,19 +447,17 @@ class PhilipsAC1214(PhilipsGenericCoAPFan):
     }
     AVAILABLE_SWITCHES = [PHILIPS_CHILD_LOCK]
 
-    async def async_turn_on(
-        self,
-        percentage: Optional[int] = None,
-        preset_mode: Optional[str] = None,
-        **kwargs,
-    ):
-        # the AC1214 doesn't like it if we set a preset mode to switch on the device,
-        # so it needs to be done in sequence
-        if not self.is_on:
-            _LOGGER.debug(f"AC1214 is switched on without setting a mode")
-            await self.coordinator.client.set_control_value(PHILIPS_POWER, PHILIPS_POWER_MAP[SWITCH_ON])
-            await asyncio.sleep(1)
+    async def async_set_a(self) -> None:
+        _LOGGER.debug(f"AC1214 switches to mode 'A' first")
+        a_status_pattern = self._available_preset_modes.get(PRESET_MODE_ALLERGEN)
+        await self.coordinator.client.set_control_values(data=a_status_pattern)
+        await asyncio.sleep(1)
+        return
 
+
+    async def async_set_preset_mode(self, preset_mode: str) -> None:
+        """Set the preset mode of the fan."""
+        _LOGGER.debug(f"AC1214 async_set_preset_mode is called with: {preset_mode}")
         # the AC1214 also doesn't seem to like switching to mode 'M' without cycling through mode 'A'
         current_pattern = self._available_preset_modes.get(self.preset_mode)
         _LOGGER.debug(f"AC1214 is currently on mode: {current_pattern}")
@@ -467,25 +465,56 @@ class PhilipsAC1214(PhilipsGenericCoAPFan):
             _LOGGER.debug(f"AC1214 preset mode requested: {preset_mode}")
             status_pattern = self._available_preset_modes.get(preset_mode)
             _LOGGER.debug(f"this corresponds to status pattern: {status_pattern}")
-            if status_pattern.get(PHILIPS_MODE) != 'A' and current_pattern.get(PHILIPS_MODE) != 'M':
-                _LOGGER.debug(f"AC1214 switches to mode 'A' first")
-                await self.async_set_preset_mode(PRESET_MODE_ALLERGEN)
-                await asyncio.sleep(1)
+            if status_pattern and status_pattern.get(PHILIPS_MODE) != 'A' and current_pattern.get(PHILIPS_MODE) != 'M':
+                await self.async_set_a()
             _LOGGER.debug(f"AC1214 sets preset mode to: {preset_mode}")
+            if status_pattern:
+                await self.coordinator.client.set_control_values(data=status_pattern)  
+        return
+
+
+    async def async_set_percentage(self, percentage: int) -> None:
+        """Set the preset mode of the fan."""
+        _LOGGER.debug(f"AC1214 async_set_percentage is called with: {percentage}")
+        current_pattern = self._available_preset_modes.get(self.preset_mode)
+        _LOGGER.debug(f"AC1214 is currently on mode: {current_pattern}")
+        if percentage == 0:
+            _LOGGER.debug(f"AC1214 uses 0% to switch off")
+            await self.async_turn_off()
+        else:
+            # the AC1214 also doesn't seem to like switching to mode 'M' without cycling through mode 'A'
+            _LOGGER.debug(f"AC1214 speed change requested: {percentage}")
+            speed = percentage_to_ordered_list_item(self._speeds, percentage)
+            status_pattern = self._available_speeds.get(speed)
+            _LOGGER.debug(f"this corresponds to status pattern: {status_pattern}")
+            if status_pattern and status_pattern.get(PHILIPS_MODE) != 'A' and current_pattern.get(PHILIPS_MODE) != 'M':
+                await self.async_set_a()
+            _LOGGER.debug(f"AC1214 sets speed percentage to: {percentage}")
+            if status_pattern:
+                await self.coordinator.client.set_control_values(data=status_pattern)
+        return
+
+
+    async def async_turn_on(
+        self,
+        percentage: Optional[int] = None,
+        preset_mode: Optional[str] = None,
+        **kwargs,
+    ):
+        _LOGGER.debug(f"AC1214 async_turn_on called with percentage={percentage} and preset_mode={preset_mode}")
+        # the AC1214 doesn't like it if we set a preset mode to switch on the device,
+        # so it needs to be done in sequence
+        if not self.is_on:
+            _LOGGER.debug(f"AC1214 is switched on without setting a mode")
+            await self.coordinator.client.set_control_value(PHILIPS_POWER, PHILIPS_POWER_MAP[SWITCH_ON])
+            await asyncio.sleep(1)
+
+        if preset_mode:
+            _LOGGER.debug(f"AC1214 preset mode requested: {preset_mode}")
             await self.async_set_preset_mode(preset_mode)
             return
-
         if percentage:
-            if percentage > 0:
-                _LOGGER.debug(f"AC1214 speed change requested: {percentage}")
-                speed = percentage_to_ordered_list_item(self._speeds, percentage)
-                status_pattern = self._available_speeds.get(speed)
-                _LOGGER.debug(f"this corresponds to status pattern: {status_pattern}")
-                if status_pattern.get(PHILIPS_MODE) != 'A' and current_pattern.get(PHILIPS_MODE) != 'M':
-                    _LOGGER.debug(f"AC1214 switches to mode 'A' first")
-                    await self.async_set_preset_mode(PRESET_MODE_ALLERGEN)
-                    await asyncio.sleep(1)
-            _LOGGER.debug(f"AC1214 sets speed percentage to: {percentage}")
+            _LOGGER.debug(f"AC1214 speed change requested: {percentage}")
             await self.async_set_percentage(percentage)
             return
 
