@@ -158,9 +158,11 @@ class PhilipsEntity(Entity):
         _LOGGER.debug("PhilipsEntity __init__ called")
         _LOGGER.debug(f"coordinator.status is: {coordinator.status}")
         self.coordinator = coordinator
-        self._serialNumber = coordinator.status["DeviceId"]
-        self._name = coordinator.status["name"]
-        self._modelName = coordinator.status["modelid"]
+        self._serialNumber = coordinator.status[PHILIPS_DEVICE_ID]
+        # self._name = coordinator.status["name"]
+        self._name = list(filter(None, map(coordinator.status.get, [PHILIPS_NAME, PHILIPS_NEW_NAME])))[0]
+        # self._modelName = coordinator.status["modelid"]
+        self._modelName = list(filter(None, map(coordinator.status.get, [PHILIPS_MODEL_ID, PHILIPS_NEW_MODEL_ID])))[0]
         self._firmware = coordinator.status["WifiVersion"]
         self._manufacturer = "Philips"
 
@@ -420,6 +422,23 @@ class PhilipsGenericCoAPFan(PhilipsGenericCoAPFanBase):
 
 class PhilipsHumidifierMixin(PhilipsGenericCoAPFanBase):
     AVAILABLE_SELECTS = [PHILIPS_FUNCTION, PHILIPS_HUMIDITY_TARGET]
+
+
+# the AC1715 seems to be a new class of devices that follows some patterns of its own
+class PhilipsAC1715(PhilipsGenericCoAPFan):
+    # TODO: override AVAILABLE_ATTRIBUTES
+    
+    async def async_turn_on(
+        self,
+        speed: Optional[str] = None,
+        percentage: Optional[int] = None,
+        preset_mode: Optional[str] = None,
+        **kwargs,
+    ):
+        await self.coordinator.client.set_control_value(PHILIPS_NEW_POWER, "ON")
+
+    async def async_turn_off(self, **kwargs) -> None:
+        await self.coordinator.client.set_control_value(PHILIPS_NEW_POWER, "OFF")
 
 
 
@@ -712,8 +731,9 @@ class PhilipsAC4236(PhilipsGenericCoAPFan):
 class PhilipsAC4558(PhilipsGenericCoAPFan):
     AVAILABLE_PRESET_MODES = {
         # there doesn't seem to be a manual mode, so no speed setting as part of preset
-        PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "AG", PHILIPS_SPEED: "a"},
-        PRESET_MODE_GAS: {PHILIPS_POWER: "1", PHILIPS_MODE: "F", PHILIPS_SPEED: "a"},
+        PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "AG"},
+        PRESET_MODE_GAS: {PHILIPS_POWER: "1", PHILIPS_MODE: "F"},
+        # it seems that when setting the pollution and allergen modes, we also need to set speed "a"
         PRESET_MODE_POLLUTION: {PHILIPS_POWER: "1", PHILIPS_MODE: "p", PHILIPS_SPEED: "a"},
         PRESET_MODE_ALLERGEN: {PHILIPS_POWER: "1", PHILIPS_MODE: "A", PHILIPS_SPEED: "a"},
     }
@@ -749,6 +769,7 @@ class PhilipsAC5659(PhilipsGenericCoAPFan):
 
 model_to_class = {
     MODEL_AC1214: PhilipsAC1214,
+    MODEL_AC1715: PhilipsAC1715,
     MODEL_AC2729: PhilipsAC2729,
     MODEL_AC2889: PhilipsAC2889,
     MODEL_AC2936: PhilipsAC2936,

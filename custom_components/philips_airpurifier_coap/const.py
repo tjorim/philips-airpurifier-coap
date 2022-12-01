@@ -66,6 +66,7 @@ CONF_MODEL = "model"
 CONF_DEVICE_ID = "device_id"
 
 MODEL_AC1214 = "AC1214"
+MODEL_AC1715 = "AC1715"
 MODEL_AC2729 = "AC2729"
 MODEL_AC2889 = "AC2889"
 MODEL_AC2936 = "AC2936"
@@ -208,6 +209,10 @@ PHILIPS_POWER_MAP = {
     SWITCH_ON: "1",
     SWITCH_OFF: "0",
 }
+# the AC1715 seems to follow a new scheme, this should later be refactored
+PHILIPS_NEW_NAME = "D01-03"
+PHILIPS_NEW_MODEL_ID = "D01-05"
+PHILIPS_NEW_POWER = "D03-02"
 
 PHILIPS_PREFERRED_INDEX_MAP = {
     "0": "Indoor Allergen Index",
