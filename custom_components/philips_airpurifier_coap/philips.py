@@ -160,9 +160,11 @@ class PhilipsEntity(Entity):
         _LOGGER.debug("PhilipsEntity __init__ called")
         _LOGGER.debug(f"coordinator.status is: {coordinator.status}")
         self.coordinator = coordinator
-        self._serialNumber = coordinator.status["DeviceId"]
-        self._name = coordinator.status["name"]
-        self._modelName = coordinator.status["modelid"]
+        self._serialNumber = coordinator.status[PHILIPS_DEVICE_ID]
+        # self._name = coordinator.status["name"]
+        self._name = list(filter(None, map(coordinator.status.get, [PHILIPS_NAME, PHILIPS_NEW_NAME])))[0]
+        # self._modelName = coordinator.status["modelid"]
+        self._modelName = list(filter(None, map(coordinator.status.get, [PHILIPS_MODEL_ID, PHILIPS_NEW_MODEL_ID])))[0]
         self._firmware = coordinator.status["WifiVersion"]
         self._manufacturer = "Philips"
 
@@ -424,6 +426,8 @@ class PhilipsHumidifierMixin(PhilipsGenericCoAPFanBase):
 
 # the AC1715 seems to be a new class of devices that follows some patterns of its own
 class PhilipsAC1715(PhilipsGenericCoAPFan):
+    # TODO: override AVAILABLE_ATTRIBUTES
+    
     async def async_turn_on(
         self,
         speed: Optional[str] = None,

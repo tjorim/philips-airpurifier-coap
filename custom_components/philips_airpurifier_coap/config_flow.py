@@ -11,7 +11,7 @@ from homeassistant.const import CONF_HOST, CONF_NAME
 
 from aioairctrl import CoAPClient
 
-from .const import CONF_MODEL, CONF_DEVICE_ID, DOMAIN
+from .const import CONF_MODEL, CONF_DEVICE_ID, DOMAIN, PHILIPS_DEVICE_ID, PHILIPS_MODEL_ID, PHILIPS_NAME, PHILIPS_NEW_MODEL_ID, PHILIPS_NEW_NAME
 from .philips import model_to_class
 
 from typing import Any
@@ -91,9 +91,9 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             raise exceptions.ConfigEntryNotReady from ex
 
         # autodetect model and name
-        self._model = status['type']
-        self._name = status['name']
-        self._device_id = status['DeviceId']
+        self._model = list(filter(None, map(status.get, [PHILIPS_MODEL_ID, PHILIPS_NEW_MODEL_ID])))[0][:6]
+        self._name = list(filter(None, map(status.get, [PHILIPS_NAME, PHILIPS_NEW_NAME])))[0]
+        self._device_id = status[PHILIPS_DEVICE_ID]
         _LOGGER.debug("Detected host %s as model %s with name: %s", self._host, self._model, self._name)
 
         # check if model is supported
@@ -195,12 +195,15 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     raise exceptions.ConfigEntryNotReady from ex
 
                 # autodetect model and name
-                self._model = status['type']
-                self._name = status['name']
-                device_id = status['DeviceId']
+                self._model = list(filter(None, map(status.get, [PHILIPS_MODEL_ID, PHILIPS_NEW_MODEL_ID])))[0][:6]
+                self._name = list(filter(None, map(status.get, [PHILIPS_NAME, PHILIPS_NEW_NAME])))[0]
+                self._device_id = status[PHILIPS_DEVICE_ID]
+                # self._model = status['type']
+                # self._name = status['name']
+                # device_id = status['DeviceId']
                 user_input[CONF_MODEL] = self._model
                 user_input[CONF_NAME] = self._name
-                user_input[CONF_DEVICE_ID] = device_id
+                user_input[CONF_DEVICE_ID] = self._device_id
                 _LOGGER.debug("Detected host %s as model %s with name: %s", self._host, self._model, self._name)
 
                 # check if model is supported
@@ -208,7 +211,7 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     return self.async_abort(reason="model_unsupported")
 
                 # use the device ID as unique_id
-                unique_id = device_id
+                unique_id = self._device_id
                 _LOGGER.debug(f"async_step_user: unique_id={unique_id}")
 
                 # set the unique id for the entry, abort if it already exists

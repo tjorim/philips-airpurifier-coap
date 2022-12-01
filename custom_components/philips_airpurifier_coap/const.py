@@ -206,6 +206,8 @@ PHILIPS_WATER_LEVEL = "wl"
 PHILIPS_WIFI_VERSION = "WifiVersion"
 
 # the AC1715 seems to follow a new scheme, this should later be refactored
+PHILIPS_NEW_NAME = "D01-03"
+PHILIPS_NEW_MODEL_ID = "D01-05"
 PHILIPS_NEW_POWER = "D03-02"
 
 PHILIPS_PREFERRED_INDEX_MAP = {
