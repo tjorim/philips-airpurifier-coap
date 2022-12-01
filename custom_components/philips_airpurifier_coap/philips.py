@@ -430,7 +430,23 @@ class PhilipsHumidifierMixin(PhilipsGenericCoAPFanBase):
 
 # the AC1715 seems to be a new class of devices that follows some patterns of its own
 class PhilipsAC1715(PhilipsGenericCoAPFan):
-    # TODO: override AVAILABLE_ATTRIBUTES
+    AVAILABLE_ATTRIBUTES = [
+        # device information
+        (ATTR_NAME, PHILIPS_NEW_NAME),
+        (ATTR_MODEL_ID, PHILIPS_NEW_MODEL_ID),
+        (ATTR_PRODUCT_ID, PHILIPS_PRODUCT_ID),
+        (ATTR_DEVICE_ID, PHILIPS_DEVICE_ID),
+        (ATTR_SOFTWARE_VERSION, PHILIPS_SOFTWARE_VERSION),
+        (ATTR_WIFI_VERSION, PHILIPS_WIFI_VERSION),
+        # (ATTR_ERROR_CODE, PHILIPS_ERROR_CODE),
+        # (ATTR_ERROR, PHILIPS_ERROR_CODE, PHILIPS_ERROR_CODE_MAP),
+        # device configuration
+        (ATTR_LANGUAGE, PHILIPS_NEW_LANGUAGE),
+        (ATTR_PREFERRED_INDEX, PHILIPS_NEW_PREFERRED_INDEX, PHILIPS_PREFERRED_INDEX_MAP),
+        # device sensors
+        (ATTR_RUNTIME, PHILIPS_RUNTIME, lambda x, _: str(timedelta(seconds=round(x / 1000)))),
+    ]
+
     AVAILABLE_LIGHTS = [PHILIPS_NEW_DISPLAY_BACKLIGHT, PHILIPS_NEW_LIGHT_BRIGHTNESS]
     
     KEY_PHILIPS_POWER = PHILIPS_NEW_POWER

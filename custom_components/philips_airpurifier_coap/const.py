@@ -208,14 +208,20 @@ PHILIPS_WIFI_VERSION = "WifiVersion"
 # the AC1715 seems to follow a new scheme, this should later be refactored
 PHILIPS_NEW_NAME = "D01-03"
 PHILIPS_NEW_MODEL_ID = "D01-05"
+PHILIPS_NEW_LANGUAGE = "D01-07"
 PHILIPS_NEW_POWER = "D03-02"
 PHILIPS_NEW_LIGHT_BRIGHTNESS = "D03-04"
 PHILIPS_NEW_DISPLAY_BACKLIGHT ="D03-05"
+PHILIPS_NEW_PREFERRED_INDEX = "D03-42"
 
 PHILIPS_PREFERRED_INDEX_MAP = {
     "0": "Indoor Allergen Index",
     "1": "PM2.5",
     "2": "Gas",
+}
+PHILIPS_NEW_PREFERRED_INDEX_MAP = {
+    "IAI": "Indoor Allergen Index",
+    "PM2.5": "PM2.5",
 }
 PHILIPS_DISPLAY_BACKLIGHT_MAP = {
     "0": False,
