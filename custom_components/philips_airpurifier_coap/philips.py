@@ -235,6 +235,10 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
     AVAILABLE_SWITCHES = []
     AVAILABLE_LIGHTS = []
 
+    KEY_PHILIPS_POWER = PHILIPS_POWER
+    STATE_POWER_ON = "1"
+    STATE_POWER_OFF = "0"
+
     def __init__(
         self,
         coordinator: Coordinator,
@@ -286,7 +290,7 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
 
     @property
     def is_on(self) -> bool:
-        return self._device_status.get(PHILIPS_POWER) == "1"
+        return self._device_status.get(self.KEY_PHILIPS_POWER) == self.STATE_POWER_ON
 
     async def async_turn_on(
         self,
@@ -301,10 +305,10 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
         if percentage:
             await self.async_set_percentage(percentage)
             return
-        await self.coordinator.client.set_control_value(PHILIPS_POWER, "1")
+        await self.coordinator.client.set_control_value(self.KEY_PHILIPS_POWER, self.STATE_POWER_ON)
 
     async def async_turn_off(self, **kwargs) -> None:
-        await self.coordinator.client.set_control_value(PHILIPS_POWER, "0")
+        await self.coordinator.client.set_control_value(self.KEY_PHILIPS_POWER, self.STATE_POWER_OFF)
 
     @property
     def supported_features(self) -> int:
@@ -427,18 +431,11 @@ class PhilipsHumidifierMixin(PhilipsGenericCoAPFanBase):
 # the AC1715 seems to be a new class of devices that follows some patterns of its own
 class PhilipsAC1715(PhilipsGenericCoAPFan):
     # TODO: override AVAILABLE_ATTRIBUTES
+    AVAILABLE_LIGHTS = [PHILIPS_NEW_DISPLAY_BACKLIGHT, PHILIPS_NEW_LIGHT_BRIGHTNESS]
     
-    async def async_turn_on(
-        self,
-        speed: Optional[str] = None,
-        percentage: Optional[int] = None,
-        preset_mode: Optional[str] = None,
-        **kwargs,
-    ):
-        await self.coordinator.client.set_control_value(PHILIPS_NEW_POWER, "ON")
-
-    async def async_turn_off(self, **kwargs) -> None:
-        await self.coordinator.client.set_control_value(PHILIPS_NEW_POWER, "OFF")
+    KEY_PHILIPS_POWER = PHILIPS_NEW_POWER
+    STATE_POWER_ON = "ON"
+    STATE_POWER_OFF = "OFF"
 
 
 
