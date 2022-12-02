@@ -423,13 +423,13 @@ class PhilipsGenericCoAPFan(PhilipsGenericCoAPFanBase):
     AVAILABLE_SWITCHES = []
     AVAILABLE_SELECTS = []
 
-
-class PhilipsHumidifierMixin(PhilipsGenericCoAPFanBase):
-    AVAILABLE_SELECTS = [PHILIPS_FUNCTION, PHILIPS_HUMIDITY_TARGET]
+    
 
 
-# the AC1715 seems to be a new class of devices that follows some patterns of its own
-class PhilipsAC1715(PhilipsGenericCoAPFan):
+class PhilipsNewGenericCoAPFan(PhilipsGenericCoAPFanBase):
+    AVAILABLE_PRESET_MODES = {}
+    AVAILABLE_SPEEDS = {}
+
     AVAILABLE_ATTRIBUTES = [
         # device information
         (ATTR_NAME, PHILIPS_NEW_NAME),
@@ -447,12 +447,25 @@ class PhilipsAC1715(PhilipsGenericCoAPFan):
         (ATTR_RUNTIME, PHILIPS_RUNTIME, lambda x, _: str(timedelta(seconds=round(x / 1000)))),
     ]
 
-    AVAILABLE_LIGHTS = [PHILIPS_NEW_DISPLAY_BACKLIGHT, PHILIPS_NEW_LIGHT_BRIGHTNESS]
-    
+    AVAILABLE_LIGHTS = [PHILIPS_NEW_DISPLAY_BACKLIGHT]
+
+    AVAILABLE_SWITCHES = []
+    AVAILABLE_SELECTS = []
+
     KEY_PHILIPS_POWER = PHILIPS_NEW_POWER
     STATE_POWER_ON = "ON"
     STATE_POWER_OFF = "OFF"
 
+
+
+class PhilipsHumidifierMixin(PhilipsGenericCoAPFanBase):
+    AVAILABLE_SELECTS = [PHILIPS_FUNCTION, PHILIPS_HUMIDITY_TARGET]
+
+
+
+# the AC1715 seems to be a new class of devices that follows some patterns of its own
+class PhilipsAC1715(PhilipsNewGenericCoAPFan):
+    
 
 
 # TODO consolidate these classes as soon as we see a proper pattern

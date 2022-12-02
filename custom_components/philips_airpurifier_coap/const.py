@@ -358,16 +358,7 @@ LIGHT_TYPES: dict[str, LightDescription] = {
         CONF_ENTITY_CATEGORY: EntityCategory.CONFIG,
         SWITCH_ON: 100,
         SWITCH_OFF: 0,
-        DIMMABLE: True,
     },
-    PHILIPS_NEW_LIGHT_BRIGHTNESS: {
-        ATTR_ICON: "mdi:circle-outline",
-        ATTR_LABEL: ATTR_LIGHT_BRIGHTNESS,
-        CONF_ENTITY_CATEGORY: EntityCategory.CONFIG,
-        SWITCH_ON: 100,
-        SWITCH_OFF: 0,
-        DIMMABLE: True,
-    }
 }
 
 SELECT_TYPES: dict[str, SelectDescription] = {
