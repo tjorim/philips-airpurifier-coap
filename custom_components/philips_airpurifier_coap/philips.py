@@ -425,7 +425,6 @@ class PhilipsGenericCoAPFan(PhilipsGenericCoAPFanBase):
     AVAILABLE_SWITCHES = []
     AVAILABLE_SELECTS = []
 
-    
 
 
 class PhilipsNewGenericCoAPFan(PhilipsGenericCoAPFanBase):
