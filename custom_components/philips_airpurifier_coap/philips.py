@@ -467,7 +467,7 @@ class PhilipsHumidifierMixin(PhilipsGenericCoAPFanBase):
 
 # the AC1715 seems to be a new class of devices that follows some patterns of its own
 class PhilipsAC1715(PhilipsNewGenericCoAPFan):
-    
+    pass
 
 
 # TODO consolidate these classes as soon as we see a proper pattern
