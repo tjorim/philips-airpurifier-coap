@@ -23,7 +23,6 @@ from .const import (
     ATTR_LABEL,
     OPTIONS,
     CONF_MODEL,
-    DATA_KEY_CLIENT,
     DATA_KEY_COORDINATOR,
     DOMAIN,
     PHILIPS_DEVICE_ID,
@@ -46,7 +45,6 @@ async def async_setup_entry(
 
     data = hass.data[DOMAIN][host]
 
-    client = data[DATA_KEY_CLIENT]
     coordinator = data[DATA_KEY_COORDINATOR]
 
     model_class = model_to_class.get(model)
