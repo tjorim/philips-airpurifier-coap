@@ -466,7 +466,19 @@ class PhilipsHumidifierMixin(PhilipsGenericCoAPFanBase):
 
 # the AC1715 seems to be a new class of devices that follows some patterns of its own
 class PhilipsAC1715(PhilipsNewGenericCoAPFan):
-    pass
+    AVAILABLE_PRESET_MODES = {
+        PRESET_MODE_AUTO: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Auto General"},
+        SPEED_1: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Gentle/Speed 1"},
+        SPEED_2: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Speed 2"},
+        PRESET_MODE_TURBO: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Turbo"},
+        PRESET_MODE_SLEEP: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Sleep"},
+    }
+    AVAILABLE_SPEEDS = {
+        PRESET_MODE_SLEEP: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Sleep"},
+        SPEED_1: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Gentle/Speed 1"},
+        SPEED_2: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Speed 2"},
+        PRESET_MODE_TURBO: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Turbo"},
+    }
 
 
 # TODO consolidate these classes as soon as we see a proper pattern
