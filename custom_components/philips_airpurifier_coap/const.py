@@ -378,37 +378,6 @@ FILTER_TYPES: dict[str, FilterDescription] = {
     },
 }
 
-# FILTER_TYPES: dict[str, FilterDescription] = {
-#     ATTR_FILTER_PRE: {
-#         ATTR_PREFIX: PHILIPS_FILTER_PREFIX,
-#         ATTR_POSTFIX: "0",
-#         ATTR_ICON: "mdi:dots-grid",
-#         ATTR_WARN_ICON: ICON.FILTER_REPLACEMENT,
-#         ATTR_WARN_VALUE: 72,
-#     },
-#     ATTR_FILTER_HEPA: {
-#         ATTR_PREFIX: PHILIPS_FILTER_PREFIX,
-#         ATTR_POSTFIX: "1",
-#         ATTR_ICON: "mdi:dots-grid",
-#         ATTR_WARN_ICON: ICON.FILTER_REPLACEMENT,
-#         ATTR_WARN_VALUE: 72,
-#     },
-#     ATTR_FILTER_ACTIVE_CARBON: {
-#         ATTR_PREFIX: PHILIPS_FILTER_PREFIX,
-#         ATTR_POSTFIX: "2",
-#         ATTR_ICON: "mdi:dots-grid",
-#         ATTR_WARN_ICON: ICON.FILTER_REPLACEMENT,
-#         ATTR_WARN_VALUE: 72,
-#     },
-#     ATTR_FILTER_WICK: {
-#         ATTR_PREFIX: PHILIPS_FILTER_WICK_PREFIX,
-#         ATTR_POSTFIX: "",
-#         ATTR_ICON: "mdi:dots-grid",
-#         ATTR_WARN_ICON: ICON.PREFILTER_WICK_CLEANING,
-#         ATTR_WARN_VALUE: 72,
-#     },
-# }
-
 SWITCH_TYPES: dict[str, SwitchDescription] = {
     PHILIPS_CHILD_LOCK: {
         ATTR_ICON: ICON.CHILD_LOCK_BUTTON,
