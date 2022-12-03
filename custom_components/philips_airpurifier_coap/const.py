@@ -106,6 +106,7 @@ DIMMABLE = "dimmable"
 PRESET_MODE_ICON_MAP = {
     PRESET_MODE_ALLERGEN: ICON.ALLERGEN_MODE,
     PRESET_MODE_AUTO: ICON.AUTO_MODE,
+    PRESET_MODE_AUTO_GENERAL: ICON.AUTO_MODE,
     PRESET_MODE_BACTERIA: ICON.BACTERIA_VIRUS_MODE,
     # we use the sleep mode icon for all related modes
     PRESET_MODE_GENTLE: ICON.SLEEP_MODE,
@@ -138,12 +139,12 @@ ATTR_RAW = "raw"
 ATTR_TOTAL = "total"
 ATTR_TIME_REMAINING = "time_remaining"
 ATTR_TYPE = "type"
-ATTR_FILTER_PRE = "filter_pre"
-ATTR_FILTER_HEPA = "filter_hepa"
-ATTR_FILTER_ACTIVE_CARBON = "filter_active_carbon"
+ATTR_FILTER_PRE = "pre_filter"
+ATTR_FILTER_HEPA = "hepa_filter"
+ATTR_FILTER_ACTIVE_CARBON = "active_carbon_filter"
 ATTR_FILTER_WICK = "wick"
-ATTR_FILTER_NANOPROTECT = "nanoprotect"
-ATTR_FILTER_NANOPROTECT_CLEAN = "prefilter"
+ATTR_FILTER_NANOPROTECT = "nanoprotect_filter"
+ATTR_FILTER_NANOPROTECT_CLEAN = "pre_filter"
 ATTR_FUNCTION = "function"
 ATTR_HUMIDITY = "humidity"
 ATTR_HUMIDITY_TARGET = "humidity_target"
