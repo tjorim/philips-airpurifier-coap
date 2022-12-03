@@ -31,7 +31,6 @@ from .const import (
     SWITCH_ON,
     SWITCH_OFF,
     CONF_MODEL,
-    DATA_KEY_CLIENT,
     DATA_KEY_COORDINATOR,
     DOMAIN,
     PHILIPS_DEVICE_ID,
@@ -124,7 +123,7 @@ class PhilipsLight(PhilipsEntity, LightEntity):
     @property
     def is_on(self) -> bool:
         status = self._device_status.get(self.kind)
-        _LOGGER.debug("is_on, kind: %s - status: %s - on: %s", self.kind, status, self._on)
+        # _LOGGER.debug("is_on, kind: %s - status: %s - on: %s", self.kind, status, self._on)
         if self._dimmable:
             return status > 0
         else:
@@ -156,5 +155,3 @@ class PhilipsLight(PhilipsEntity, LightEntity):
     async def async_turn_off(self, **kwargs) -> None:
         _LOGGER.debug("async_turn_off, kind: %s - value: %s", self.kind, self._off)
         await self.coordinator.client.set_control_value(self.kind, self._off)
-
-
