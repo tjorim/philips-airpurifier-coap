@@ -374,6 +374,7 @@ FILTER_TYPES: dict[str, FilterDescription] = {
         ATTR_WARN_VALUE: 72,
         ATTR_LABEL: ATTR_FILTER_NANOPROTECT_CLEAN,
         ATTR_TOTAL: PHILIPS_FILTER_NANOPROTECT_CLEAN_TOTAL,
+        ATTR_TYPE: "",
     },
 }
 
