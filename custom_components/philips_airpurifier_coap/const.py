@@ -42,12 +42,17 @@ class ICON:
     TWO_IN_ONE_MODE_BUTTON = "pap:two_in_one_mode_button"
     SLEEP_MODE = "pap:sleep_mode"
     AUTO_MODE = "pap:auto_mode"
+    SPEED_1 = "pap:speed_1"
+    SPEED_2 = "pap:speed_2"
+    SPEED_3 = "pap:speed_3"
     ALLERGEN_MODE = "pap:allergen_mode"
     PURIFICATION_ONLY_MODE = "pap:purification_only_mode"
     TWO_IN_ONE_MODE = "pap:two_in_one_mode"
     BACTERIA_VIRUS_MODE = "pap:bacteria_virus_mode"
+    NANOPROTECT_FILTER = "pap:nanoprotect_filter"
     FILTER_REPLACEMENT = "pap:filter_replacement"
     WATER_REFILL = "pap:water_refill"
+    PREFILTER_CLEANING = "pap:prefilter_cleaning"
     PREFILTER_WICK_CLEANING = "pap:prefilter_wick_cleaning"
     PM25 = "pap:pm25"
     IAI = "pap:iai"
@@ -365,16 +370,16 @@ FILTER_TYPES: dict[str, FilterDescription] = {
         ATTR_TYPE: PHILIPS_FILTER_WICK_TYPE,
     },
     PHILIPS_FILTER_NANOPROTECT: {
-        ATTR_ICON: "mdi:cylinder",
-        ATTR_WARN_ICON: "mdi:cylinder-off",
+        ATTR_ICON: ICON.NANOPROTECT_FILTER,
+        ATTR_WARN_ICON: ICON.FILTER_REPLACEMENT,
         ATTR_WARN_VALUE: 10,
         ATTR_LABEL: ATTR_FILTER_NANOPROTECT,
         ATTR_TOTAL: PHILIPS_FILTER_NANOPROTECT_TOTAL,
         ATTR_TYPE: PHILIPS_FILTER_NANOPROTECT_TYPE,
     },
     PHILIPS_FILTER_NANOPROTECT_PREFILTER: {
-        ATTR_ICON: "mdi:cylinder",
-        ATTR_WARN_ICON: "mdi:brush-variant",
+        ATTR_ICON: ICON.NANOPROTECT_FILTER,
+        ATTR_WARN_ICON: ICON.PREFILTER_CLEANING,
         ATTR_WARN_VALUE: 10,
         ATTR_LABEL: ATTR_FILTER_NANOPROTECT_CLEAN,
         ATTR_TOTAL: PHILIPS_FILTER_NANOPROTECT_CLEAN_TOTAL,
