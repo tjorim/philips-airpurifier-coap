@@ -142,7 +142,7 @@ class PhilipsFilterSensor(PhilipsEntity, SensorEntity):
 
         try:
             device_id = self._device_status[PHILIPS_DEVICE_ID]
-            self._attr_unique_id = f"{self._model}-{device_id}-{kind}"
+            self._attr_unique_id = f"{self._model}-{device_id}-{self._description[ATTR_LABEL]}"
         except Exception as e:
             _LOGGER.error("Failed retrieving unique_id: %s", e)
             raise PlatformNotReady
