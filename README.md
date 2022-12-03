@@ -45,6 +45,7 @@ Note: `configuration.yaml` is no longer supported and your configuration is not 
 ## Supported models
 
 - AC1214 (*)
+- AC1715
 - AC2729
 - AC2889
 - AC2936
@@ -165,12 +166,17 @@ The integration also provides the original Philips icons for your use in the fro
 ![Preview](./custom_components/philips_airpurifier_coap/icons/pap/timer_reset_button.svg) timer_reset_button<br />
 ![Preview](./custom_components/philips_airpurifier_coap/icons/pap/sleep_mode.svg) sleep_mode<br />
 ![Preview](./custom_components/philips_airpurifier_coap/icons/pap/auto_mode.svg) auto_mode<br />
+![Preview](./custom_components/philips_airpurifier_coap/icons/pap/speed_1.svg) speed_1<br />
+![Preview](./custom_components/philips_airpurifier_coap/icons/pap/speed_2.svg) speed_2<br />
+![Preview](./custom_components/philips_airpurifier_coap/icons/pap/speed_3.svg) speed_3<br />
 ![Preview](./custom_components/philips_airpurifier_coap/icons/pap/allergen_mode.svg) allergen_mode<br />
 ![Preview](./custom_components/philips_airpurifier_coap/icons/pap/purification_only_mode.svg) purification_only_mode<br />
 ![Preview](./custom_components/philips_airpurifier_coap/icons/pap/two_in_one_mode.svg) two_in_one_mode<br />
 ![Preview](./custom_components/philips_airpurifier_coap/icons/pap/bacteria_virus_mode.svg) bacteria_virus_mode<br />
+![Preview](./custom_components/philips_airpurifier_coap/icons/pap/nanoprotect_filter.svg) nanoprotect_filter<br />
 ![Preview](./custom_components/philips_airpurifier_coap/icons/pap/filter_replacement.svg) filter_replacement<br />
 ![Preview](./custom_components/philips_airpurifier_coap/icons/pap/water_refill.svg) water_refill<br />
+![Preview](./custom_components/philips_airpurifier_coap/icons/pap/prefilter_cleaning.svg) prefilter_clearning<br />
 ![Preview](./custom_components/philips_airpurifier_coap/icons/pap/prefilter_wick_cleaning.svg) prefilter_wick_cleaning<br />
 ![Preview](./custom_components/philips_airpurifier_coap/icons/pap/pm25.svg) pm25<br />
 ![Preview](./custom_components/philips_airpurifier_coap/icons/pap/iai.svg) iai<br />

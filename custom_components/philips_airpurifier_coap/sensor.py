@@ -71,7 +71,7 @@ async def async_setup_entry(
             sensors.append(PhilipsSensor(coordinator, name, model, sensor))
 
     for filter in FILTER_TYPES:
-        if PhilipsFilterSensor.is_supported(status, filter):
+        if filter in status:
             sensors.append(PhilipsFilterSensor(coordinator, name, model, filter))
 
     async_add_entities(sensors, update_before_add=False)
@@ -86,12 +86,12 @@ class PhilipsSensor(PhilipsEntity, SensorEntity):
         self._description = SENSOR_TYPES[kind]
         self._warn_icon = self._description.get(ATTR_WARN_ICON)
         self._warn_value = self._description.get(ATTR_WARN_VALUE)
-        self._attr_device_class = self._description.get(ATTR_DEVICE_CLASS)
         self._norm_icon = self._description.get(ATTR_ICON)
-        self._attr_name = f"{name} {self._description[ATTR_LABEL].replace('_', ' ').title()}"
         self._attr_state_class = self._description.get(ATTR_STATE_CLASS)
-        self._attr_native_unit_of_measurement = self._description.get(ATTR_UNIT)
+        self._attr_device_class = self._description.get(ATTR_DEVICE_CLASS)
         self._attr_entity_category = self._description.get(CONF_ENTITY_CATEGORY)
+        self._attr_name = f"{name} {self._description[ATTR_LABEL].replace('_', ' ').title()}"
+        self._attr_native_unit_of_measurement = self._description.get(ATTR_UNIT)
 
         try:
             device_id = self._device_status[PHILIPS_DEVICE_ID]
@@ -121,37 +121,28 @@ class PhilipsSensor(PhilipsEntity, SensorEntity):
 class PhilipsFilterSensor(PhilipsEntity, SensorEntity):
     """Define a Philips AirPurifier filter sensor."""
 
-    @classmethod
-    def is_supported(cls, device_status: DeviceStatus, kind: str) -> bool:
-        description = FILTER_TYPES[kind]
-        prefix = description[ATTR_PREFIX]
-        postfix = description[ATTR_POSTFIX]
-        return "".join([prefix, PHILIPS_FILTER_STATUS, postfix]) in device_status
-
     def __init__(self, coordinator: Coordinator, name: str, model: str, kind: str) -> None:
         super().__init__(coordinator)
         self._model = model
-        description = FILTER_TYPES[kind]
-        prefix = description[ATTR_PREFIX]
-        postfix = description[ATTR_POSTFIX]
-        self._value_key = "".join([prefix, PHILIPS_FILTER_STATUS, postfix])
-        self._total_key = "".join([prefix, PHILIPS_FILTER_TOTAL, postfix])
-        self._type_key = "".join([prefix, PHILIPS_FILTER_TYPE, postfix])
+        self._description = FILTER_TYPES[kind]
+        self._warn_icon = self._description[ATTR_WARN_ICON]
+        self._warn_value = self._description[ATTR_WARN_VALUE]
+        self._norm_icon = self._description[ATTR_ICON]
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
+        self._attr_name = f"{name} {self._description[ATTR_LABEL].replace('_', ' ').title()}"
 
-        self._norm_icon = description[ATTR_ICON]
-        self._warn_icon = description[ATTR_WARN_ICON]
-        self._warn_value = description[ATTR_WARN_VALUE]
+        self._value_key = kind
+        self._total_key = self._description[ATTR_TOTAL]
+        self._type_key = self._description[ATTR_TYPE]
 
         if self._has_total:
             self._attr_native_unit_of_measurement = PERCENTAGE
         else:
             self._attr_native_unit_of_measurement = TIME_HOURS
 
-        self._attr_name = f"{name} {kind.replace('_', ' ').title()}"
         try:
             device_id = self._device_status[PHILIPS_DEVICE_ID]
-            self._attr_unique_id = f"{self._model}-{device_id}-{kind}"
+            self._attr_unique_id = f"{self._model}-{device_id}-{self._description[ATTR_LABEL]}"
         except Exception as e:
             _LOGGER.error("Failed retrieving unique_id: %s", e)
             raise PlatformNotReady

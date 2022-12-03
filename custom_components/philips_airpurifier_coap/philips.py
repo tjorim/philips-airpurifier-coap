@@ -235,6 +235,10 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
     AVAILABLE_SWITCHES = []
     AVAILABLE_LIGHTS = []
 
+    KEY_PHILIPS_POWER = PHILIPS_POWER
+    STATE_POWER_ON = "1"
+    STATE_POWER_OFF = "0"
+
     def __init__(
         self,
         coordinator: Coordinator,
@@ -286,7 +290,9 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
 
     @property
     def is_on(self) -> bool:
-        return self._device_status.get(PHILIPS_POWER) == "1"
+        status = self._device_status.get(self.KEY_PHILIPS_POWER)
+        # _LOGGER.debug("is_on: status=%s - test=%s", status, self.STATE_POWER_ON)
+        return status == self.STATE_POWER_ON
 
     async def async_turn_on(
         self,
@@ -301,10 +307,10 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
         if percentage:
             await self.async_set_percentage(percentage)
             return
-        await self.coordinator.client.set_control_value(PHILIPS_POWER, "1")
+        await self.coordinator.client.set_control_value(self.KEY_PHILIPS_POWER, self.STATE_POWER_ON)
 
     async def async_turn_off(self, **kwargs) -> None:
-        await self.coordinator.client.set_control_value(PHILIPS_POWER, "0")
+        await self.coordinator.client.set_control_value(self.KEY_PHILIPS_POWER, self.STATE_POWER_OFF)
 
     @property
     def supported_features(self) -> int:
@@ -420,26 +426,59 @@ class PhilipsGenericCoAPFan(PhilipsGenericCoAPFanBase):
     AVAILABLE_SELECTS = []
 
 
+
+class PhilipsNewGenericCoAPFan(PhilipsGenericCoAPFanBase):
+    AVAILABLE_PRESET_MODES = {}
+    AVAILABLE_SPEEDS = {}
+
+    AVAILABLE_ATTRIBUTES = [
+        # device information
+        (ATTR_NAME, PHILIPS_NEW_NAME),
+        (ATTR_MODEL_ID, PHILIPS_NEW_MODEL_ID),
+        (ATTR_PRODUCT_ID, PHILIPS_PRODUCT_ID),
+        (ATTR_DEVICE_ID, PHILIPS_DEVICE_ID),
+        (ATTR_SOFTWARE_VERSION, PHILIPS_SOFTWARE_VERSION),
+        (ATTR_WIFI_VERSION, PHILIPS_WIFI_VERSION),
+        # (ATTR_ERROR_CODE, PHILIPS_ERROR_CODE),
+        # (ATTR_ERROR, PHILIPS_ERROR_CODE, PHILIPS_ERROR_CODE_MAP),
+        # device configuration
+        (ATTR_LANGUAGE, PHILIPS_NEW_LANGUAGE),
+        (ATTR_PREFERRED_INDEX, PHILIPS_NEW_PREFERRED_INDEX, PHILIPS_PREFERRED_INDEX_MAP),
+        # device sensors
+        (ATTR_RUNTIME, PHILIPS_RUNTIME, lambda x, _: str(timedelta(seconds=round(x / 1000)))),
+    ]
+
+    AVAILABLE_LIGHTS = [PHILIPS_NEW_DISPLAY_BACKLIGHT]
+
+    AVAILABLE_SWITCHES = []
+    AVAILABLE_SELECTS = []
+
+    KEY_PHILIPS_POWER = PHILIPS_NEW_POWER
+    STATE_POWER_ON = "ON"
+    STATE_POWER_OFF = "OFF"
+
+
+
 class PhilipsHumidifierMixin(PhilipsGenericCoAPFanBase):
     AVAILABLE_SELECTS = [PHILIPS_FUNCTION, PHILIPS_HUMIDITY_TARGET]
 
 
+
 # the AC1715 seems to be a new class of devices that follows some patterns of its own
-class PhilipsAC1715(PhilipsGenericCoAPFan):
-    # TODO: override AVAILABLE_ATTRIBUTES
-    
-    async def async_turn_on(
-        self,
-        speed: Optional[str] = None,
-        percentage: Optional[int] = None,
-        preset_mode: Optional[str] = None,
-        **kwargs,
-    ):
-        await self.coordinator.client.set_control_value(PHILIPS_NEW_POWER, "ON")
-
-    async def async_turn_off(self, **kwargs) -> None:
-        await self.coordinator.client.set_control_value(PHILIPS_NEW_POWER, "OFF")
-
+class PhilipsAC1715(PhilipsNewGenericCoAPFan):
+    AVAILABLE_PRESET_MODES = {
+        PRESET_MODE_AUTO: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Auto General"},
+        SPEED_1: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Gentle/Speed 1"},
+        SPEED_2: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Speed 2"},
+        PRESET_MODE_TURBO: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Turbo"},
+        PRESET_MODE_SLEEP: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Sleep"},
+    }
+    AVAILABLE_SPEEDS = {
+        PRESET_MODE_SLEEP: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Sleep"},
+        SPEED_1: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Gentle/Speed 1"},
+        SPEED_2: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Speed 2"},
+        PRESET_MODE_TURBO: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Turbo"},
+    }
 
 
 # TODO consolidate these classes as soon as we see a proper pattern
