@@ -363,7 +363,7 @@ FILTER_TYPES: dict[str, FilterDescription] = {
     PHILIPS_FILTER_NANOPROTECT: {
         ATTR_ICON: "mdi:cylinder",
         ATTR_WARN_ICON: "mdi:cylinder-off",
-        ATTR_WARN_VALUE: 72,
+        ATTR_WARN_VALUE: 10,
         ATTR_LABEL: ATTR_FILTER_NANOPROTECT,
         ATTR_TOTAL: PHILIPS_FILTER_NANOPROTECT_TOTAL,
         ATTR_TYPE: PHILIPS_FILTER_NANOPROTECT_TYPE,
@@ -371,7 +371,7 @@ FILTER_TYPES: dict[str, FilterDescription] = {
     PHILIPS_FILTER_NANOPROTECT_CLEAN: {
         ATTR_ICON: "mdi:cylinder",
         ATTR_WARN_ICON: "mdi:brush-variant",
-        ATTR_WARN_VALUE: 72,
+        ATTR_WARN_VALUE: 10,
         ATTR_LABEL: ATTR_FILTER_NANOPROTECT_CLEAN,
         ATTR_TOTAL: PHILIPS_FILTER_NANOPROTECT_CLEAN_TOTAL,
         ATTR_TYPE: "",
