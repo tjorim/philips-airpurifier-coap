@@ -291,7 +291,7 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
     @property
     def is_on(self) -> bool:
         status = self._device_status.get(self.KEY_PHILIPS_POWER)
-        _LOGGER.debug("is_on: status=%s - test=%s", status, self.STATE_POWER_ON)
+        # _LOGGER.debug("is_on: status=%s - test=%s", status, self.STATE_POWER_ON)
         return self._device_status.get(self.KEY_PHILIPS_POWER) == self.STATE_POWER_ON
 
     async def async_turn_on(
