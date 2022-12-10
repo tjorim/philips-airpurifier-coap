@@ -1,19 +1,12 @@
 [![HACS Default][hacs_shield]][hacs]
 [![GitHub Latest Release][releases_shield]][latest_release]
-[![GitHub All Releases][downloads_total_shield]][releases]
 [![Community Forum][community_forum_shield]][community_forum]
-[![Ko-Fi][ko_fi_shield]][ko_fi]
-[![PayPal.Me][paypal_me_shield]][paypal_me]
-
 
 [hacs_shield]: https://img.shields.io/static/v1.svg?label=HACS&message=Default&style=popout&color=green&labelColor=41bdf5&logo=HomeAssistantCommunityStore&logoColor=white
 [hacs]: https://hacs.xyz/docs/default_repositories
 
 [latest_release]: https://github.com/kongo09/philips-airpurifier-coap/releases/latest
 [releases_shield]: https://img.shields.io/github/release/kongo09/philips-airpurifier-coap.svg?style=popout
-
-[releases]: https://github.com/kongo09/philips-airpurifier-coap/releases
-[downloads_total_shield]: https://img.shields.io/github/downloads/kongo09/philips-airpurifier-coap/total
 
 [community_forum_shield]: https://img.shields.io/static/v1.svg?label=%20&message=Forum&style=popout&color=41bdf5&logo=HomeAssistant&logoColor=white
 [community_forum]: https://community.home-assistant.io/t/philips-air-purifier/53030
