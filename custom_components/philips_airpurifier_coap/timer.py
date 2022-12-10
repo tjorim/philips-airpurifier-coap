@@ -27,7 +27,7 @@ class Timer:
                 _LOGGER.debug(f"Starting Timer {self._timeout}s.")
                 await asyncio.sleep(self._timeout)
                 self._in_callback = True
-                _LOGGER.info("Calling timeout callback...")
+                _LOGGER.debug("Calling timeout callback...")
                 await self._callback()
                 _LOGGER.debug("Timeout callback finished!")
             except asyncio.exceptions.CancelledError as e:
