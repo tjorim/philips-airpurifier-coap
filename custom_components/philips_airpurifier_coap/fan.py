@@ -2,9 +2,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Callable, Optional, List
-
-import voluptuous as vol
+from typing import Callable, List
 
 from homeassistant.const import CONF_HOST, CONF_NAME
 from homeassistant.helpers.typing import HomeAssistantType
