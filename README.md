@@ -55,7 +55,7 @@ Note: `configuration.yaml` is no longer supported and your configuration is not 
 
 ## Supported models
 
-- AC1214 (*)
+- AC1214
 - AC1715
 - AC2729
 - AC2889
@@ -73,8 +73,6 @@ Note: `configuration.yaml` is no longer supported and your configuration is not 
 - AC4236
 - AC4558
 - AC5659
-
-(*) there are a number of open bug reports for this model. Some stuff might work, while some might not.
 
 
 ## Is your model not supported yet?
