@@ -238,6 +238,10 @@ PHILIPS_TYPE = "type"
 PHILIPS_WATER_LEVEL = "wl"
 PHILIPS_WIFI_VERSION = "WifiVersion"
 
+PHILIPS_POWER_MAP = {
+    SWITCH_ON: "1",
+    SWITCH_OFF: "0",
+}
 # the AC1715 seems to follow a new scheme, this should later be refactored
 PHILIPS_NEW_NAME = "D01-03"
 PHILIPS_NEW_MODEL_ID = "D01-05"
