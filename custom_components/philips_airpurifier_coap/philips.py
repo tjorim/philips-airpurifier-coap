@@ -788,7 +788,7 @@ class PhilipsAC4558(PhilipsGenericCoAPFan):
         PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "AG"},
         PRESET_MODE_GAS: {PHILIPS_POWER: "1", PHILIPS_MODE: "F"},
         # it seems that when setting the pollution and allergen modes, we also need to set speed "a"
-        PRESET_MODE_POLLUTION: {PHILIPS_POWER: "1", PHILIPS_MODE: "p", PHILIPS_SPEED: "a"},
+        PRESET_MODE_POLLUTION: {PHILIPS_POWER: "1", PHILIPS_MODE: "P", PHILIPS_SPEED: "a"},
         PRESET_MODE_ALLERGEN: {PHILIPS_POWER: "1", PHILIPS_MODE: "A", PHILIPS_SPEED: "a"},
     }
     AVAILABLE_SPEEDS = {
