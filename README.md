@@ -73,6 +73,7 @@ Note: `configuration.yaml` is no longer supported and your configuration is not 
 - AC4236
 - AC4558
 - AC5659
+- AMF765 (experimental)
 
 
 ## Is your model not supported yet?

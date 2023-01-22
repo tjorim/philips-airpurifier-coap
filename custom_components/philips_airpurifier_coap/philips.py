@@ -457,6 +457,37 @@ class PhilipsNewGenericCoAPFan(PhilipsGenericCoAPFanBase):
     STATE_POWER_OFF = "OFF"
 
 
+class PhilipsNew2GenericCoAPFan(PhilipsGenericCoAPFanBase):
+    AVAILABLE_PRESET_MODES = {}
+    AVAILABLE_SPEEDS = {}
+
+    AVAILABLE_ATTRIBUTES = [
+        # device information
+        (ATTR_NAME, PHILIPS_NEW2_NAME),
+        (ATTR_MODEL_ID, PHILIPS_NEW2_MODEL_ID),
+        (ATTR_PRODUCT_ID, PHILIPS_PRODUCT_ID),
+        (ATTR_DEVICE_ID, PHILIPS_DEVICE_ID),
+        (ATTR_SOFTWARE_VERSION, PHILIPS_NEW2_SOFTWARE_VERSION),
+        (ATTR_WIFI_VERSION, PHILIPS_WIFI_VERSION),
+        # (ATTR_ERROR_CODE, PHILIPS_ERROR_CODE),
+        # (ATTR_ERROR, PHILIPS_ERROR_CODE, PHILIPS_ERROR_CODE_MAP),
+        # device configuration
+        # (ATTR_LANGUAGE, PHILIPS_NEW_LANGUAGE),
+        # (ATTR_PREFERRED_INDEX, PHILIPS_NEW_PREFERRED_INDEX, PHILIPS_PREFERRED_INDEX_MAP),
+        # device sensors
+        (ATTR_RUNTIME, PHILIPS_RUNTIME, lambda x, _: str(timedelta(seconds=round(x / 1000)))),
+    ]
+
+    AVAILABLE_LIGHTS = [PHILIPS_NEW2_DISPLAY_BACKLIGHT]
+
+    AVAILABLE_SWITCHES = []
+    AVAILABLE_SELECTS = []
+
+    # KEY_PHILIPS_POWER = PHILIPS_NEW_POWER
+    # STATE_POWER_ON = "ON"
+    # STATE_POWER_OFF = "OFF"
+
+
 
 class PhilipsHumidifierMixin(PhilipsGenericCoAPFanBase):
     AVAILABLE_SELECTS = [PHILIPS_FUNCTION, PHILIPS_HUMIDITY_TARGET]
@@ -478,6 +509,11 @@ class PhilipsAC1715(PhilipsNewGenericCoAPFan):
         SPEED_2: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Speed 2"},
         PRESET_MODE_TURBO: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Turbo"},
     }
+
+
+# the AMF765 seems to be a new class of devices that follows some patterns of its own
+class PhilipsAMF765(PhilipsNew2GenericCoAPFan):
+    pass
 
 
 # TODO consolidate these classes as soon as we see a proper pattern
@@ -840,4 +876,5 @@ model_to_class = {
     MODEL_AC4236: PhilipsAC4236,
     MODEL_AC4558: PhilipsAC4558,
     MODEL_AC5659: PhilipsAC5659,
+    MODEL_AMF765: PhilipsAMF765,
 }
