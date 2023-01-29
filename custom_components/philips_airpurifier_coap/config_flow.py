@@ -11,7 +11,7 @@ from homeassistant.const import CONF_HOST, CONF_NAME
 
 from aioairctrl import CoAPClient
 
-from .const import CONF_MODEL, CONF_DEVICE_ID, DOMAIN, PHILIPS_DEVICE_ID, PHILIPS_MODEL_ID, PHILIPS_NAME, PHILIPS_NEW_MODEL_ID, PHILIPS_NEW_NAME
+from .const import CONF_MODEL, CONF_DEVICE_ID, DOMAIN, PHILIPS_DEVICE_ID, PHILIPS_MODEL_ID, PHILIPS_NAME, PHILIPS_NEW2_MODEL_ID, PHILIPS_NEW2_NAME, PHILIPS_NEW_MODEL_ID, PHILIPS_NEW_NAME
 from .philips import model_to_class
 
 from typing import Any
@@ -91,8 +91,8 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             raise exceptions.ConfigEntryNotReady from ex
 
         # autodetect model and name
-        self._model = list(filter(None, map(status.get, [PHILIPS_MODEL_ID, PHILIPS_NEW_MODEL_ID])))[0][:6]
-        self._name = list(filter(None, map(status.get, [PHILIPS_NAME, PHILIPS_NEW_NAME])))[0]
+        self._model = list(filter(None, map(status.get, [PHILIPS_MODEL_ID, PHILIPS_NEW_MODEL_ID, PHILIPS_NEW2_MODEL_ID])))[0][:6]
+        self._name = list(filter(None, map(status.get, [PHILIPS_NAME, PHILIPS_NEW_NAME, PHILIPS_NEW2_NAME])))[0]
         self._device_id = status[PHILIPS_DEVICE_ID]
         _LOGGER.debug("Detected host %s as model %s with name: %s", self._host, self._model, self._name)
 
@@ -195,8 +195,8 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     raise exceptions.ConfigEntryNotReady from ex
 
                 # autodetect model and name
-                self._model = list(filter(None, map(status.get, [PHILIPS_MODEL_ID, PHILIPS_NEW_MODEL_ID])))[0][:6]
-                self._name = list(filter(None, map(status.get, [PHILIPS_NAME, PHILIPS_NEW_NAME])))[0]
+                self._model = list(filter(None, map(status.get, [PHILIPS_MODEL_ID, PHILIPS_NEW_MODEL_ID, PHILIPS_NEW2_MODEL_ID])))[0][:6]
+                self._name = list(filter(None, map(status.get, [PHILIPS_NAME, PHILIPS_NEW_NAME, PHILIPS_NEW2_NAME])))[0]
                 self._device_id = status[PHILIPS_DEVICE_ID]
                 # self._model = status['type']
                 # self._name = status['name']
