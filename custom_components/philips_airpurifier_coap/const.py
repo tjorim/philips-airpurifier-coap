@@ -22,7 +22,13 @@ from homeassistant.const import (
 from homeassistant.helpers.entity import EntityCategory
 
 
-from .model import FilterDescription, SensorDescription, SwitchDescription, LightDescription, SelectDescription
+from .model import (
+    FilterDescription,
+    SensorDescription,
+    SwitchDescription,
+    LightDescription,
+    SelectDescription,
+)
 
 DOMAIN = "philips_airpurifier_coap"
 
@@ -31,6 +37,7 @@ DATA_KEY_COORDINATOR = "coordinator"
 DATA_KEY_FAN = "fan"
 
 DEFAULT_NAME = "Philips AirPurifier"
+
 
 class ICON:
     POWER_BUTTON = "pap:power_button"
@@ -58,14 +65,15 @@ class ICON:
     IAI = "pap:iai"
 
 
-DATA_EXTRA_MODULE_URL = 'frontend_extra_module_url'
-LOADER_URL = f'/{DOMAIN}/main.js'
-LOADER_PATH = f'custom_components/{DOMAIN}/main.js'
-ICONS_URL = f'/{DOMAIN}/icons'
-ICONLIST_URL = f'/{DOMAIN}/list'
-ICONS_PATH = f'custom_components/{DOMAIN}/icons'
+DATA_EXTRA_MODULE_URL = "frontend_extra_module_url"
+LOADER_URL = f"/{DOMAIN}/main.js"
+LOADER_PATH = f"custom_components/{DOMAIN}/main.js"
+ICONS_URL = f"/{DOMAIN}/icons"
+ICONLIST_URL = f"/{DOMAIN}/list"
+ICONS_PATH = f"custom_components/{DOMAIN}/icons"
 
 PAP = "pap"
+ICONS = "icons"
 
 CONF_MODEL = "model"
 CONF_DEVICE_ID = "device_id"
@@ -245,7 +253,7 @@ PHILIPS_NEW_NAME = "D01-03"
 PHILIPS_NEW_MODEL_ID = "D01-05"
 PHILIPS_NEW_LANGUAGE = "D01-07"
 PHILIPS_NEW_POWER = "D03-02"
-PHILIPS_NEW_DISPLAY_BACKLIGHT ="D03-05"
+PHILIPS_NEW_DISPLAY_BACKLIGHT = "D03-05"
 PHILIPS_NEW_MODE = "D03-12"
 PHILIPS_NEW_INDOOR_ALLERGEN_INDEX = "D03-32"
 PHILIPS_NEW_PM25 = "D03-33"
@@ -335,12 +343,14 @@ SENSOR_TYPES: dict[str, SensorDescription] = {
     PHILIPS_WATER_LEVEL: {
         ATTR_ICON: "mdi:water",
         ATTR_LABEL: ATTR_WATER_LEVEL,
-        ATTR_VALUE: lambda value, status: 0 if status.get("err") in [32768, 49408] else value,
+        ATTR_VALUE: lambda value, status: 0
+        if status.get("err") in [32768, 49408]
+        else value,
         ATTR_STATE_CLASS: STATE_CLASS_MEASUREMENT,
         ATTR_UNIT: PERCENTAGE,
         CONF_ENTITY_CATEGORY: EntityCategory.DIAGNOSTIC,
         ATTR_WARN_VALUE: 10,
-        ATTR_WARN_ICON: ICON.WATER_REFILL
+        ATTR_WARN_ICON: ICON.WATER_REFILL,
     },
 }
 
@@ -440,5 +450,5 @@ SELECT_TYPES: dict[str, SelectDescription] = {
         ATTR_LABEL: ATTR_HUMIDITY_TARGET,
         CONF_ENTITY_CATEGORY: EntityCategory.CONFIG,
         OPTIONS: PHILIPS_HUMIDITY_TARGET_MAP,
-    }
+    },
 }
