@@ -92,6 +92,7 @@ MODEL_AC3055 = "AC3055"
 MODEL_AC3059 = "AC3059"
 MODEL_AC3259 = "AC3259"
 MODEL_AC3829 = "AC3829"
+MODEL_AC3854 = "AC3854"
 MODEL_AC3858 = "AC3858"
 MODEL_AC4236 = "AC4236"
 MODEL_AC4558 = "AC4558"
@@ -108,6 +109,7 @@ PRESET_MODE_BACTERIA = "bacteria"
 PRESET_MODE_GENTLE = "gentle"
 PRESET_MODE_NIGHT = "night"
 PRESET_MODE_SLEEP = "sleep"
+PRESET_MODE_SLEEP_ALLERGY = "allergy sleep"
 PRESET_MODE_TURBO = "turbo"
 PRESET_MODE_GAS = "gas"
 PRESET_MODE_POLLUTION = "pollution"
@@ -129,6 +131,8 @@ PRESET_MODE_ICON_MAP = {
     PRESET_MODE_GENTLE: ICON.SLEEP_MODE,
     PRESET_MODE_NIGHT: ICON.SLEEP_MODE,
     PRESET_MODE_SLEEP: ICON.SLEEP_MODE,
+    # TODO: so far the AC3854 seems the only model with an allergy sleep mode - need to check for its icon
+    PRESET_MODE_SLEEP_ALLERGY: ICON.ALLERGEN_MODE,
     # some devices have a gas and a pollution mode, but there doesn't seem to be a Philips icon for that
     PRESET_MODE_POLLUTION: ICON.AUTO_MODE,
     PRESET_MODE_GAS: ICON.AUTO_MODE,
