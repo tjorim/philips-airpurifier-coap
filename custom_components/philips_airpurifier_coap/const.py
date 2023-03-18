@@ -131,8 +131,8 @@ PRESET_MODE_ICON_MAP = {
     PRESET_MODE_GENTLE: ICON.SLEEP_MODE,
     PRESET_MODE_NIGHT: ICON.SLEEP_MODE,
     PRESET_MODE_SLEEP: ICON.SLEEP_MODE,
-    # TODO: so far the AC3854 seems the only model with an allergy sleep mode - need to check for its icon
-    PRESET_MODE_SLEEP_ALLERGY: ICON.ALLERGEN_MODE,
+    # unfortunately, the allergy sleep mode has the same icon as the auto mode on the device
+    PRESET_MODE_SLEEP_ALLERGY: ICON.AUTO_MODE,
     # some devices have a gas and a pollution mode, but there doesn't seem to be a Philips icon for that
     PRESET_MODE_POLLUTION: ICON.AUTO_MODE,
     PRESET_MODE_GAS: ICON.AUTO_MODE,
