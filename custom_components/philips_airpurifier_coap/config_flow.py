@@ -91,15 +91,18 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             raise exceptions.ConfigEntryNotReady from ex
 
         # autodetect model and name
-        self._model = list(filter(None, map(status.get, [PHILIPS_MODEL_ID, PHILIPS_NEW_MODEL_ID, PHILIPS_NEW2_MODEL_ID])))[0][:6]
-        self._name = list(filter(None, map(status.get, [PHILIPS_NAME, PHILIPS_NEW_NAME, PHILIPS_NEW2_NAME])))[0]
+        self._model = list(filter(None, map(status.get, [PHILIPS_MODEL_ID, PHILIPS_NEW_MODEL_ID, PHILIPS_NEW2_MODEL_ID])))[0][:9]
+        self._name = list(filter(None, map(status.get, [PHILIPS_NAME, PHILIPS_NEW_NAME, PHILIPS_NEW2_MODEL_ID])))[0]
         self._device_id = status[PHILIPS_DEVICE_ID]
         _LOGGER.debug("Detected host %s as model %s with name: %s", self._host, self._model, self._name)
 
         # check if model is supported
         if not self._model in model_to_class.keys():
-            _LOGGER.warn(f"Model {self._model} found, but not supported. Aborting discovery.")
-            return self.async_abort(reason="model_unsupported")
+            _LOGGER.info(f"Model {self._model} found, but not supported. Trying model family.")
+            self._model = self._model[:6]
+            if not self._model in model_to_class.keys():
+                _LOGGER.warn(f"Model {self._model} found, but not supported. Aborting discovery.")
+                return self.async_abort(reason="model_unsupported")
 
         # use the device ID as unique_id
         unique_id = self._device_id
@@ -195,8 +198,8 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     raise exceptions.ConfigEntryNotReady from ex
 
                 # autodetect model and name
-                self._model = list(filter(None, map(status.get, [PHILIPS_MODEL_ID, PHILIPS_NEW_MODEL_ID, PHILIPS_NEW2_MODEL_ID])))[0][:6]
-                self._name = list(filter(None, map(status.get, [PHILIPS_NAME, PHILIPS_NEW_NAME, PHILIPS_NEW2_NAME])))[0]
+                self._model = list(filter(None, map(status.get, [PHILIPS_MODEL_ID, PHILIPS_NEW_MODEL_ID, PHILIPS_NEW2_MODEL_ID])))[0][:9]
+                self._name = list(filter(None, map(status.get, [PHILIPS_NAME, PHILIPS_NEW_NAME, PHILIPS_NEW2_MODEL_ID])))[0]
                 self._device_id = status[PHILIPS_DEVICE_ID]
                 # self._model = status['type']
                 # self._name = status['name']
@@ -208,7 +211,10 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
                 # check if model is supported
                 if not self._model in model_to_class.keys():
-                    return self.async_abort(reason="model_unsupported")
+                    _LOGGER.info(f"Model {self._model} not supported. Trying model family.")
+                    self._model = self._model[:6]
+                    if not self._model in model_to_class.keys():
+                        return self.async_abort(reason="model_unsupported")
 
                 # use the device ID as unique_id
                 unique_id = self._device_id

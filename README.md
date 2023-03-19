@@ -34,12 +34,7 @@ Philips has recently introduced a proper API to remote control the devices. Howe
 
 ## Install
 
-* Go to HACS -> Integrations
-* Click the three dots on the top right and select `Custom Repositories`
-* Enter `https://github.com/kongo09/philips-airpurifier-coap.git` as repository, select the category `Integration` and click Add
-* A new custom integration shows up for installation (Philips AirPurifier CoAP) - install it
-* Restart Home Assistant
-
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=kongo09&repository=philips-airpurifier-coap&category=integration)
 
 ## Configuration
 
@@ -69,7 +64,10 @@ Note: `configuration.yaml` is no longer supported and your configuration is not 
 - AC3059
 - AC3259
 - AC3829
-- AC3858
+- AC3854/50
+- AC3854/51
+- AC3858/50
+- AC3858/51
 - AC4236
 - AC4558
 - AC5659
