@@ -31,6 +31,7 @@ _LOGGER = logging.getLogger(__name__)
 
 MISSED_PACKAGE_COUNT = 3
 
+
 class Coordinator:
     def __init__(self, client: CoAPClient, host: str) -> None:
         self.client = client
@@ -49,10 +50,14 @@ class Coordinator:
         self._reconnect_task: Task | None = None
         self._timeout: int = 60
 
-        #Timeout = MAX_AGE * 3 Packet losses
+        # Timeout = MAX_AGE * 3 Packet losses
         _LOGGER.debug(f"init: Creating and autostarting timer for host {self._host}")
-        self._timer_disconnected = Timer(timeout=self._timeout * MISSED_PACKAGE_COUNT, callback=self.reconnect, autostart=True)
-        self._timer_disconnected._auto_restart = True 
+        self._timer_disconnected = Timer(
+            timeout=self._timeout * MISSED_PACKAGE_COUNT,
+            callback=self.reconnect,
+            autostart=True,
+        )
+        self._timer_disconnected._auto_restart = True
         _LOGGER.debug(f"init: finished for host {self._host}")
 
     async def shutdown(self):
@@ -71,11 +76,15 @@ class Coordinator:
         try:
             if self._reconnect_task is not None:
                 # Reconnect stuck
-                _LOGGER.debug(f"reconnect: cancelling reconnect task for host {self._host}")
+                _LOGGER.debug(
+                    f"reconnect: cancelling reconnect task for host {self._host}"
+                )
                 self._reconnect_task.cancel()
                 self._reconnect_task = None
             # Reconnect in new Task, keep timer watching
-            _LOGGER.debug(f"reconnect: creating new reconnect task for host {self._host}")
+            _LOGGER.debug(
+                f"reconnect: creating new reconnect task for host {self._host}"
+            )
             self._reconnect_task = asyncio.create_task(self._reconnect())
         except:
             _LOGGER.exception("Exception on starting reconnect!")
@@ -105,7 +114,9 @@ class Coordinator:
                 self._timer_disconnected.setTimeout(timeout * MISSED_PACKAGE_COUNT)
             _LOGGER.debug("finished first refresh for host %s", self._host)
         except Exception as ex:
-            _LOGGER.error("config not ready, first refresh failed for host %s", self._host)
+            _LOGGER.error(
+                "config not ready, first refresh failed for host %s", self._host
+            )
             raise ConfigEntryNotReady from ex
 
     @callback
@@ -151,7 +162,6 @@ class Coordinator:
         self._timer_disconnected.reset()
 
 
-
 class PhilipsEntity(Entity):
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__()
@@ -160,9 +170,16 @@ class PhilipsEntity(Entity):
         self.coordinator = coordinator
         self._serialNumber = coordinator.status[PHILIPS_DEVICE_ID]
         # self._name = coordinator.status["name"]
-        self._name = list(filter(None, map(coordinator.status.get, [PHILIPS_NAME, PHILIPS_NEW_NAME])))[0]
+        self._name = list(
+            filter(None, map(coordinator.status.get, [PHILIPS_NAME, PHILIPS_NEW_NAME]))
+        )[0]
         # self._modelName = coordinator.status["modelid"]
-        self._modelName = list(filter(None, map(coordinator.status.get, [PHILIPS_MODEL_ID, PHILIPS_NEW_MODEL_ID])))[0]
+        self._modelName = list(
+            filter(
+                None,
+                map(coordinator.status.get, [PHILIPS_MODEL_ID, PHILIPS_NEW_MODEL_ID]),
+            )
+        )[0]
         self._firmware = coordinator.status["WifiVersion"]
         self._manufacturer = "Philips"
 
@@ -174,9 +191,7 @@ class PhilipsEntity(Entity):
     @property
     def device_info(self):
         return {
-            "identifiers": {
-                (DOMAIN, self._serialNumber)
-            },
+            "identifiers": {(DOMAIN, self._serialNumber)},
             "name": self._name,
             "model": self._modelName,
             "manufacturer": self._manufacturer,
@@ -193,13 +208,14 @@ class PhilipsEntity(Entity):
 
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()
-        self.async_on_remove(self.coordinator.async_add_listener(self._handle_coordinator_update))
+        self.async_on_remove(
+            self.coordinator.async_add_listener(self._handle_coordinator_update)
+        )
 
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
         self.async_write_ha_state()
-
 
 
 class PhilipsGenericFan(PhilipsEntity, FanEntity):
@@ -225,7 +241,6 @@ class PhilipsGenericFan(PhilipsEntity, FanEntity):
     @property
     def icon(self) -> str:
         return self._icon
-
 
 
 class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
@@ -306,10 +321,14 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
         if percentage:
             await self.async_set_percentage(percentage)
             return
-        await self.coordinator.client.set_control_value(self.KEY_PHILIPS_POWER, self.STATE_POWER_ON)
+        await self.coordinator.client.set_control_value(
+            self.KEY_PHILIPS_POWER, self.STATE_POWER_ON
+        )
 
     async def async_turn_off(self, **kwargs) -> None:
-        await self.coordinator.client.set_control_value(self.KEY_PHILIPS_POWER, self.STATE_POWER_OFF)
+        await self.coordinator.client.set_control_value(
+            self.KEY_PHILIPS_POWER, self.STATE_POWER_OFF
+        )
 
     @property
     def supported_features(self) -> int:
@@ -391,9 +410,8 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
             return ICON.FAN_SPEED_BUTTON
         if preset_mode in PRESET_MODE_ICON_MAP:
             return PRESET_MODE_ICON_MAP[preset_mode]
-        
+
         return ICON.FAN_SPEED_BUTTON
-        
 
 
 class PhilipsGenericCoAPFan(PhilipsGenericCoAPFanBase):
@@ -416,14 +434,17 @@ class PhilipsGenericCoAPFan(PhilipsGenericCoAPFanBase):
         (ATTR_LANGUAGE, PHILIPS_LANGUAGE),
         (ATTR_PREFERRED_INDEX, PHILIPS_PREFERRED_INDEX, PHILIPS_PREFERRED_INDEX_MAP),
         # device sensors
-        (ATTR_RUNTIME, PHILIPS_RUNTIME, lambda x, _: str(timedelta(seconds=round(x / 1000)))),
+        (
+            ATTR_RUNTIME,
+            PHILIPS_RUNTIME,
+            lambda x, _: str(timedelta(seconds=round(x / 1000))),
+        ),
     ]
 
     AVAILABLE_LIGHTS = [PHILIPS_DISPLAY_BACKLIGHT, PHILIPS_LIGHT_BRIGHTNESS]
 
     AVAILABLE_SWITCHES = []
     AVAILABLE_SELECTS = []
-
 
 
 class PhilipsNewGenericCoAPFan(PhilipsGenericCoAPFanBase):
@@ -442,9 +463,17 @@ class PhilipsNewGenericCoAPFan(PhilipsGenericCoAPFanBase):
         # (ATTR_ERROR, PHILIPS_ERROR_CODE, PHILIPS_ERROR_CODE_MAP),
         # device configuration
         (ATTR_LANGUAGE, PHILIPS_NEW_LANGUAGE),
-        (ATTR_PREFERRED_INDEX, PHILIPS_NEW_PREFERRED_INDEX, PHILIPS_PREFERRED_INDEX_MAP),
+        (
+            ATTR_PREFERRED_INDEX,
+            PHILIPS_NEW_PREFERRED_INDEX,
+            PHILIPS_PREFERRED_INDEX_MAP,
+        ),
         # device sensors
-        (ATTR_RUNTIME, PHILIPS_RUNTIME, lambda x, _: str(timedelta(seconds=round(x / 1000)))),
+        (
+            ATTR_RUNTIME,
+            PHILIPS_RUNTIME,
+            lambda x, _: str(timedelta(seconds=round(x / 1000))),
+        ),
     ]
 
     AVAILABLE_LIGHTS = [PHILIPS_NEW_DISPLAY_BACKLIGHT]
@@ -457,10 +486,8 @@ class PhilipsNewGenericCoAPFan(PhilipsGenericCoAPFanBase):
     STATE_POWER_OFF = "OFF"
 
 
-
 class PhilipsHumidifierMixin(PhilipsGenericCoAPFanBase):
     AVAILABLE_SELECTS = [PHILIPS_FUNCTION, PHILIPS_HUMIDITY_TARGET]
-
 
 
 # the AC1715 seems to be a new class of devices that follows some patterns of its own
@@ -482,6 +509,7 @@ class PhilipsAC1715(PhilipsNewGenericCoAPFan):
 
 # TODO consolidate these classes as soon as we see a proper pattern
 
+
 class PhilipsAC1214(PhilipsGenericCoAPFan):
     # the AC1214 doesn't seem to like a power on call when the mode or speed is set,
     # so this needs to be handled separately
@@ -498,7 +526,7 @@ class PhilipsAC1214(PhilipsGenericCoAPFan):
     AVAILABLE_SPEEDS = {
         PRESET_MODE_NIGHT: {PHILIPS_MODE: "N"},
         SPEED_1: {PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
-        SPEED_2: { PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
+        SPEED_2: {PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
         SPEED_3: {PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
         PRESET_MODE_TURBO: {PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
     }
@@ -511,7 +539,6 @@ class PhilipsAC1214(PhilipsGenericCoAPFan):
         await asyncio.sleep(1)
         return
 
-
     async def async_set_preset_mode(self, preset_mode: str) -> None:
         """Set the preset mode of the fan."""
         _LOGGER.debug(f"AC1214 async_set_preset_mode is called with: {preset_mode}")
@@ -520,7 +547,9 @@ class PhilipsAC1214(PhilipsGenericCoAPFan):
         # so it needs to be done in sequence
         if not self.is_on:
             _LOGGER.debug(f"AC1214 is switched on without setting a mode")
-            await self.coordinator.client.set_control_value(PHILIPS_POWER, PHILIPS_POWER_MAP[SWITCH_ON])
+            await self.coordinator.client.set_control_value(
+                PHILIPS_POWER, PHILIPS_POWER_MAP[SWITCH_ON]
+            )
             await asyncio.sleep(1)
 
         # the AC1214 also doesn't seem to like switching to mode 'M' without cycling through mode 'A'
@@ -530,13 +559,16 @@ class PhilipsAC1214(PhilipsGenericCoAPFan):
             _LOGGER.debug(f"AC1214 preset mode requested: {preset_mode}")
             status_pattern = self._available_preset_modes.get(preset_mode)
             _LOGGER.debug(f"this corresponds to status pattern: {status_pattern}")
-            if status_pattern and status_pattern.get(PHILIPS_MODE) != 'A' and current_pattern.get(PHILIPS_MODE) != 'M':
+            if (
+                status_pattern
+                and status_pattern.get(PHILIPS_MODE) != "A"
+                and current_pattern.get(PHILIPS_MODE) != "M"
+            ):
                 await self.async_set_a()
             _LOGGER.debug(f"AC1214 sets preset mode to: {preset_mode}")
             if status_pattern:
-                await self.coordinator.client.set_control_values(data=status_pattern)  
+                await self.coordinator.client.set_control_values(data=status_pattern)
         return
-
 
     async def async_set_percentage(self, percentage: int) -> None:
         """Set the preset mode of the fan."""
@@ -546,7 +578,9 @@ class PhilipsAC1214(PhilipsGenericCoAPFan):
         # so it needs to be done in sequence
         if not self.is_on:
             _LOGGER.debug(f"AC1214 is switched on without setting a mode")
-            await self.coordinator.client.set_control_value(PHILIPS_POWER, PHILIPS_POWER_MAP[SWITCH_ON])
+            await self.coordinator.client.set_control_value(
+                PHILIPS_POWER, PHILIPS_POWER_MAP[SWITCH_ON]
+            )
             await asyncio.sleep(1)
 
         current_pattern = self._available_preset_modes.get(self.preset_mode)
@@ -560,13 +594,16 @@ class PhilipsAC1214(PhilipsGenericCoAPFan):
             speed = percentage_to_ordered_list_item(self._speeds, percentage)
             status_pattern = self._available_speeds.get(speed)
             _LOGGER.debug(f"this corresponds to status pattern: {status_pattern}")
-            if status_pattern and status_pattern.get(PHILIPS_MODE) != 'A' and current_pattern.get(PHILIPS_MODE) != 'M':
+            if (
+                status_pattern
+                and status_pattern.get(PHILIPS_MODE) != "A"
+                and current_pattern.get(PHILIPS_MODE) != "M"
+            ):
                 await self.async_set_a()
             _LOGGER.debug(f"AC1214 sets speed percentage to: {percentage}")
             if status_pattern:
                 await self.coordinator.client.set_control_values(data=status_pattern)
         return
-
 
     async def async_turn_on(
         self,
@@ -574,12 +611,16 @@ class PhilipsAC1214(PhilipsGenericCoAPFan):
         preset_mode: Optional[str] = None,
         **kwargs,
     ):
-        _LOGGER.debug(f"AC1214 async_turn_on called with percentage={percentage} and preset_mode={preset_mode}")
+        _LOGGER.debug(
+            f"AC1214 async_turn_on called with percentage={percentage} and preset_mode={preset_mode}"
+        )
         # the AC1214 doesn't like it if we set a preset mode to switch on the device,
         # so it needs to be done in sequence
         if not self.is_on:
             _LOGGER.debug(f"AC1214 is switched on without setting a mode")
-            await self.coordinator.client.set_control_value(PHILIPS_POWER, PHILIPS_POWER_MAP[SWITCH_ON])
+            await self.coordinator.client.set_control_value(
+                PHILIPS_POWER, PHILIPS_POWER_MAP[SWITCH_ON]
+            )
             await asyncio.sleep(1)
 
         if preset_mode:
@@ -590,7 +631,6 @@ class PhilipsAC1214(PhilipsGenericCoAPFan):
             _LOGGER.debug(f"AC1214 speed change requested: {percentage}")
             await self.async_set_percentage(percentage)
             return
-
 
 
 class PhilipsAC2729(
@@ -617,7 +657,6 @@ class PhilipsAC2729(
     AVAILABLE_SWITCHES = [PHILIPS_CHILD_LOCK]
 
 
-
 class PhilipsAC2889(PhilipsGenericCoAPFan):
     AVAILABLE_PRESET_MODES = {
         PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "P"},
@@ -639,7 +678,6 @@ class PhilipsAC2889(PhilipsGenericCoAPFan):
     }
 
 
-
 class PhilipsAC29xx(PhilipsGenericCoAPFan):
     AVAILABLE_PRESET_MODES = {
         PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "AG"},
@@ -654,7 +692,6 @@ class PhilipsAC29xx(PhilipsGenericCoAPFan):
     }
 
 
-
 class PhilipsAC2936(PhilipsAC29xx):
     pass
 
@@ -665,7 +702,6 @@ class PhilipsAC2939(PhilipsAC29xx):
 
 class PhilipsAC2958(PhilipsAC29xx):
     pass
-
 
 
 class PhilipsAC30xx(PhilipsGenericCoAPFan):
@@ -685,22 +721,24 @@ class PhilipsAC30xx(PhilipsGenericCoAPFan):
     }
 
 
-
 class PhilipsAC3033(PhilipsAC30xx):
     pass
+
 
 class PhilipsAC3036(PhilipsAC30xx):
     pass
 
+
 class PhilipsAC3039(PhilipsAC30xx):
     pass
+
 
 class PhilipsAC3055(PhilipsAC30xx):
     pass
 
+
 class PhilipsAC3059(PhilipsAC30xx):
     pass
-
 
 
 class PhilipsAC3259(PhilipsGenericCoAPFan):
@@ -722,7 +760,6 @@ class PhilipsAC3259(PhilipsGenericCoAPFan):
         SPEED_3: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
         PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
     }
-
 
 
 class PhilipsAC3829(PhilipsHumidifierMixin, PhilipsGenericCoAPFan):
@@ -775,17 +812,21 @@ class PhilipsAC385x51(PhilipsGenericCoAPFan):
     AVAILABLE_PRESET_MODES = {
         PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "AG"},
         # make speeds available as preset
-        PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "S", PHILIPS_SPEED: "2"},
-        PRESET_MODE_SLEEP_ALLERGY: {PHILIPS_POWER: "1", PHILIPS_MODE: "AS", PHILIPS_SPEED: "s"},
+        PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "S", PHILIPS_SPEED: "s"},
+        PRESET_MODE_SLEEP_ALLERGY: {
+            PHILIPS_POWER: "1",
+            PHILIPS_MODE: "AS",
+            PHILIPS_SPEED: "as",
+        },
         SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
         SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
-        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T", PHILIPS_SPEED: "2"},
+        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T", PHILIPS_SPEED: "t"},
     }
     AVAILABLE_SPEEDS = {
-        PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "S", PHILIPS_SPEED: "2"},
+        PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "S", PHILIPS_SPEED: "s"},
         SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
         SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
-        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T", PHILIPS_SPEED: "2"},
+        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T", PHILIPS_SPEED: "t"},
     }
     AVAILABLE_SWITCHES = [PHILIPS_CHILD_LOCK]
 
@@ -821,8 +862,16 @@ class PhilipsAC4558(PhilipsGenericCoAPFan):
         PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "AG"},
         PRESET_MODE_GAS: {PHILIPS_POWER: "1", PHILIPS_MODE: "F"},
         # it seems that when setting the pollution and allergen modes, we also need to set speed "a"
-        PRESET_MODE_POLLUTION: {PHILIPS_POWER: "1", PHILIPS_MODE: "P", PHILIPS_SPEED: "a"},
-        PRESET_MODE_ALLERGEN: {PHILIPS_POWER: "1", PHILIPS_MODE: "A", PHILIPS_SPEED: "a"},
+        PRESET_MODE_POLLUTION: {
+            PHILIPS_POWER: "1",
+            PHILIPS_MODE: "P",
+            PHILIPS_SPEED: "a",
+        },
+        PRESET_MODE_ALLERGEN: {
+            PHILIPS_POWER: "1",
+            PHILIPS_MODE: "A",
+            PHILIPS_SPEED: "a",
+        },
     }
     AVAILABLE_SPEEDS = {
         PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_SPEED: "s"},
@@ -851,7 +900,6 @@ class PhilipsAC5659(PhilipsGenericCoAPFan):
         SPEED_3: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
         PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
     }
-
 
 
 model_to_class = {
