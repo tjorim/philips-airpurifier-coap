@@ -676,6 +676,7 @@ class PhilipsAC2889(PhilipsGenericCoAPFan):
         SPEED_3: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
         PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
     }
+    AVAILABLE_SWITCHES = [PHILIPS_CHILD_LOCK]
 
 
 class PhilipsAC29xx(PhilipsGenericCoAPFan):
