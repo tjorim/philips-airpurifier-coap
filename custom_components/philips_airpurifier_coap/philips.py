@@ -476,7 +476,7 @@ class PhilipsNewGenericCoAPFan(PhilipsGenericCoAPFanBase):
         ),
     ]
 
-    AVAILABLE_LIGHTS = [PHILIPS_NEW_DISPLAY_BACKLIGHT]
+    AVAILABLE_LIGHTS = []
 
     AVAILABLE_SWITCHES = []
     AVAILABLE_SELECTS = []
@@ -488,6 +488,20 @@ class PhilipsNewGenericCoAPFan(PhilipsGenericCoAPFanBase):
 
 class PhilipsHumidifierMixin(PhilipsGenericCoAPFanBase):
     AVAILABLE_SELECTS = [PHILIPS_FUNCTION, PHILIPS_HUMIDITY_TARGET]
+
+
+# similar to the AC1715, the AC0850/11 seems to be a new class of devices that
+# follows some patterns of its own
+class PhilipsAC085011(PhilipsNewGenericCoAPFan):
+    AVAILABLE_PRESET_MODES = {
+        PRESET_MODE_AUTO: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Auto General"},
+        PRESET_MODE_TURBO: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Turbo"},
+        PRESET_MODE_SLEEP: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Sleep"},
+    }
+    AVAILABLE_SPEEDS = {
+        PRESET_MODE_SLEEP: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Sleep"},
+        PRESET_MODE_TURBO: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Turbo"},
+    }
 
 
 # the AC1715 seems to be a new class of devices that follows some patterns of its own
@@ -505,6 +519,7 @@ class PhilipsAC1715(PhilipsNewGenericCoAPFan):
         SPEED_2: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Speed 2"},
         PRESET_MODE_TURBO: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Turbo"},
     }
+    AVAILABLE_LIGHTS = [PHILIPS_NEW_DISPLAY_BACKLIGHT]
 
 
 # TODO consolidate these classes as soon as we see a proper pattern
@@ -906,6 +921,7 @@ class PhilipsAC5659(PhilipsGenericCoAPFan):
 
 
 model_to_class = {
+    MODEL_AC0850_11: PhilipsAC085011,
     MODEL_AC1214: PhilipsAC1214,
     MODEL_AC1715: PhilipsAC1715,
     MODEL_AC2729: PhilipsAC2729,
