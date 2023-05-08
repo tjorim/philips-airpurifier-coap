@@ -490,9 +490,9 @@ class PhilipsHumidifierMixin(PhilipsGenericCoAPFanBase):
     AVAILABLE_SELECTS = [PHILIPS_FUNCTION, PHILIPS_HUMIDITY_TARGET]
 
 
-# similar to the AC1715, the AC0850/11 seems to be a new class of devices that
+# similar to the AC1715, the AC0850 seems to be a new class of devices that
 # follows some patterns of its own
-class PhilipsAC085011(PhilipsNewGenericCoAPFan):
+class PhilipsAC0850(PhilipsNewGenericCoAPFan):
     AVAILABLE_PRESET_MODES = {
         PRESET_MODE_AUTO: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Auto General"},
         PRESET_MODE_TURBO: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Turbo"},
@@ -921,7 +921,7 @@ class PhilipsAC5659(PhilipsGenericCoAPFan):
 
 
 model_to_class = {
-    MODEL_AC0850_11: PhilipsAC085011,
+    MODEL_AC0850: PhilipsAC0850,
     MODEL_AC1214: PhilipsAC1214,
     MODEL_AC1715: PhilipsAC1715,
     MODEL_AC2729: PhilipsAC2729,
