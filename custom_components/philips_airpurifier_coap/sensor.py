@@ -65,8 +65,17 @@ async def async_setup_entry(
         if sensor in status:
             sensors.append(PhilipsSensor(coordinator, name, model, sensor))
 
+    model_class = model_to_class.get(model)
+    unavailable_filters = []
+
+    if model_class:
+
+        for cls in reversed(model_class.__mro__):
+            cls_unavailable_filters = getattr(cls, "UNAVAILABLE_FILTERS", [])
+            unavailable_filters.extend(cls_unavailable_filters)
+
     for filter in FILTER_TYPES:
-        if filter in status:
+        if filter in status and not filter in unavailable_filters:
             sensors.append(PhilipsFilterSensor(coordinator, name, model, filter))
 
     async_add_entities(sensors, update_before_add=False)
