@@ -24,8 +24,6 @@ from homeassistant.config_entries import ConfigEntry
 from .philips import Coordinator, PhilipsEntity
 from .const import (
     ATTR_LABEL,
-    ATTR_POSTFIX,
-    ATTR_PREFIX,
     ATTR_TIME_REMAINING,
     ATTR_TOTAL,
     ATTR_TYPE,
@@ -38,9 +36,6 @@ from .const import (
     DOMAIN,
     FILTER_TYPES,
     PHILIPS_DEVICE_ID,
-    PHILIPS_FILTER_STATUS,
-    PHILIPS_FILTER_TOTAL,
-    PHILIPS_FILTER_TYPE,
     SENSOR_TYPES,
 )
 from .model import DeviceStatus
