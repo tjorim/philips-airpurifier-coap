@@ -21,7 +21,7 @@ from homeassistant.helpers.entity import Entity, EntityCategory
 from homeassistant.helpers.typing import StateType
 from homeassistant.config_entries import ConfigEntry
 
-from .philips import Coordinator, PhilipsEntity
+from .philips import Coordinator, PhilipsEntity, model_to_class
 from .const import (
     ATTR_LABEL,
     ATTR_TIME_REMAINING,
