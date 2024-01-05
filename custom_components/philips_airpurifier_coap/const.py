@@ -1,33 +1,28 @@
 """Constants for Philips AirPurifier integration."""
 from __future__ import annotations
-from typing import Tuple
 
 from homeassistant.components.sensor import (
     ATTR_STATE_CLASS,
-    STATE_CLASS_MEASUREMENT,
+    SensorDeviceClass,
+    SensorStateClass,
 )
-
 from homeassistant.const import (
     ATTR_DEVICE_CLASS,
     ATTR_ICON,
     ATTR_TEMPERATURE,
-    TEMP_CELSIUS,
-    PERCENTAGE,
     CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
-    DEVICE_CLASS_HUMIDITY,
-    DEVICE_CLASS_TEMPERATURE,
     CONF_ENTITY_CATEGORY,
+    PERCENTAGE,
+    UnitOfTemperature,
 )
-
 from homeassistant.helpers.entity import EntityCategory
-
 
 from .model import (
     FilterDescription,
-    SensorDescription,
-    SwitchDescription,
     LightDescription,
     SelectDescription,
+    SensorDescription,
+    SwitchDescription,
 )
 
 DOMAIN = "philips_airpurifier_coap"
@@ -40,6 +35,8 @@ DEFAULT_NAME = "Philips AirPurifier"
 
 
 class ICON:
+    """Custom icons provided by the integration for the interface."""
+
     POWER_BUTTON = "pap:power_button"
     CHILD_LOCK_BUTTON = "pap:child_lock_button"
     AUTO_MODE_BUTTON = "pap:auto_mode_button"
@@ -303,49 +300,49 @@ SENSOR_TYPES: dict[str, SensorDescription] = {
         ATTR_ICON: "mdi:blur",
         ATTR_LABEL: ATTR_AIR_QUALITY_INDEX,
         ATTR_UNIT: AIR_QUALITY_INDEX,
-        ATTR_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+        ATTR_STATE_CLASS: SensorStateClass.MEASUREMENT,
     },
     PHILIPS_INDOOR_ALLERGEN_INDEX: {
         ATTR_ICON: ICON.IAI,
         ATTR_LABEL: ATTR_INDOOR_ALLERGEN_INDEX,
         ATTR_UNIT: INDOOR_ALLERGEN_INDEX,
-        ATTR_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+        ATTR_STATE_CLASS: SensorStateClass.MEASUREMENT,
     },
     PHILIPS_NEW_INDOOR_ALLERGEN_INDEX: {
         ATTR_ICON: ICON.IAI,
         ATTR_LABEL: ATTR_INDOOR_ALLERGEN_INDEX,
         ATTR_UNIT: INDOOR_ALLERGEN_INDEX,
-        ATTR_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+        ATTR_STATE_CLASS: SensorStateClass.MEASUREMENT,
     },
     PHILIPS_PM25: {
         ATTR_ICON: ICON.PM25,
         ATTR_LABEL: "PM2.5",
         ATTR_UNIT: CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
-        ATTR_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+        ATTR_STATE_CLASS: SensorStateClass.MEASUREMENT,
     },
     PHILIPS_NEW_PM25: {
         ATTR_ICON: ICON.PM25,
         ATTR_LABEL: "PM2.5",
         ATTR_UNIT: CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
-        ATTR_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+        ATTR_STATE_CLASS: SensorStateClass.MEASUREMENT,
     },
     PHILIPS_TOTAL_VOLATILE_ORGANIC_COMPOUNDS: {
         ATTR_ICON: "mdi:blur",
         ATTR_LABEL: ATTR_TOTAL_VOLATILE_ORGANIC_COMPOUNDS,
         ATTR_UNIT: LEVEL,
-        ATTR_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+        ATTR_STATE_CLASS: SensorStateClass.MEASUREMENT,
     },
     PHILIPS_HUMIDITY: {
-        ATTR_DEVICE_CLASS: DEVICE_CLASS_HUMIDITY,
+        ATTR_DEVICE_CLASS: SensorDeviceClass.HUMIDITY,
         ATTR_LABEL: ATTR_HUMIDITY,
-        ATTR_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+        ATTR_STATE_CLASS: SensorStateClass.MEASUREMENT,
         ATTR_UNIT: PERCENTAGE,
     },
     PHILIPS_TEMPERATURE: {
-        ATTR_DEVICE_CLASS: DEVICE_CLASS_TEMPERATURE,
+        ATTR_DEVICE_CLASS: SensorDeviceClass.TEMPERATURE,
         ATTR_LABEL: ATTR_TEMPERATURE,
-        ATTR_STATE_CLASS: STATE_CLASS_MEASUREMENT,
-        ATTR_UNIT: TEMP_CELSIUS,
+        ATTR_STATE_CLASS: SensorStateClass.MEASUREMENT,
+        ATTR_UNIT: UnitOfTemperature.CELSIUS,
     },
     # diagnostic information
     PHILIPS_WATER_LEVEL: {
@@ -354,7 +351,7 @@ SENSOR_TYPES: dict[str, SensorDescription] = {
         ATTR_VALUE: lambda value, status: 0
         if status.get("err") in [32768, 49408]
         else value,
-        ATTR_STATE_CLASS: STATE_CLASS_MEASUREMENT,
+        ATTR_STATE_CLASS: SensorStateClass.MEASUREMENT,
         ATTR_UNIT: PERCENTAGE,
         CONF_ENTITY_CATEGORY: EntityCategory.DIAGNOSTIC,
         ATTR_WARN_VALUE: 10,
