@@ -1,9 +1,10 @@
 """Philips Air Purifier & Humidifier Sensors."""
 from __future__ import annotations
 
+from collections.abc import Callable
 from datetime import timedelta
 import logging
-from typing import Any, Callable, List, cast
+from typing import Any, cast
 
 from homeassistant.components.sensor import ATTR_STATE_CLASS, SensorEntity
 from homeassistant.config_entries import ConfigEntry
@@ -14,7 +15,7 @@ from homeassistant.const import (
     CONF_HOST,
     CONF_NAME,
     PERCENTAGE,
-    TIME_HOURS,
+    UnitOfTime,
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import PlatformNotReady
@@ -46,7 +47,7 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
-    async_add_entities: Callable[[List[Entity], bool], None],
+    async_add_entities: Callable[[list[Entity], bool], None],
 ) -> None:
     _LOGGER.debug("async_setup_entry called for platform sensor")
 
@@ -149,7 +150,7 @@ class PhilipsFilterSensor(PhilipsEntity, SensorEntity):
         if self._has_total:
             self._attr_native_unit_of_measurement = PERCENTAGE
         else:
-            self._attr_native_unit_of_measurement = TIME_HOURS
+            self._attr_native_unit_of_measurement = UnitOfTime.HOURS
 
         try:
             device_id = self._device_status[PHILIPS_DEVICE_ID]
