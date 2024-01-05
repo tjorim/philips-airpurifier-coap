@@ -23,20 +23,13 @@ from homeassistant.helpers.entity import Entity, EntityCategory
 from homeassistant.helpers.typing import StateType
 
 from .const import (
-    ATTR_LABEL,
-    ATTR_TIME_REMAINING,
-    ATTR_TOTAL,
-    ATTR_TYPE,
-    ATTR_UNIT,
-    ATTR_VALUE,
-    ATTR_WARN_ICON,
-    ATTR_WARN_VALUE,
     CONF_MODEL,
     DATA_KEY_COORDINATOR,
     DOMAIN,
     FILTER_TYPES,
-    PHILIPS_DEVICE_ID,
     SENSOR_TYPES,
+    FanAttributes,
+    PhilipsApi,
 )
 from .philips import Coordinator, PhilipsEntity, model_to_class
 
@@ -89,19 +82,21 @@ class PhilipsSensor(PhilipsEntity, SensorEntity):
         super().__init__(coordinator)
         self._model = model
         self._description = SENSOR_TYPES[kind]
-        self._warn_icon = self._description.get(ATTR_WARN_ICON)
-        self._warn_value = self._description.get(ATTR_WARN_VALUE)
+        self._warn_icon = self._description.get(FanAttributes.WARN_ICON)
+        self._warn_value = self._description.get(FanAttributes.WARN_VALUE)
         self._norm_icon = self._description.get(ATTR_ICON)
         self._attr_state_class = self._description.get(ATTR_STATE_CLASS)
         self._attr_device_class = self._description.get(ATTR_DEVICE_CLASS)
         self._attr_entity_category = self._description.get(CONF_ENTITY_CATEGORY)
         self._attr_name = (
-            f"{name} {self._description[ATTR_LABEL].replace('_', ' ').title()}"
+            f"{name} {self._description[FanAttributes.LABEL].replace('_', ' ').title()}"
         )
-        self._attr_native_unit_of_measurement = self._description.get(ATTR_UNIT)
+        self._attr_native_unit_of_measurement = self._description.get(
+            FanAttributes.UNIT
+        )
 
         try:
-            device_id = self._device_status[PHILIPS_DEVICE_ID]
+            device_id = self._device_status[PhilipsApi.DEVICE_ID]
             self._attr_unique_id = f"{self._model}-{device_id}-{kind.lower()}"
         except Exception as e:
             _LOGGER.error("Failed retrieving unique_id: %s", e)
@@ -113,7 +108,7 @@ class PhilipsSensor(PhilipsEntity, SensorEntity):
     def native_value(self) -> StateType:
         """Return the native value of the sensor."""
         value = self._device_status[self.kind]
-        convert = self._description.get(ATTR_VALUE)
+        convert = self._description.get(FanAttributes.VALUE)
         if convert:
             value = convert(value, self._device_status)
         return cast(StateType, value)
@@ -136,17 +131,17 @@ class PhilipsFilterSensor(PhilipsEntity, SensorEntity):
         super().__init__(coordinator)
         self._model = model
         self._description = FILTER_TYPES[kind]
-        self._warn_icon = self._description[ATTR_WARN_ICON]
-        self._warn_value = self._description[ATTR_WARN_VALUE]
+        self._warn_icon = self._description[FanAttributes.WARN_ICON]
+        self._warn_value = self._description[FanAttributes.WARN_VALUE]
         self._norm_icon = self._description[ATTR_ICON]
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
         self._attr_name = (
-            f"{name} {self._description[ATTR_LABEL].replace('_', ' ').title()}"
+            f"{name} {self._description[FanAttributes.LABEL].replace('_', ' ').title()}"
         )
 
         self._value_key = kind
-        self._total_key = self._description[ATTR_TOTAL]
-        self._type_key = self._description[ATTR_TYPE]
+        self._total_key = self._description[FanAttributes.TOTAL]
+        self._type_key = self._description[FanAttributes.TYPE]
 
         if self._has_total:
             self._attr_native_unit_of_measurement = PERCENTAGE
@@ -154,9 +149,9 @@ class PhilipsFilterSensor(PhilipsEntity, SensorEntity):
             self._attr_native_unit_of_measurement = UnitOfTime.HOURS
 
         try:
-            device_id = self._device_status[PHILIPS_DEVICE_ID]
+            device_id = self._device_status[PhilipsApi.DEVICE_ID]
             self._attr_unique_id = (
-                f"{self._model}-{device_id}-{self._description[ATTR_LABEL]}"
+                f"{self._model}-{device_id}-{self._description[FanAttributes.LABEL]}"
             )
         except Exception as e:
             _LOGGER.error("Failed retrieving unique_id: %s", e)
@@ -175,11 +170,11 @@ class PhilipsFilterSensor(PhilipsEntity, SensorEntity):
     def extra_state_attributes(self) -> dict[str, Any]:
         """Return the extra state attributes of the filter sensor."""
         if self._type_key in self._device_status:
-            self._attrs[ATTR_TYPE] = self._device_status[self._type_key]
+            self._attrs[FanAttributes.TYPE] = self._device_status[self._type_key]
         # self._attrs[ATTR_RAW] = self._value
         if self._has_total:
-            self._attrs[ATTR_TOTAL] = self._total
-            self._attrs[ATTR_TIME_REMAINING] = self._time_remaining
+            self._attrs[FanAttributes.TOTAL] = self._total
+            self._attrs[FanAttributes.TIME_REMAINING] = self._time_remaining
         return self._attrs
 
     @property
