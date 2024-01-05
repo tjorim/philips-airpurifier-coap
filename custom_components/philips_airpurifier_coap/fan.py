@@ -1,31 +1,26 @@
-"""Philips Air Purifier & Humidifier"""
+"""Philips Air Purifier & Humidifier."""
 from __future__ import annotations
 
+from collections.abc import Callable
 import logging
-from typing import Callable, List
 
-from homeassistant.const import CONF_HOST, CONF_NAME
-from homeassistant.helpers.typing import HomeAssistantType
-from homeassistant.helpers.entity import Entity
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import CONF_HOST, CONF_NAME
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity import Entity
 
-
+from .const import CONF_MODEL, DATA_KEY_COORDINATOR, DATA_KEY_FAN, DOMAIN
 from .philips import model_to_class
-from .const import (
-    CONF_MODEL,
-    DATA_KEY_COORDINATOR,
-    DATA_KEY_FAN,
-    DOMAIN,
-)
 
 _LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(
-    hass: HomeAssistantType, 
-    entry: ConfigEntry, 
-    async_add_entities: Callable[[List[Entity], bool], None]
+    hass: HomeAssistant,
+    entry: ConfigEntry,
+    async_add_entities: Callable[[list[Entity], bool], None],
 ):
+    """Set up the fan platform."""
     _LOGGER.debug("async_setup_entry called for platform fan")
 
     host = entry.data[CONF_HOST]
