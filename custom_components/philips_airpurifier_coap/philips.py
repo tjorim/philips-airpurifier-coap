@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 from asyncio.tasks import Task
 from collections.abc import Callable
+import contextlib
 from datetime import timedelta
 import logging
 from typing import Any, Optional, Union
@@ -19,7 +20,16 @@ from homeassistant.util.percentage import (
     percentage_to_ordered_list_item,
 )
 
-from .const import *
+from .const import (
+    DOMAIN,
+    ICON,
+    SWITCH_ON,
+    FanAttributes,
+    FanModel,
+    PhilipsApi,
+    PresetMode,
+)
+from .model import DeviceStatus
 from .timer import Timer
 
 _LOGGER = logging.getLogger(__name__)
@@ -28,7 +38,9 @@ MISSED_PACKAGE_COUNT = 3
 
 
 class Coordinator:
-    def __init__(self, client: CoAPClient, host: str) -> None:
+    """Class to coordinate the data requests from the Philips API."""
+
+    def __init__(self, client: CoAPClient, host: str) -> None:  # noqa: D107
         self.client = client
         self._host = host
 
@@ -46,61 +58,62 @@ class Coordinator:
         self._timeout: int = 60
 
         # Timeout = MAX_AGE * 3 Packet losses
-        _LOGGER.debug(f"init: Creating and autostarting timer for host {self._host}")
+        _LOGGER.debug("init: Creating and autostarting timer for host %s", self._host)
         self._timer_disconnected = Timer(
             timeout=self._timeout * MISSED_PACKAGE_COUNT,
             callback=self.reconnect,
             autostart=True,
         )
         self._timer_disconnected._auto_restart = True
-        _LOGGER.debug(f"init: finished for host {self._host}")
+        _LOGGER.debug("init: finished for host %s", self._host)
 
     async def shutdown(self):
-        _LOGGER.debug(f"shutdown: called for host {self._host}")
+        """Shutdown the API connection."""
+        _LOGGER.debug("shutdown: called for host %s", self._host)
         if self._reconnect_task is not None:
-            _LOGGER.debug(f"shutdown: cancelling reconnect task for host {self._host}")
+            _LOGGER.debug("shutdown: cancelling reconnect task for host %s", self._host)
             self._reconnect_task.cancel()
         if self._timer_disconnected is not None:
-            _LOGGER.debug(f"shutdown: cancelling timeout task for host {self._host}")
-            self._timer_disconnected._cancel()
+            _LOGGER.debug("shutdown: cancelling timeout task for host %s", self._host)
+            self._timer_disconnected.cancel()
         if self.client is not None:
             await self.client.shutdown()
 
     async def reconnect(self):
-        _LOGGER.debug(f"reconnect: called for host {self._host}")
+        """Reconnect to the API connection."""
+        _LOGGER.debug("reconnect: called for host %s", self._host)
         try:
             if self._reconnect_task is not None:
                 # Reconnect stuck
                 _LOGGER.debug(
-                    f"reconnect: cancelling reconnect task for host {self._host}"
+                    "reconnect: cancelling reconnect task for host %s", self._host
                 )
                 self._reconnect_task.cancel()
                 self._reconnect_task = None
             # Reconnect in new Task, keep timer watching
             _LOGGER.debug(
-                f"reconnect: creating new reconnect task for host {self._host}"
+                "reconnect: creating new reconnect task for host %s", self._host
             )
             self._reconnect_task = asyncio.create_task(self._reconnect())
-        except:
+        except:  # noqa: E722
             _LOGGER.exception("Exception on starting reconnect!")
 
     async def _reconnect(self):
         try:
-            _LOGGER.debug("Reconnecting...")
-            try:
+            _LOGGER.debug("Reconnecting")
+            with contextlib.suppress(Exception):
                 await self.client.shutdown()
-            except:
-                pass
             self.client = await CoAPClient.create(self._host)
             self._start_observing()
         except asyncio.CancelledError:
             # Silently drop this exception, because we are responsible for it.
             # Reconnect took to long
             pass
-        except:
+        except:  # noqa: E722
             _LOGGER.exception("_reconnect error")
 
     async def async_first_refresh(self) -> None:
+        """Refresh the data for the first time."""
         _LOGGER.debug("async_first_refresh for host %s", self._host)
         try:
             self.status, timeout = await self.client.get_status()
@@ -110,7 +123,7 @@ class Coordinator:
             _LOGGER.debug("finished first refresh for host %s", self._host)
         except Exception as ex:
             _LOGGER.error(
-                "config not ready, first refresh failed for host %s", self._host
+                "Config not ready, first refresh failed for host %s", self._host
             )
             raise ConfigEntryNotReady from ex
 
@@ -158,21 +171,29 @@ class Coordinator:
 
 
 class PhilipsEntity(Entity):
-    def __init__(self, coordinator: Coordinator) -> None:
+    """Class to represent a generic Philips entity."""
+
+    def __init__(self, coordinator: Coordinator) -> None:  # noqa: D107
         super().__init__()
         _LOGGER.debug("PhilipsEntity __init__ called")
-        _LOGGER.debug(f"coordinator.status is: {coordinator.status}")
+        _LOGGER.debug("coordinator.status is: %s", coordinator.status)
         self.coordinator = coordinator
-        self._serialNumber = coordinator.status[PHILIPS_DEVICE_ID]
+        self._serialNumber = coordinator.status[PhilipsApi.DEVICE_ID]
         # self._name = coordinator.status["name"]
         self._name = list(
-            filter(None, map(coordinator.status.get, [PHILIPS_NAME, PHILIPS_NEW_NAME]))
+            filter(
+                None,
+                map(coordinator.status.get, [PhilipsApi.NAME, PhilipsApi.NEW_NAME]),
+            )
         )[0]
         # self._modelName = coordinator.status["modelid"]
         self._modelName = list(
             filter(
                 None,
-                map(coordinator.status.get, [PHILIPS_MODEL_ID, PHILIPS_NEW_MODEL_ID]),
+                map(
+                    coordinator.status.get,
+                    [PhilipsApi.MODEL_ID, PhilipsApi.NEW_MODEL_ID],
+                ),
             )
         )[0]
         self._firmware = coordinator.status["WifiVersion"]
@@ -185,6 +206,7 @@ class PhilipsEntity(Entity):
 
     @property
     def device_info(self):
+        """Return info about the device."""
         return {
             "identifiers": {(DOMAIN, self._serialNumber)},
             "name": self._name,
@@ -195,13 +217,16 @@ class PhilipsEntity(Entity):
 
     @property
     def available(self):
+        """Return if the device is available."""
         return self.coordinator.status is not None
 
     @property
     def _device_status(self) -> dict[str, Any]:
+        """Return the status of the device."""
         return self.coordinator.status
 
     async def async_added_to_hass(self) -> None:
+        """Register with hass that routine got added."""
         await super().async_added_to_hass()
         self.async_on_remove(
             self.coordinator.async_add_listener(self._handle_coordinator_update)
@@ -214,7 +239,9 @@ class PhilipsEntity(Entity):
 
 
 class PhilipsGenericFan(PhilipsEntity, FanEntity):
-    def __init__(
+    """Class to manage a generic Philips fan."""
+
+    def __init__(  # noqa: D107
         self,
         coordinator: Coordinator,
         model: str,
@@ -227,29 +254,34 @@ class PhilipsGenericFan(PhilipsEntity, FanEntity):
 
     @property
     def unique_id(self) -> Optional[str]:
+        """Return the unique ID of the fan."""
         return self._unique_id
 
     @property
     def name(self) -> str:
+        """Return the name of the fan."""
         return self._name
 
     @property
     def icon(self) -> str:
+        """Return the icon of the fan."""
         return self._icon
 
 
 class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
+    """Class as basis to manage a generic Philips CoAP fan."""
+
     AVAILABLE_PRESET_MODES = {}
     AVAILABLE_SPEEDS = {}
     AVAILABLE_ATTRIBUTES = []
     AVAILABLE_SWITCHES = []
     AVAILABLE_LIGHTS = []
 
-    KEY_PHILIPS_POWER = PHILIPS_POWER
+    KEY_PHILIPS_POWER = PhilipsApi.POWER
     STATE_POWER_ON = "1"
     STATE_POWER_OFF = "0"
 
-    def __init__(
+    def __init__(  # noqa: D107
         self,
         coordinator: Coordinator,
         model: str,
@@ -269,7 +301,7 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
         self._collect_available_attributes()
 
         try:
-            device_id = self._device_status[PHILIPS_DEVICE_ID]
+            device_id = self._device_status[PhilipsApi.DEVICE_ID]
             self._unique_id = f"{self._model}-{device_id}"
         except Exception as e:
             _LOGGER.error("Failed retrieving unique_id: %s", e)
@@ -300,6 +332,7 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
 
     @property
     def is_on(self) -> bool:
+        """Return if the fan is on."""
         status = self._device_status.get(self.KEY_PHILIPS_POWER)
         # _LOGGER.debug("is_on: status=%s - test=%s", status, self.STATE_POWER_ON)
         return status == self.STATE_POWER_ON
@@ -310,6 +343,7 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
         preset_mode: Optional[str] = None,
         **kwargs,
     ):
+        """Turn the fan on."""
         if preset_mode:
             await self.async_set_preset_mode(preset_mode)
             return
@@ -321,23 +355,27 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
         )
 
     async def async_turn_off(self, **kwargs) -> None:
+        """Turn the fan off."""
         await self.coordinator.client.set_control_value(
             self.KEY_PHILIPS_POWER, self.STATE_POWER_OFF
         )
 
     @property
     def supported_features(self) -> int:
+        """Return the supported features."""
         features = FanEntityFeature.PRESET_MODE
         if self._speeds:
             features |= FanEntityFeature.SET_SPEED
         return features
 
     @property
-    def preset_modes(self) -> Optional[List[str]]:
+    def preset_modes(self) -> Optional[list[str]]:
+        """Return the supported preset modes."""
         return self._preset_modes
 
     @property
     def preset_mode(self) -> Optional[str]:
+        """Return the selected preset mode."""
         for preset_mode, status_pattern in self._available_preset_modes.items():
             for k, v in status_pattern.items():
                 if self._device_status.get(k) != v:
@@ -353,10 +391,12 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
 
     @property
     def speed_count(self) -> int:
+        """Return the number of speed options."""
         return len(self._speeds)
 
     @property
     def percentage(self) -> Optional[int]:
+        """Return the speed percentages."""
         for speed, status_pattern in self._available_speeds.items():
             for k, v in status_pattern.items():
                 if self._device_status.get(k) != v:
@@ -365,6 +405,7 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
                 return ordered_list_item_to_percentage(self._speeds, speed)
 
     async def async_set_percentage(self, percentage: int) -> None:
+        """Return the selected speed percentage."""
         if percentage == 0:
             await self.async_turn_off()
         else:
@@ -374,7 +415,9 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
                 await self.coordinator.client.set_control_values(data=status_pattern)
 
     @property
-    def extra_state_attributes(self) -> Optional[Dict[str, Any]]:
+    def extra_state_attributes(self) -> Optional[dict[str, Any]]:
+        """Return the extra state attributes."""
+
         def append(
             attributes: dict,
             key: str,
@@ -389,7 +432,7 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
                     value = value_map(value, self._device_status)
                 attributes.update({key: value})
 
-        device_attributes = dict()
+        device_attributes = {}
         for key, philips_key, *rest in self._available_attributes:
             value_map = rest[0] if len(rest) else None
             append(device_attributes, key, philips_key, value_map)
@@ -397,76 +440,85 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
 
     @property
     def icon(self) -> str:
+        """Return the icon of the fan."""
         if not self.is_on:
             return ICON.POWER_BUTTON
 
         preset_mode = self.preset_mode
-        if preset_mode == None:
+        if preset_mode is None:
             return ICON.FAN_SPEED_BUTTON
-        if preset_mode in PRESET_MODE_ICON_MAP:
-            return PRESET_MODE_ICON_MAP[preset_mode]
+        if preset_mode in PresetMode.ICON_MAP:
+            return PresetMode.ICON_MAP[preset_mode]
 
         return ICON.FAN_SPEED_BUTTON
 
 
 class PhilipsGenericCoAPFan(PhilipsGenericCoAPFanBase):
+    """Class to manage a generic Philips CoAP fan."""
+
     AVAILABLE_PRESET_MODES = {}
     AVAILABLE_SPEEDS = {}
 
     AVAILABLE_ATTRIBUTES = [
         # device information
-        (ATTR_NAME, PHILIPS_NAME),
-        (ATTR_TYPE, PHILIPS_TYPE),
-        (ATTR_MODEL_ID, PHILIPS_MODEL_ID),
-        (ATTR_PRODUCT_ID, PHILIPS_PRODUCT_ID),
-        (ATTR_DEVICE_ID, PHILIPS_DEVICE_ID),
-        (ATTR_DEVICE_VERSION, PHILIPS_DEVICE_VERSION),
-        (ATTR_SOFTWARE_VERSION, PHILIPS_SOFTWARE_VERSION),
-        (ATTR_WIFI_VERSION, PHILIPS_WIFI_VERSION),
-        (ATTR_ERROR_CODE, PHILIPS_ERROR_CODE),
-        (ATTR_ERROR, PHILIPS_ERROR_CODE, PHILIPS_ERROR_CODE_MAP),
+        (FanAttributes.NAME, PhilipsApi.NAME),
+        (FanAttributes.TYPE, PhilipsApi.TYPE),
+        (FanAttributes.MODEL_ID, PhilipsApi.MODEL_ID),
+        (FanAttributes.PRODUCT_ID, PhilipsApi.PRODUCT_ID),
+        (FanAttributes.DEVICE_ID, PhilipsApi.DEVICE_ID),
+        (FanAttributes.DEVICE_VERSION, PhilipsApi.DEVICE_VERSION),
+        (FanAttributes.SOFTWARE_VERSION, PhilipsApi.SOFTWARE_VERSION),
+        (FanAttributes.WIFI_VERSION, PhilipsApi.WIFI_VERSION),
+        (FanAttributes.ERROR_CODE, PhilipsApi.ERROR_CODE),
+        (FanAttributes.ERROR, PhilipsApi.ERROR_CODE, PhilipsApi.ERROR_CODE_MAP),
         # device configuration
-        (ATTR_LANGUAGE, PHILIPS_LANGUAGE),
-        (ATTR_PREFERRED_INDEX, PHILIPS_PREFERRED_INDEX, PHILIPS_PREFERRED_INDEX_MAP),
+        (FanAttributes.LANGUAGE, PhilipsApi.LANGUAGE),
+        (
+            FanAttributes.PREFERRED_INDEX,
+            PhilipsApi.PREFERRED_INDEX,
+            PhilipsApi.PREFERRED_INDEX_MAP,
+        ),
         # device sensors
         (
-            ATTR_RUNTIME,
-            PHILIPS_RUNTIME,
+            FanAttributes.RUNTIME,
+            PhilipsApi.RUNTIME,
             lambda x, _: str(timedelta(seconds=round(x / 1000))),
         ),
     ]
 
-    AVAILABLE_LIGHTS = [PHILIPS_DISPLAY_BACKLIGHT, PHILIPS_LIGHT_BRIGHTNESS]
+    AVAILABLE_LIGHTS = [PhilipsApi.DISPLAY_BACKLIGHT, PhilipsApi.LIGHT_BRIGHTNESS]
 
     AVAILABLE_SWITCHES = []
     AVAILABLE_SELECTS = []
 
 
 class PhilipsNewGenericCoAPFan(PhilipsGenericCoAPFanBase):
+    """Class to manage a new generic CoAP fan."""
+
     AVAILABLE_PRESET_MODES = {}
     AVAILABLE_SPEEDS = {}
 
     AVAILABLE_ATTRIBUTES = [
         # device information
-        (ATTR_NAME, PHILIPS_NEW_NAME),
-        (ATTR_MODEL_ID, PHILIPS_NEW_MODEL_ID),
-        (ATTR_PRODUCT_ID, PHILIPS_PRODUCT_ID),
-        (ATTR_DEVICE_ID, PHILIPS_DEVICE_ID),
-        (ATTR_SOFTWARE_VERSION, PHILIPS_SOFTWARE_VERSION),
-        (ATTR_WIFI_VERSION, PHILIPS_WIFI_VERSION),
-        # (ATTR_ERROR_CODE, PHILIPS_ERROR_CODE),
-        # (ATTR_ERROR, PHILIPS_ERROR_CODE, PHILIPS_ERROR_CODE_MAP),
+        (FanAttributes.NAME, PhilipsApi.NEW_NAME),
+        (FanAttributes.MODEL_ID, PhilipsApi.NEW_MODEL_ID),
+        (FanAttributes.PRODUCT_ID, PhilipsApi.PRODUCT_ID),
+        (FanAttributes.DEVICE_ID, PhilipsApi.DEVICE_ID),
+        (FanAttributes.SOFTWARE_VERSION, PhilipsApi.SOFTWARE_VERSION),
+        (FanAttributes.WIFI_VERSION, PhilipsApi.WIFI_VERSION),
+        # (FanAttributes.ERROR_CODE, PhilipsApi.ERROR_CODE),
+        # (FanAttributes.ERROR, PhilipsApi.ERROR_CODE, PhilipsApi.ERROR_CODE_MAP),
         # device configuration
-        (ATTR_LANGUAGE, PHILIPS_NEW_LANGUAGE),
+        (FanAttributes.LANGUAGE, PhilipsApi.NEW_LANGUAGE),
         (
-            ATTR_PREFERRED_INDEX,
-            PHILIPS_NEW_PREFERRED_INDEX,
-            PHILIPS_PREFERRED_INDEX_MAP,
+            FanAttributes.PREFERRED_INDEX,
+            PhilipsApi.NEW_PREFERRED_INDEX,
+            PhilipsApi.PREFERRED_INDEX_MAP,
         ),
         # device sensors
         (
-            ATTR_RUNTIME,
-            PHILIPS_RUNTIME,
+            FanAttributes.RUNTIME,
+            PhilipsApi.RUNTIME,
             lambda x, _: str(timedelta(seconds=round(x / 1000))),
         ),
     ]
@@ -474,146 +526,167 @@ class PhilipsNewGenericCoAPFan(PhilipsGenericCoAPFanBase):
     AVAILABLE_LIGHTS = []
     AVAILABLE_SWITCHES = []
     AVAILABLE_SELECTS = []
-    UNAVAILABLE_FILTERS = [PHILIPS_FILTER_NANOPROTECT_PREFILTER]
+    UNAVAILABLE_FILTERS = [PhilipsApi.FILTER_NANOPROTECT_PREFILTER]
 
-    KEY_PHILIPS_POWER = PHILIPS_NEW_POWER
+    KEY_PHILIPS_POWER = PhilipsApi.NEW_POWER
     STATE_POWER_ON = "ON"
     STATE_POWER_OFF = "OFF"
 
 
 class PhilipsHumidifierMixin(PhilipsGenericCoAPFanBase):
-    AVAILABLE_SELECTS = [PHILIPS_FUNCTION, PHILIPS_HUMIDITY_TARGET]
+    """Mixin for humidifiers."""
+
+    AVAILABLE_SELECTS = [PhilipsApi.FUNCTION, PhilipsApi.HUMIDITY_TARGET]
 
 
 # similar to the AC1715, the AC0850 seems to be a new class of devices that
 # follows some patterns of its own
 class PhilipsAC0850(PhilipsNewGenericCoAPFan):
+    """AC0850."""
+
     AVAILABLE_PRESET_MODES = {
-        PRESET_MODE_AUTO: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Auto General"},
-        PRESET_MODE_TURBO: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Turbo"},
-        PRESET_MODE_SLEEP: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Sleep"},
+        PresetMode.AUTO: {
+            PhilipsApi.NEW_POWER: "ON",
+            PhilipsApi.NEW_MODE: "Auto General",
+        },
+        PresetMode.TURBO: {PhilipsApi.NEW_POWER: "ON", PhilipsApi.NEW_MODE: "Turbo"},
+        PresetMode.SLEEP: {PhilipsApi.NEW_POWER: "ON", PhilipsApi.NEW_MODE: "Sleep"},
     }
     AVAILABLE_SPEEDS = {
-        PRESET_MODE_SLEEP: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Sleep"},
-        PRESET_MODE_TURBO: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Turbo"},
+        PresetMode.SLEEP: {PhilipsApi.NEW_POWER: "ON", PhilipsApi.NEW_MODE: "Sleep"},
+        PresetMode.TURBO: {PhilipsApi.NEW_POWER: "ON", PhilipsApi.NEW_MODE: "Turbo"},
     }
 
 
 # the AC1715 seems to be a new class of devices that follows some patterns of its own
 class PhilipsAC1715(PhilipsNewGenericCoAPFan):
+    """AC1715."""
+
     AVAILABLE_PRESET_MODES = {
-        PRESET_MODE_AUTO: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Auto General"},
-        SPEED_1: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Gentle/Speed 1"},
-        SPEED_2: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Speed 2"},
-        PRESET_MODE_TURBO: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Turbo"},
-        PRESET_MODE_SLEEP: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Sleep"},
+        PresetMode.AUTO: {
+            PhilipsApi.NEW_POWER: "ON",
+            PhilipsApi.NEW_MODE: "Auto General",
+        },
+        PresetMode.SPEED_1: {
+            PhilipsApi.NEW_POWER: "ON",
+            PhilipsApi.NEW_MODE: "Gentle/Speed 1",
+        },
+        PresetMode.SPEED_2: {
+            PhilipsApi.NEW_POWER: "ON",
+            PhilipsApi.NEW_MODE: "Speed 2",
+        },
+        PresetMode.TURBO: {PhilipsApi.NEW_POWER: "ON", PhilipsApi.NEW_MODE: "Turbo"},
+        PresetMode.SLEEP: {PhilipsApi.NEW_POWER: "ON", PhilipsApi.NEW_MODE: "Sleep"},
     }
     AVAILABLE_SPEEDS = {
-        PRESET_MODE_SLEEP: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Sleep"},
-        SPEED_1: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Gentle/Speed 1"},
-        SPEED_2: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Speed 2"},
-        PRESET_MODE_TURBO: {PHILIPS_NEW_POWER: "ON", PHILIPS_NEW_MODE: "Turbo"},
+        PresetMode.SLEEP: {PhilipsApi.NEW_POWER: "ON", PhilipsApi.NEW_MODE: "Sleep"},
+        PresetMode.SPEED_1: {
+            PhilipsApi.NEW_POWER: "ON",
+            PhilipsApi.NEW_MODE: "Gentle/Speed 1",
+        },
+        PresetMode.SPEED_2: {
+            PhilipsApi.NEW_POWER: "ON",
+            PhilipsApi.NEW_MODE: "Speed 2",
+        },
+        PresetMode.TURBO: {PhilipsApi.NEW_POWER: "ON", PhilipsApi.NEW_MODE: "Turbo"},
     }
-    AVAILABLE_LIGHTS = [PHILIPS_NEW_DISPLAY_BACKLIGHT]
-
-
-# TODO consolidate these classes as soon as we see a proper pattern
+    AVAILABLE_LIGHTS = [PhilipsApi.NEW_DISPLAY_BACKLIGHT]
 
 
 class PhilipsAC1214(PhilipsGenericCoAPFan):
+    """AC1214."""
+
     # the AC1214 doesn't seem to like a power on call when the mode or speed is set,
     # so this needs to be handled separately
     AVAILABLE_PRESET_MODES = {
-        PRESET_MODE_AUTO: {PHILIPS_MODE: "P"},
-        PRESET_MODE_ALLERGEN: {PHILIPS_MODE: "A"},
+        PresetMode.AUTO: {PhilipsApi.MODE: "P"},
+        PresetMode.ALLERGEN: {PhilipsApi.MODE: "A"},
         # make speeds available as preset
-        PRESET_MODE_NIGHT: {PHILIPS_MODE: "N"},
-        SPEED_1: {PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
-        SPEED_2: {PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
-        SPEED_3: {PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
-        PRESET_MODE_TURBO: {PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
+        PresetMode.NIGHT: {PhilipsApi.MODE: "N"},
+        PresetMode.SPEED_1: {PhilipsApi.MODE: "M", PhilipsApi.SPEED: "1"},
+        PresetMode.SPEED_2: {PhilipsApi.MODE: "M", PhilipsApi.SPEED: "2"},
+        PresetMode.SPEED_3: {PhilipsApi.MODE: "M", PhilipsApi.SPEED: "3"},
+        PresetMode.TURBO: {PhilipsApi.MODE: "M", PhilipsApi.SPEED: "t"},
     }
     AVAILABLE_SPEEDS = {
-        PRESET_MODE_NIGHT: {PHILIPS_MODE: "N"},
-        SPEED_1: {PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
-        SPEED_2: {PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
-        SPEED_3: {PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
-        PRESET_MODE_TURBO: {PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
+        PresetMode.NIGHT: {PhilipsApi.MODE: "N"},
+        PresetMode.SPEED_1: {PhilipsApi.MODE: "M", PhilipsApi.SPEED: "1"},
+        PresetMode.SPEED_2: {PhilipsApi.MODE: "M", PhilipsApi.SPEED: "2"},
+        PresetMode.SPEED_3: {PhilipsApi.MODE: "M", PhilipsApi.SPEED: "3"},
+        PresetMode.TURBO: {PhilipsApi.MODE: "M", PhilipsApi.SPEED: "t"},
     }
-    AVAILABLE_SWITCHES = [PHILIPS_CHILD_LOCK]
+    AVAILABLE_SWITCHES = [PhilipsApi.CHILD_LOCK]
 
     async def async_set_a(self) -> None:
-        _LOGGER.debug(f"AC1214 switches to mode 'A' first")
-        a_status_pattern = self._available_preset_modes.get(PRESET_MODE_ALLERGEN)
+        """Set the preset mode to Allergen."""
+        _LOGGER.debug("AC1214 switches to mode 'A' first")
+        a_status_pattern = self._available_preset_modes.get(PresetMode.ALLERGEN)
         await self.coordinator.client.set_control_values(data=a_status_pattern)
         await asyncio.sleep(1)
-        return
 
     async def async_set_preset_mode(self, preset_mode: str) -> None:
         """Set the preset mode of the fan."""
-        _LOGGER.debug(f"AC1214 async_set_preset_mode is called with: {preset_mode}")
+        _LOGGER.debug("AC1214 async_set_preset_mode is called with: %s", preset_mode)
 
         # the AC1214 doesn't like it if we set a preset mode to switch on the device,
         # so it needs to be done in sequence
         if not self.is_on:
-            _LOGGER.debug(f"AC1214 is switched on without setting a mode")
+            _LOGGER.debug("AC1214 is switched on without setting a mode")
             await self.coordinator.client.set_control_value(
-                PHILIPS_POWER, PHILIPS_POWER_MAP[SWITCH_ON]
+                PhilipsApi.POWER, PhilipsApi.POWER_MAP[SWITCH_ON]
             )
             await asyncio.sleep(1)
 
         # the AC1214 also doesn't seem to like switching to mode 'M' without cycling through mode 'A'
         current_pattern = self._available_preset_modes.get(self.preset_mode)
-        _LOGGER.debug(f"AC1214 is currently on mode: {current_pattern}")
+        _LOGGER.debug("AC1214 is currently on mode: %s", current_pattern)
         if preset_mode:
-            _LOGGER.debug(f"AC1214 preset mode requested: {preset_mode}")
+            _LOGGER.debug("AC1214 preset mode requested: %s", preset_mode)
             status_pattern = self._available_preset_modes.get(preset_mode)
-            _LOGGER.debug(f"this corresponds to status pattern: {status_pattern}")
+            _LOGGER.debug("this corresponds to status pattern: %s", status_pattern)
             if (
                 status_pattern
-                and status_pattern.get(PHILIPS_MODE) != "A"
-                and current_pattern.get(PHILIPS_MODE) != "M"
+                and status_pattern.get(PhilipsApi.MODE) != "A"
+                and current_pattern.get(PhilipsApi.MODE) != "M"
             ):
                 await self.async_set_a()
-            _LOGGER.debug(f"AC1214 sets preset mode to: {preset_mode}")
+            _LOGGER.debug("AC1214 sets preset mode to: %s", preset_mode)
             if status_pattern:
                 await self.coordinator.client.set_control_values(data=status_pattern)
-        return
 
     async def async_set_percentage(self, percentage: int) -> None:
         """Set the preset mode of the fan."""
-        _LOGGER.debug(f"AC1214 async_set_percentage is called with: {percentage}")
+        _LOGGER.debug("AC1214 async_set_percentage is called with: %s", percentage)
 
         # the AC1214 doesn't like it if we set a preset mode to switch on the device,
         # so it needs to be done in sequence
         if not self.is_on:
-            _LOGGER.debug(f"AC1214 is switched on without setting a mode")
+            _LOGGER.debug("AC1214 is switched on without setting a mode")
             await self.coordinator.client.set_control_value(
-                PHILIPS_POWER, PHILIPS_POWER_MAP[SWITCH_ON]
+                PhilipsApi.POWER, PhilipsApi.POWER_MAP[SWITCH_ON]
             )
             await asyncio.sleep(1)
 
         current_pattern = self._available_preset_modes.get(self.preset_mode)
-        _LOGGER.debug(f"AC1214 is currently on mode: {current_pattern}")
+        _LOGGER.debug("AC1214 is currently on mode: %s", current_pattern)
         if percentage == 0:
-            _LOGGER.debug(f"AC1214 uses 0% to switch off")
+            _LOGGER.debug("AC1214 uses 0% to switch off")
             await self.async_turn_off()
         else:
             # the AC1214 also doesn't seem to like switching to mode 'M' without cycling through mode 'A'
-            _LOGGER.debug(f"AC1214 speed change requested: {percentage}")
+            _LOGGER.debug("AC1214 speed change requested: %s", percentage)
             speed = percentage_to_ordered_list_item(self._speeds, percentage)
             status_pattern = self._available_speeds.get(speed)
-            _LOGGER.debug(f"this corresponds to status pattern: {status_pattern}")
+            _LOGGER.debug("this corresponds to status pattern: %s", status_pattern)
             if (
                 status_pattern
-                and status_pattern.get(PHILIPS_MODE) != "A"
-                and current_pattern.get(PHILIPS_MODE) != "M"
+                and status_pattern.get(PhilipsApi.MODE) != "A"
+                and current_pattern.get(PhilipsApi.MODE) != "M"
             ):
                 await self.async_set_a()
-            _LOGGER.debug(f"AC1214 sets speed percentage to: {percentage}")
+            _LOGGER.debug("AC1214 sets speed percentage to: %s", percentage)
             if status_pattern:
                 await self.coordinator.client.set_control_values(data=status_pattern)
-        return
 
     async def async_turn_on(
         self,
@@ -621,24 +694,27 @@ class PhilipsAC1214(PhilipsGenericCoAPFan):
         preset_mode: Optional[str] = None,
         **kwargs,
     ):
+        """Turn on the device."""
         _LOGGER.debug(
-            f"AC1214 async_turn_on called with percentage={percentage} and preset_mode={preset_mode}"
+            "AC1214 async_turn_on called with percentage=%s and preset_mode=%s",
+            percentage,
+            preset_mode,
         )
         # the AC1214 doesn't like it if we set a preset mode to switch on the device,
         # so it needs to be done in sequence
         if not self.is_on:
-            _LOGGER.debug(f"AC1214 is switched on without setting a mode")
+            _LOGGER.debug("AC1214 is switched on without setting a mode")
             await self.coordinator.client.set_control_value(
-                PHILIPS_POWER, PHILIPS_POWER_MAP[SWITCH_ON]
+                PhilipsApi.POWER, PhilipsApi.POWER_MAP[SWITCH_ON]
             )
             await asyncio.sleep(1)
 
         if preset_mode:
-            _LOGGER.debug(f"AC1214 preset mode requested: {preset_mode}")
+            _LOGGER.debug("AC1214 preset mode requested: %s", preset_mode)
             await self.async_set_preset_mode(preset_mode)
             return
         if percentage:
-            _LOGGER.debug(f"AC1214 speed change requested: {percentage}")
+            _LOGGER.debug("AC1214 speed change requested: %s", percentage)
             await self.async_set_percentage(percentage)
             return
 
@@ -647,297 +723,647 @@ class PhilipsAC2729(
     PhilipsHumidifierMixin,
     PhilipsGenericCoAPFan,
 ):
+    """AC2729."""
+
     AVAILABLE_PRESET_MODES = {
-        PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "P"},
-        PRESET_MODE_ALLERGEN: {PHILIPS_POWER: "1", PHILIPS_MODE: "A"},
+        PresetMode.AUTO: {PhilipsApi.POWER: "1", PhilipsApi.MODE: "P"},
+        PresetMode.ALLERGEN: {PhilipsApi.POWER: "1", PhilipsApi.MODE: "A"},
         # make speeds available as preset
-        PRESET_MODE_NIGHT: {PHILIPS_POWER: "1", PHILIPS_MODE: "S", PHILIPS_SPEED: "s"},
-        SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
-        SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
-        SPEED_3: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
-        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
+        PresetMode.NIGHT: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "S",
+            PhilipsApi.SPEED: "s",
+        },
+        PresetMode.SPEED_1: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "1",
+        },
+        PresetMode.SPEED_2: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "2",
+        },
+        PresetMode.SPEED_3: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "3",
+        },
+        PresetMode.TURBO: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "t",
+        },
     }
     AVAILABLE_SPEEDS = {
-        PRESET_MODE_NIGHT: {PHILIPS_POWER: "1", PHILIPS_MODE: "S", PHILIPS_SPEED: "s"},
-        SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
-        SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
-        SPEED_3: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
-        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
+        PresetMode.NIGHT: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "S",
+            PhilipsApi.SPEED: "s",
+        },
+        PresetMode.SPEED_1: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "1",
+        },
+        PresetMode.SPEED_2: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "2",
+        },
+        PresetMode.SPEED_3: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "3",
+        },
+        PresetMode.TURBO: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "t",
+        },
     }
-    AVAILABLE_SWITCHES = [PHILIPS_CHILD_LOCK]
+    AVAILABLE_SWITCHES = [PhilipsApi.CHILD_LOCK]
 
 
 class PhilipsAC2889(PhilipsGenericCoAPFan):
+    """AC2889."""
+
     AVAILABLE_PRESET_MODES = {
-        PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "P"},
-        PRESET_MODE_ALLERGEN: {PHILIPS_POWER: "1", PHILIPS_MODE: "A"},
-        PRESET_MODE_BACTERIA: {PHILIPS_POWER: "1", PHILIPS_MODE: "B"},
+        PresetMode.AUTO: {PhilipsApi.POWER: "1", PhilipsApi.MODE: "P"},
+        PresetMode.ALLERGEN: {PhilipsApi.POWER: "1", PhilipsApi.MODE: "A"},
+        PresetMode.BACTERIA: {PhilipsApi.POWER: "1", PhilipsApi.MODE: "B"},
         # make speeds available as preset
-        PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "s"},
-        SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
-        SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
-        SPEED_3: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
-        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
+        PresetMode.SLEEP: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "s",
+        },
+        PresetMode.SPEED_1: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "1",
+        },
+        PresetMode.SPEED_2: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "2",
+        },
+        PresetMode.SPEED_3: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "3",
+        },
+        PresetMode.TURBO: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "t",
+        },
     }
     AVAILABLE_SPEEDS = {
-        PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "s"},
-        SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
-        SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
-        SPEED_3: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
-        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
+        PresetMode.SLEEP: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "s",
+        },
+        PresetMode.SPEED_1: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "1",
+        },
+        PresetMode.SPEED_2: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "2",
+        },
+        PresetMode.SPEED_3: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "3",
+        },
+        PresetMode.TURBO: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "t",
+        },
     }
 
 
 class PhilipsAC29xx(PhilipsGenericCoAPFan):
+    """AC29xx family."""
+
     AVAILABLE_PRESET_MODES = {
-        PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "AG"},
-        PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "S"},
-        PRESET_MODE_GENTLE: {PHILIPS_POWER: "1", PHILIPS_MODE: "GT"},
-        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T"},
+        PresetMode.AUTO: {PhilipsApi.POWER: "1", PhilipsApi.MODE: "AG"},
+        PresetMode.SLEEP: {PhilipsApi.POWER: "1", PhilipsApi.MODE: "S"},
+        PresetMode.GENTLE: {PhilipsApi.POWER: "1", PhilipsApi.MODE: "GT"},
+        PresetMode.TURBO: {PhilipsApi.POWER: "1", PhilipsApi.MODE: "T"},
     }
     AVAILABLE_SPEEDS = {
-        PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "S"},
-        PRESET_MODE_GENTLE: {PHILIPS_POWER: "1", PHILIPS_MODE: "GT"},
-        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T"},
+        PresetMode.SLEEP: {PhilipsApi.POWER: "1", PhilipsApi.MODE: "S"},
+        PresetMode.GENTLE: {PhilipsApi.POWER: "1", PhilipsApi.MODE: "GT"},
+        PresetMode.TURBO: {PhilipsApi.POWER: "1", PhilipsApi.MODE: "T"},
     }
 
 
 class PhilipsAC2936(PhilipsAC29xx):
-    pass
+    """AC2936."""
 
 
 class PhilipsAC2939(PhilipsAC29xx):
-    pass
+    """AC2939."""
 
 
 class PhilipsAC2958(PhilipsAC29xx):
-    pass
+    """AC2958."""
 
 
 class PhilipsAC2959(PhilipsAC29xx):
-    pass
+    """AC2959."""
 
 
 class PhilipsAC30xx(PhilipsGenericCoAPFan):
+    """AC30xx family."""
+
     AVAILABLE_PRESET_MODES = {
-        PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "AG"},
+        PresetMode.AUTO: {PhilipsApi.POWER: "1", PhilipsApi.MODE: "AG"},
         # make speeds available as preset
-        PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "S", PHILIPS_SPEED: "s"},
-        SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
-        SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
-        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T", PHILIPS_SPEED: "t"},
+        PresetMode.SLEEP: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "S",
+            PhilipsApi.SPEED: "s",
+        },
+        PresetMode.SPEED_1: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "1",
+        },
+        PresetMode.SPEED_2: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "2",
+        },
+        PresetMode.TURBO: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "T",
+            PhilipsApi.SPEED: "t",
+        },
     }
     AVAILABLE_SPEEDS = {
-        PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "S", PHILIPS_SPEED: "s"},
-        SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
-        SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
-        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T", PHILIPS_SPEED: "t"},
+        PresetMode.SLEEP: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "S",
+            PhilipsApi.SPEED: "s",
+        },
+        PresetMode.SPEED_1: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "1",
+        },
+        PresetMode.SPEED_2: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "2",
+        },
+        PresetMode.TURBO: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "T",
+            PhilipsApi.SPEED: "t",
+        },
     }
 
 
 class PhilipsAC3033(PhilipsAC30xx):
-    pass
+    """AC3033."""
 
 
 class PhilipsAC3036(PhilipsAC30xx):
-    pass
+    """AC3036."""
 
 
 class PhilipsAC3039(PhilipsAC30xx):
-    pass
+    """AC3039."""
 
 
 class PhilipsAC3055(PhilipsAC30xx):
-    pass
+    """AC3055."""
 
 
 class PhilipsAC3059(PhilipsAC30xx):
-    pass
+    """AC3059."""
 
 
 class PhilipsAC3259(PhilipsGenericCoAPFan):
+    """AC3259."""
+
     AVAILABLE_PRESET_MODES = {
-        PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "P"},
-        PRESET_MODE_ALLERGEN: {PHILIPS_POWER: "1", PHILIPS_MODE: "A"},
-        PRESET_MODE_BACTERIA: {PHILIPS_POWER: "1", PHILIPS_MODE: "B"},
+        PresetMode.AUTO: {PhilipsApi.POWER: "1", PhilipsApi.MODE: "P"},
+        PresetMode.ALLERGEN: {PhilipsApi.POWER: "1", PhilipsApi.MODE: "A"},
+        PresetMode.BACTERIA: {PhilipsApi.POWER: "1", PhilipsApi.MODE: "B"},
         # make speeds available as preset
-        PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "s"},
-        SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
-        SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
-        SPEED_3: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
-        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
+        PresetMode.SLEEP: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "s",
+        },
+        PresetMode.SPEED_1: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "1",
+        },
+        PresetMode.SPEED_2: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "2",
+        },
+        PresetMode.SPEED_3: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "3",
+        },
+        PresetMode.TURBO: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "t",
+        },
     }
     AVAILABLE_SPEEDS = {
-        PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "s"},
-        SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
-        SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
-        SPEED_3: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
-        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
+        PresetMode.SLEEP: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "s",
+        },
+        PresetMode.SPEED_1: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "1",
+        },
+        PresetMode.SPEED_2: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "2",
+        },
+        PresetMode.SPEED_3: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "3",
+        },
+        PresetMode.TURBO: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "t",
+        },
     }
 
 
 class PhilipsAC3829(PhilipsHumidifierMixin, PhilipsGenericCoAPFan):
+    """AC3829."""
+
     AVAILABLE_PRESET_MODES = {
-        PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "P"},
-        PRESET_MODE_ALLERGEN: {PHILIPS_POWER: "1", PHILIPS_MODE: "A"},
+        PresetMode.AUTO: {PhilipsApi.POWER: "1", PhilipsApi.MODE: "P"},
+        PresetMode.ALLERGEN: {PhilipsApi.POWER: "1", PhilipsApi.MODE: "A"},
         # make speeds available as preset
-        PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "S", PHILIPS_SPEED: "s"},
-        SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
-        SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
-        SPEED_3: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
-        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
+        PresetMode.SLEEP: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "S",
+            PhilipsApi.SPEED: "s",
+        },
+        PresetMode.SPEED_1: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "1",
+        },
+        PresetMode.SPEED_2: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "2",
+        },
+        PresetMode.SPEED_3: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "3",
+        },
+        PresetMode.TURBO: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "t",
+        },
     }
     AVAILABLE_SPEEDS = {
-        PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "S", PHILIPS_SPEED: "s"},
-        SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
-        SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
-        SPEED_3: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
-        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
+        PresetMode.SLEEP: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "S",
+            PhilipsApi.SPEED: "s",
+        },
+        PresetMode.SPEED_1: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "1",
+        },
+        PresetMode.SPEED_2: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "2",
+        },
+        PresetMode.SPEED_3: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "3",
+        },
+        PresetMode.TURBO: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "t",
+        },
     }
-    AVAILABLE_SWITCHES = [PHILIPS_CHILD_LOCK]
+    AVAILABLE_SWITCHES = [PhilipsApi.CHILD_LOCK]
 
 
 class PhilipsAC385x50(PhilipsGenericCoAPFan):
+    """AC385x/50 family."""
+
     AVAILABLE_PRESET_MODES = {
-        PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "AG"},
+        PresetMode.AUTO: {PhilipsApi.POWER: "1", PhilipsApi.MODE: "AG"},
         # make speeds available as preset
-        PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "S", PHILIPS_SPEED: "s"},
-        SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
-        SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
-        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T", PHILIPS_SPEED: "t"},
+        PresetMode.SLEEP: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "S",
+            PhilipsApi.SPEED: "s",
+        },
+        PresetMode.SPEED_1: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "1",
+        },
+        PresetMode.SPEED_2: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "2",
+        },
+        PresetMode.TURBO: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "T",
+            PhilipsApi.SPEED: "t",
+        },
     }
     AVAILABLE_SPEEDS = {
-        PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "S", PHILIPS_SPEED: "s"},
-        SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
-        SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
-        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T", PHILIPS_SPEED: "t"},
+        PresetMode.SLEEP: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "S",
+            PhilipsApi.SPEED: "s",
+        },
+        PresetMode.SPEED_1: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "1",
+        },
+        PresetMode.SPEED_2: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "2",
+        },
+        PresetMode.TURBO: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "T",
+            PhilipsApi.SPEED: "t",
+        },
     }
 
 
 class PhilipsAC385450(PhilipsAC385x50):
-    pass
+    """AC3854/50."""
 
 
 class PhilipsAC385850(PhilipsAC385x50):
-    pass
+    """AC3858/50."""
 
 
 class PhilipsAC385x51(PhilipsGenericCoAPFan):
+    """AC385x/51 family."""
+
     AVAILABLE_PRESET_MODES = {
-        PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "AG"},
+        PresetMode.AUTO: {PhilipsApi.POWER: "1", PhilipsApi.MODE: "AG"},
         # make speeds available as preset
-        PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "S", PHILIPS_SPEED: "s"},
-        PRESET_MODE_SLEEP_ALLERGY: {
-            PHILIPS_POWER: "1",
-            PHILIPS_MODE: "AS",
-            PHILIPS_SPEED: "as",
+        PresetMode.SLEEP: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "S",
+            PhilipsApi.SPEED: "s",
         },
-        SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
-        SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
-        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T", PHILIPS_SPEED: "t"},
+        PresetMode.SLEEP_ALLERGY: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "AS",
+            PhilipsApi.SPEED: "as",
+        },
+        PresetMode.SPEED_1: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "1",
+        },
+        PresetMode.SPEED_2: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "2",
+        },
+        PresetMode.TURBO: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "T",
+            PhilipsApi.SPEED: "t",
+        },
     }
     AVAILABLE_SPEEDS = {
-        PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "S", PHILIPS_SPEED: "s"},
-        SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
-        SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
-        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T", PHILIPS_SPEED: "t"},
+        PresetMode.SLEEP: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "S",
+            PhilipsApi.SPEED: "s",
+        },
+        PresetMode.SPEED_1: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "1",
+        },
+        PresetMode.SPEED_2: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "2",
+        },
+        PresetMode.TURBO: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "T",
+            PhilipsApi.SPEED: "t",
+        },
     }
-    AVAILABLE_SWITCHES = [PHILIPS_CHILD_LOCK]
+    AVAILABLE_SWITCHES = [PhilipsApi.CHILD_LOCK]
 
 
 class PhilipsAC385451(PhilipsAC385x51):
-    pass
+    """AC3854/51."""
 
 
 class PhilipsAC385851(PhilipsAC385x51):
-    pass
+    """AC3858/51."""
 
 
 class PhilipsAC4236(PhilipsGenericCoAPFan):
+    """AC4236."""
+
     AVAILABLE_PRESET_MODES = {
-        PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "AG"},
+        PresetMode.AUTO: {PhilipsApi.POWER: "1", PhilipsApi.MODE: "AG"},
         # make speeds available as preset
-        PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "S", PHILIPS_SPEED: "s"},
-        SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
-        SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
-        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T", PHILIPS_SPEED: "t"},
+        PresetMode.SLEEP: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "S",
+            PhilipsApi.SPEED: "s",
+        },
+        PresetMode.SPEED_1: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "1",
+        },
+        PresetMode.SPEED_2: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "2",
+        },
+        PresetMode.TURBO: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "T",
+            PhilipsApi.SPEED: "t",
+        },
     }
     AVAILABLE_SPEEDS = {
-        PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "S", PHILIPS_SPEED: "s"},
-        SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
-        SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
-        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "T", PHILIPS_SPEED: "t"},
+        PresetMode.SLEEP: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "S",
+            PhilipsApi.SPEED: "s",
+        },
+        PresetMode.SPEED_1: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "1",
+        },
+        PresetMode.SPEED_2: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "2",
+        },
+        PresetMode.TURBO: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "T",
+            PhilipsApi.SPEED: "t",
+        },
     }
 
 
 class PhilipsAC4558(PhilipsGenericCoAPFan):
+    """AC4558."""
+
     AVAILABLE_PRESET_MODES = {
         # there doesn't seem to be a manual mode, so no speed setting as part of preset
-        PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "AG"},
-        PRESET_MODE_GAS: {PHILIPS_POWER: "1", PHILIPS_MODE: "F"},
+        PresetMode.AUTO: {PhilipsApi.POWER: "1", PhilipsApi.MODE: "AG"},
+        PresetMode.GAS: {PhilipsApi.POWER: "1", PhilipsApi.MODE: "F"},
         # it seems that when setting the pollution and allergen modes, we also need to set speed "a"
-        PRESET_MODE_POLLUTION: {
-            PHILIPS_POWER: "1",
-            PHILIPS_MODE: "P",
-            PHILIPS_SPEED: "a",
+        PresetMode.POLLUTION: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "P",
+            PhilipsApi.SPEED: "a",
         },
-        PRESET_MODE_ALLERGEN: {
-            PHILIPS_POWER: "1",
-            PHILIPS_MODE: "A",
-            PHILIPS_SPEED: "a",
+        PresetMode.ALLERGEN: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "A",
+            PhilipsApi.SPEED: "a",
         },
     }
     AVAILABLE_SPEEDS = {
-        PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_SPEED: "s"},
-        SPEED_1: {PHILIPS_POWER: "1", PHILIPS_SPEED: "1"},
-        SPEED_2: {PHILIPS_POWER: "1", PHILIPS_SPEED: "2"},
-        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_SPEED: "t"},
+        PresetMode.SLEEP: {PhilipsApi.POWER: "1", PhilipsApi.SPEED: "s"},
+        PresetMode.SPEED_1: {PhilipsApi.POWER: "1", PhilipsApi.SPEED: "1"},
+        PresetMode.SPEED_2: {PhilipsApi.POWER: "1", PhilipsApi.SPEED: "2"},
+        PresetMode.TURBO: {PhilipsApi.POWER: "1", PhilipsApi.SPEED: "t"},
     }
 
 
 class PhilipsAC5659(PhilipsGenericCoAPFan):
+    """AC5659."""
+
     AVAILABLE_PRESET_MODES = {
-        PRESET_MODE_AUTO: {PHILIPS_POWER: "1", PHILIPS_MODE: "P"},
-        PRESET_MODE_ALLERGEN: {PHILIPS_POWER: "1", PHILIPS_MODE: "A"},
-        PRESET_MODE_BACTERIA: {PHILIPS_POWER: "1", PHILIPS_MODE: "B"},
+        PresetMode.AUTO: {PhilipsApi.POWER: "1", PhilipsApi.MODE: "P"},
+        PresetMode.ALLERGEN: {PhilipsApi.POWER: "1", PhilipsApi.MODE: "A"},
+        PresetMode.BACTERIA: {PhilipsApi.POWER: "1", PhilipsApi.MODE: "B"},
         # make speeds available as preset
-        PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "s"},
-        SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
-        SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
-        SPEED_3: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
-        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
+        PresetMode.SLEEP: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "s",
+        },
+        PresetMode.SPEED_1: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "1",
+        },
+        PresetMode.SPEED_2: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "2",
+        },
+        PresetMode.SPEED_3: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "3",
+        },
+        PresetMode.TURBO: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "t",
+        },
     }
     AVAILABLE_SPEEDS = {
-        PRESET_MODE_SLEEP: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "s"},
-        SPEED_1: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "1"},
-        SPEED_2: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "2"},
-        SPEED_3: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "3"},
-        PRESET_MODE_TURBO: {PHILIPS_POWER: "1", PHILIPS_MODE: "M", PHILIPS_SPEED: "t"},
+        PresetMode.SLEEP: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "s",
+        },
+        PresetMode.SPEED_1: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "1",
+        },
+        PresetMode.SPEED_2: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "2",
+        },
+        PresetMode.SPEED_3: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "3",
+        },
+        PresetMode.TURBO: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "t",
+        },
     }
 
 
 model_to_class = {
-    MODEL_AC0850: PhilipsAC0850,
-    MODEL_AC1214: PhilipsAC1214,
-    MODEL_AC1715: PhilipsAC1715,
-    MODEL_AC2729: PhilipsAC2729,
-    MODEL_AC2889: PhilipsAC2889,
-    MODEL_AC2936: PhilipsAC2936,
-    MODEL_AC2939: PhilipsAC2939,
-    MODEL_AC2958: PhilipsAC2958,
-    MODEL_AC2959: PhilipsAC2959,
-    MODEL_AC3033: PhilipsAC3033,
-    MODEL_AC3036: PhilipsAC3036,
-    MODEL_AC3039: PhilipsAC3039,
-    MODEL_AC3055: PhilipsAC3055,
-    MODEL_AC3059: PhilipsAC3059,
-    MODEL_AC3259: PhilipsAC3259,
-    MODEL_AC3829: PhilipsAC3829,
-    MODEL_AC3854_50: PhilipsAC385450,
-    MODEL_AC3854_51: PhilipsAC385451,
-    MODEL_AC3858_50: PhilipsAC385850,
-    MODEL_AC3858_51: PhilipsAC385851,
-    MODEL_AC4236: PhilipsAC4236,
-    MODEL_AC4558: PhilipsAC4558,
-    MODEL_AC5659: PhilipsAC5659,
+    FanModel.AC0850: PhilipsAC0850,
+    FanModel.AC1214: PhilipsAC1214,
+    FanModel.AC1715: PhilipsAC1715,
+    FanModel.AC2729: PhilipsAC2729,
+    FanModel.AC2889: PhilipsAC2889,
+    FanModel.AC2936: PhilipsAC2936,
+    FanModel.AC2939: PhilipsAC2939,
+    FanModel.AC2958: PhilipsAC2958,
+    FanModel.AC2959: PhilipsAC2959,
+    FanModel.AC3033: PhilipsAC3033,
+    FanModel.AC3036: PhilipsAC3036,
+    FanModel.AC3039: PhilipsAC3039,
+    FanModel.AC3055: PhilipsAC3055,
+    FanModel.AC3059: PhilipsAC3059,
+    FanModel.AC3259: PhilipsAC3259,
+    FanModel.AC3829: PhilipsAC3829,
+    FanModel.AC3854_50: PhilipsAC385450,
+    FanModel.AC3854_51: PhilipsAC385451,
+    FanModel.AC3858_50: PhilipsAC385850,
+    FanModel.AC3858_51: PhilipsAC385851,
+    FanModel.AC4236: PhilipsAC4236,
+    FanModel.AC4558: PhilipsAC4558,
+    FanModel.AC5659: PhilipsAC5659,
 }

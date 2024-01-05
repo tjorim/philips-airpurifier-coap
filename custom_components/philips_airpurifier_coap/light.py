@@ -19,15 +19,15 @@ from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers.entity import Entity
 
 from .const import (
-    ATTR_LABEL,
     CONF_MODEL,
     DATA_KEY_COORDINATOR,
     DIMMABLE,
     DOMAIN,
     LIGHT_TYPES,
-    PHILIPS_DEVICE_ID,
     SWITCH_OFF,
     SWITCH_ON,
+    FanAttributes,
+    PhilipsApi,
 )
 from .philips import Coordinator, PhilipsEntity, model_to_class
 
@@ -88,7 +88,7 @@ class PhilipsLight(PhilipsEntity, LightEntity):
         self._attr_device_class = self._description.get(ATTR_DEVICE_CLASS)
         self._attr_icon = self._description.get(ATTR_ICON)
         self._attr_name = (
-            f"{name} {self._description[ATTR_LABEL].replace('_', ' ').title()}"
+            f"{name} {self._description[FanAttributes.LABEL].replace('_', ' ').title()}"
         )
         self._attr_entity_category = self._description.get(CONF_ENTITY_CATEGORY)
 
@@ -103,7 +103,7 @@ class PhilipsLight(PhilipsEntity, LightEntity):
             self._attr_supported_color_modes = {ColorMode.ONOFF}
 
         try:
-            device_id = self._device_status[PHILIPS_DEVICE_ID]
+            device_id = self._device_status[PhilipsApi.DEVICE_ID]
             self._attr_unique_id = f"{self._model}-{device_id}-{light.lower()}"
         except Exception as e:
             _LOGGER.error("Failed retrieving unique_id: %s", e)

@@ -59,7 +59,7 @@ class Timer:
         # Set new Timeout immediatly effective
         self.reset()
 
-    def _cancel(self, msg="STOP"):
+    def cancel(self, msg="STOP"):
         """Cancel the task."""
         if self._in_callback:
             raise CallbackRunningException("Timedout too late to cancel!")
@@ -71,7 +71,7 @@ class Timer:
         """Reset the task."""
         # _LOGGER.debug("Cancel current timer...")
         with contextlib.suppress(CallbackRunningException):
-            self._cancel(msg="RESET")
+            self.cancel(msg="RESET")
         self.start()
 
     def start(self):
