@@ -38,13 +38,12 @@ from .const import (
     PHILIPS_DEVICE_ID,
     SENSOR_TYPES,
 )
-from .model import DeviceStatus
 from .philips import Coordinator, PhilipsEntity, model_to_class
 
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup_entry(
+async def async_setup_entry(  # noqa: D103
     hass: HomeAssistant,
     entry: ConfigEntry,
     async_add_entities: Callable[[list[Entity], bool], None],
@@ -74,9 +73,9 @@ async def async_setup_entry(
             cls_unavailable_filters = getattr(cls, "UNAVAILABLE_FILTERS", [])
             unavailable_filters.extend(cls_unavailable_filters)
 
-    for filter in FILTER_TYPES:
-        if filter in status and not filter in unavailable_filters:
-            sensors.append(PhilipsFilterSensor(coordinator, name, model, filter))
+    for _filter in FILTER_TYPES:
+        if _filter in status and _filter not in unavailable_filters:
+            sensors.append(PhilipsFilterSensor(coordinator, name, model, _filter))
 
     async_add_entities(sensors, update_before_add=False)
 
@@ -84,7 +83,7 @@ async def async_setup_entry(
 class PhilipsSensor(PhilipsEntity, SensorEntity):
     """Define a Philips AirPurifier sensor."""
 
-    def __init__(
+    def __init__(  # noqa: D107
         self, coordinator: Coordinator, name: str, model: str, kind: str
     ) -> None:
         super().__init__(coordinator)
@@ -112,6 +111,7 @@ class PhilipsSensor(PhilipsEntity, SensorEntity):
 
     @property
     def native_value(self) -> StateType:
+        """Return the native value of the sensor."""
         value = self._device_status[self.kind]
         convert = self._description.get(ATTR_VALUE)
         if convert:
@@ -120,6 +120,7 @@ class PhilipsSensor(PhilipsEntity, SensorEntity):
 
     @property
     def icon(self) -> str:
+        """Return the icon of the sensor."""
         if self._warn_value and self._warn_value >= int(self.native_value):
             return self._warn_icon
         else:
@@ -129,7 +130,7 @@ class PhilipsSensor(PhilipsEntity, SensorEntity):
 class PhilipsFilterSensor(PhilipsEntity, SensorEntity):
     """Define a Philips AirPurifier filter sensor."""
 
-    def __init__(
+    def __init__(  # noqa: D107
         self, coordinator: Coordinator, name: str, model: str, kind: str
     ) -> None:
         super().__init__(coordinator)
@@ -164,6 +165,7 @@ class PhilipsFilterSensor(PhilipsEntity, SensorEntity):
 
     @property
     def native_value(self) -> StateType:
+        """Return the native value of the filter sensor."""
         if self._has_total:
             return self._percentage
         else:
@@ -171,6 +173,7 @@ class PhilipsFilterSensor(PhilipsEntity, SensorEntity):
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
+        """Return the extra state attributes of the filter sensor."""
         if self._type_key in self._device_status:
             self._attrs[ATTR_TYPE] = self._device_status[self._type_key]
         # self._attrs[ATTR_RAW] = self._value
@@ -201,6 +204,7 @@ class PhilipsFilterSensor(PhilipsEntity, SensorEntity):
 
     @property
     def icon(self) -> str:
+        """Return the icon of the filter sensor."""
         if self._warn_value and self._warn_value >= int(self.native_value):
             return self._warn_icon
         else:
