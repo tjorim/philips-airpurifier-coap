@@ -40,6 +40,8 @@ PLATFORMS = ["fan", "sensor", "switch", "light", "select"]
 
 
 class ListingView(HomeAssistantView):
+    """Provide a json list of the used icons."""
+
     requires_auth = False
 
     def __init__(self, hass, url):
