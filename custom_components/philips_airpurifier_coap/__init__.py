@@ -1,23 +1,19 @@
 """Support for Philips AirPurifier with CoAP."""
 from __future__ import annotations
-import asyncio
 
+import asyncio
+import json
 import logging
+from os import path, walk
 
 from aioairctrl import CoAPClient
 
+from homeassistant.components.frontend import add_extra_js_url
+from homeassistant.components.http.view import HomeAssistantView
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
-from homeassistant.config_entries import ConfigEntry
-
-from homeassistant.components.frontend import add_extra_js_url
-from homeassistant.components.http.view import HomeAssistantView
-
-import json
-from os import walk, path
-
-from .philips import Coordinator
 
 from .const import (
     DATA_KEY_CLIENT,
@@ -31,6 +27,7 @@ from .const import (
     LOADER_URL,
     PAP,
 )
+from .philips import Coordinator
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -43,7 +40,6 @@ PLATFORMS = ["fan", "sensor", "switch", "light", "select"]
 
 
 class ListingView(HomeAssistantView):
-
     requires_auth = False
 
     def __init__(self, hass, url):
@@ -67,7 +63,7 @@ async def async_setup(hass: HomeAssistant, config) -> bool:
 
     # walk the directory to get the icons
     icons = []
-    for (dirpath, dirnames, filenames) in walk(iconpath):
+    for dirpath, _dirnames, filenames in walk(iconpath):
         icons.extend(
             [
                 {"name": path.join(dirpath[len(iconpath) :], fn[:-4])}
