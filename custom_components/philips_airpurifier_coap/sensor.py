@@ -1,4 +1,4 @@
-"""Philips Air Purifier & Humidifier Sensors"""
+"""Philips Air Purifier & Humidifier Sensors."""
 from __future__ import annotations
 
 from datetime import timedelta
@@ -6,12 +6,13 @@ import logging
 from typing import Any, Callable, List, cast
 
 from homeassistant.components.sensor import ATTR_STATE_CLASS, SensorEntity
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     ATTR_DEVICE_CLASS,
     ATTR_ICON,
+    CONF_ENTITY_CATEGORY,
     CONF_HOST,
     CONF_NAME,
-    CONF_ENTITY_CATEGORY,
     PERCENTAGE,
     TIME_HOURS,
 )
@@ -19,9 +20,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers.entity import Entity, EntityCategory
 from homeassistant.helpers.typing import StateType
-from homeassistant.config_entries import ConfigEntry
 
-from .philips import Coordinator, PhilipsEntity, model_to_class
 from .const import (
     ATTR_LABEL,
     ATTR_TIME_REMAINING,
@@ -39,6 +38,7 @@ from .const import (
     SENSOR_TYPES,
 )
 from .model import DeviceStatus
+from .philips import Coordinator, PhilipsEntity, model_to_class
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
-    async_add_entities: Callable[[List[Entity], bool], None]
+    async_add_entities: Callable[[List[Entity], bool], None],
 ) -> None:
     _LOGGER.debug("async_setup_entry called for platform sensor")
 
@@ -60,7 +60,7 @@ async def async_setup_entry(
     status = coordinator.status
 
     sensors = []
-    
+
     for sensor in SENSOR_TYPES:
         if sensor in status:
             sensors.append(PhilipsSensor(coordinator, name, model, sensor))
@@ -69,7 +69,6 @@ async def async_setup_entry(
     unavailable_filters = []
 
     if model_class:
-
         for cls in reversed(model_class.__mro__):
             cls_unavailable_filters = getattr(cls, "UNAVAILABLE_FILTERS", [])
             unavailable_filters.extend(cls_unavailable_filters)
@@ -84,7 +83,9 @@ async def async_setup_entry(
 class PhilipsSensor(PhilipsEntity, SensorEntity):
     """Define a Philips AirPurifier sensor."""
 
-    def __init__(self, coordinator: Coordinator, name: str, model: str, kind: str) -> None:
+    def __init__(
+        self, coordinator: Coordinator, name: str, model: str, kind: str
+    ) -> None:
         super().__init__(coordinator)
         self._model = model
         self._description = SENSOR_TYPES[kind]
@@ -94,7 +95,9 @@ class PhilipsSensor(PhilipsEntity, SensorEntity):
         self._attr_state_class = self._description.get(ATTR_STATE_CLASS)
         self._attr_device_class = self._description.get(ATTR_DEVICE_CLASS)
         self._attr_entity_category = self._description.get(CONF_ENTITY_CATEGORY)
-        self._attr_name = f"{name} {self._description[ATTR_LABEL].replace('_', ' ').title()}"
+        self._attr_name = (
+            f"{name} {self._description[ATTR_LABEL].replace('_', ' ').title()}"
+        )
         self._attr_native_unit_of_measurement = self._description.get(ATTR_UNIT)
 
         try:
@@ -125,7 +128,9 @@ class PhilipsSensor(PhilipsEntity, SensorEntity):
 class PhilipsFilterSensor(PhilipsEntity, SensorEntity):
     """Define a Philips AirPurifier filter sensor."""
 
-    def __init__(self, coordinator: Coordinator, name: str, model: str, kind: str) -> None:
+    def __init__(
+        self, coordinator: Coordinator, name: str, model: str, kind: str
+    ) -> None:
         super().__init__(coordinator)
         self._model = model
         self._description = FILTER_TYPES[kind]
@@ -133,7 +138,9 @@ class PhilipsFilterSensor(PhilipsEntity, SensorEntity):
         self._warn_value = self._description[ATTR_WARN_VALUE]
         self._norm_icon = self._description[ATTR_ICON]
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
-        self._attr_name = f"{name} {self._description[ATTR_LABEL].replace('_', ' ').title()}"
+        self._attr_name = (
+            f"{name} {self._description[ATTR_LABEL].replace('_', ' ').title()}"
+        )
 
         self._value_key = kind
         self._total_key = self._description[ATTR_TOTAL]
@@ -146,7 +153,9 @@ class PhilipsFilterSensor(PhilipsEntity, SensorEntity):
 
         try:
             device_id = self._device_status[PHILIPS_DEVICE_ID]
-            self._attr_unique_id = f"{self._model}-{device_id}-{self._description[ATTR_LABEL]}"
+            self._attr_unique_id = (
+                f"{self._model}-{device_id}-{self._description[ATTR_LABEL]}"
+            )
         except Exception as e:
             _LOGGER.error("Failed retrieving unique_id: %s", e)
             raise PlatformNotReady
