@@ -1,33 +1,32 @@
-"""Philips Air Purifier & Humidifier Selects"""
+"""Philips Air Purifier & Humidifier Selects."""
 from __future__ import annotations
 
+from collections.abc import Callable
 import logging
-from typing import Any, Callable, List
-
-from aioairctrl import CoAPClient
+from typing import Any
 
 from homeassistant.components.select import SelectEntity
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     ATTR_DEVICE_CLASS,
+    CONF_ENTITY_CATEGORY,
     CONF_HOST,
     CONF_NAME,
-    CONF_ENTITY_CATEGORY,
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers.entity import Entity
-from homeassistant.config_entries import ConfigEntry
 
-from .philips import Coordinator, PhilipsEntity, model_to_class
 from .const import (
     ATTR_LABEL,
-    OPTIONS,
     CONF_MODEL,
     DATA_KEY_COORDINATOR,
     DOMAIN,
+    OPTIONS,
     PHILIPS_DEVICE_ID,
     SELECT_TYPES,
 )
+from .philips import Coordinator, PhilipsEntity, model_to_class
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -35,8 +34,9 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
-    async_add_entities: Callable[[List[Entity], bool], None],
+    async_add_entities: Callable[[list[Entity], bool], None],
 ) -> None:
+    """Set up the select platform."""
     _LOGGER.debug("async_setup_entry called for platform select")
 
     host = entry.data[CONF_HOST]
@@ -49,7 +49,6 @@ async def async_setup_entry(
 
     model_class = model_to_class.get(model)
     if model_class:
-
         available_selects = []
 
         for cls in reversed(model_class.__mro__):
@@ -74,7 +73,7 @@ class PhilipsSelect(PhilipsEntity, SelectEntity):
 
     _attr_is_on: bool | None = False
 
-    def __init__(
+    def __init__(  # noqa: D107
         self, coordinator: Coordinator, name: str, model: str, select: str
     ) -> None:
         super().__init__(coordinator)
@@ -107,14 +106,16 @@ class PhilipsSelect(PhilipsEntity, SelectEntity):
 
     @property
     def current_option(self) -> str:
+        """Return the currently selected option."""
         option = self._device_status.get(self.kind)
         if option in self._options:
             return self._options[option]
         return None
 
     async def async_select_option(self, option: str) -> None:
-        if option == None or len(option) == 0:
-            _LOGGER.error(f"Cannot set empty option '{option}'")
+        """Select an option."""
+        if option is None or len(option) == 0:
+            _LOGGER.error("Cannot set empty option '%s'", option)
             return
         try:
             option_key = next(
@@ -128,8 +129,9 @@ class PhilipsSelect(PhilipsEntity, SelectEntity):
             )
             await self.coordinator.client.set_control_value(self.kind, option_key)
         except Exception as e:
-            _LOGGER.error(f"Failed setting option: '{option}' with error: {e}")
+            _LOGGER.error("Failed setting option: '%s' with error: %s", option, e)
 
     @property
     def icon(self) -> str:
+        """Return the icon."""
         return self._icons.get(self.current_option)
