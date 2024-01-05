@@ -1,27 +1,22 @@
+"""Collection of classes to manage Philips AirPurifier devices."""
 from __future__ import annotations
 
-from typing import Any, Callable, Dict, List, Optional, Union
-
-import logging
 import asyncio
 from asyncio.tasks import Task
+from collections.abc import Callable
 from datetime import timedelta
+import logging
+from typing import Any, Optional, Union
 
 from aioairctrl import CoAPClient
 
+from homeassistant.components.fan import FanEntity, FanEntityFeature
 from homeassistant.core import CALLBACK_TYPE, callback
-from homeassistant.helpers.entity import Entity
 from homeassistant.exceptions import ConfigEntryNotReady, PlatformNotReady
-
+from homeassistant.helpers.entity import Entity
 from homeassistant.util.percentage import (
     ordered_list_item_to_percentage,
     percentage_to_ordered_list_item,
-)
-
-from homeassistant.components.fan import (
-    SUPPORT_PRESET_MODE,
-    SUPPORT_SET_SPEED,
-    FanEntity,
 )
 
 from .const import *
@@ -332,9 +327,9 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
 
     @property
     def supported_features(self) -> int:
-        features = SUPPORT_PRESET_MODE
+        features = FanEntityFeature.PRESET_MODE
         if self._speeds:
-            features |= SUPPORT_SET_SPEED
+            features |= FanEntityFeature.SET_SPEED
         return features
 
     @property
@@ -717,6 +712,7 @@ class PhilipsAC2939(PhilipsAC29xx):
 
 class PhilipsAC2958(PhilipsAC29xx):
     pass
+
 
 class PhilipsAC2959(PhilipsAC29xx):
     pass
