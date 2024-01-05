@@ -1,6 +1,8 @@
 """Constants for Philips AirPurifier integration."""
 from __future__ import annotations
 
+from enum import StrEnum
+
 from homeassistant.components.sensor import (
     ATTR_STATE_CLASS,
     SensorDeviceClass,
@@ -34,7 +36,7 @@ DATA_KEY_FAN = "fan"
 DEFAULT_NAME = "Philips AirPurifier"
 
 
-class ICON:
+class ICON(StrEnum):
     """Custom icons provided by the integration for the interface."""
 
     POWER_BUTTON = "pap:power_button"
@@ -75,345 +77,374 @@ ICONS = "icons"
 CONF_MODEL = "model"
 CONF_DEVICE_ID = "device_id"
 
-MODEL_AC0850 = "AC0850"
-MODEL_AC1214 = "AC1214"
-MODEL_AC1715 = "AC1715"
-MODEL_AC2729 = "AC2729"
-MODEL_AC2889 = "AC2889"
-MODEL_AC2936 = "AC2936"
-MODEL_AC2939 = "AC2939"
-MODEL_AC2958 = "AC2958"
-MODEL_AC2959 = "AC2959"
-MODEL_AC3033 = "AC3033"
-MODEL_AC3036 = "AC3036"
-MODEL_AC3039 = "AC3039"
-MODEL_AC3055 = "AC3055"
-MODEL_AC3059 = "AC3059"
-MODEL_AC3259 = "AC3259"
-MODEL_AC3829 = "AC3829"
-MODEL_AC3854_50 = "AC3854/50"
-MODEL_AC3854_51 = "AC3854/51"
-MODEL_AC3858_50 = "AC3858/50"
-MODEL_AC3858_51 = "AC3858/51"
-MODEL_AC4236 = "AC4236"
-MODEL_AC4558 = "AC4558"
-MODEL_AC5659 = "AC5659"
-
-SPEED_1 = "speed 1"
-SPEED_GENTLE_1 = "gentle/speed 1"
-SPEED_2 = "speed 2"
-SPEED_3 = "speed 3"
-PRESET_MODE_ALLERGEN = "allergen"
-PRESET_MODE_AUTO = "auto"
-PRESET_MODE_AUTO_GENERAL = "auto general"
-PRESET_MODE_BACTERIA = "bacteria"
-PRESET_MODE_GENTLE = "gentle"
-PRESET_MODE_NIGHT = "night"
-PRESET_MODE_SLEEP = "sleep"
-PRESET_MODE_SLEEP_ALLERGY = "allergy sleep"
-PRESET_MODE_TURBO = "turbo"
-PRESET_MODE_GAS = "gas"
-PRESET_MODE_POLLUTION = "pollution"
 SWITCH_ON = "on"
 SWITCH_OFF = "off"
 OPTIONS = "options"
 DIMMABLE = "dimmable"
 
-PRESET_MODE_ICON_MAP = {
-    PRESET_MODE_ALLERGEN: ICON.ALLERGEN_MODE,
-    PRESET_MODE_AUTO: ICON.AUTO_MODE,
-    PRESET_MODE_AUTO_GENERAL: ICON.AUTO_MODE,
-    PRESET_MODE_BACTERIA: ICON.BACTERIA_VIRUS_MODE,
-    SPEED_GENTLE_1: ICON.SPEED_1,
-    SPEED_1: ICON.SPEED_1,
-    SPEED_2: ICON.SPEED_2,
-    SPEED_3: ICON.SPEED_3,
-    # we use the sleep mode icon for all related modes
-    PRESET_MODE_GENTLE: ICON.SLEEP_MODE,
-    PRESET_MODE_NIGHT: ICON.SLEEP_MODE,
-    PRESET_MODE_SLEEP: ICON.SLEEP_MODE,
-    # unfortunately, the allergy sleep mode has the same icon as the auto mode on the device
-    PRESET_MODE_SLEEP_ALLERGY: ICON.AUTO_MODE,
-    # some devices have a gas and a pollution mode, but there doesn't seem to be a Philips icon for that
-    PRESET_MODE_POLLUTION: ICON.AUTO_MODE,
-    PRESET_MODE_GAS: ICON.AUTO_MODE,
-}
 
-FUNCTION_PURIFICATION = "purification"
-FUNCTION_PURIFICATION_HUMIDIFICATION = "purification_humidification"
+class FanModel(StrEnum):
+    """Supported fan models."""
 
-SERVICE_SET_CHILD_LOCK_OFF = "set_child_lock_off"
-SERVICE_SET_CHILD_LOCK_ON = "set_child_lock_on"
-SERVICE_SET_DISPLAY_BACKLIGHT_OFF = "set_display_backlight_off"
-SERVICE_SET_DISPLAY_BACKLIGHT_ON = "set_display_backlight_on"
-SERVICE_SET_FUNCTION = "set_function"
-SERVICE_SET_HUMIDITY_TARGET = "set_humidity_target"
-SERVICE_SET_LIGHT_BRIGHTNESS = "set_light_brightness"
+    AC0850 = "AC0850"
+    AC1214 = "AC1214"
+    AC1715 = "AC1715"
+    AC2729 = "AC2729"
+    AC2889 = "AC2889"
+    AC2936 = "AC2936"
+    AC2939 = "AC2939"
+    AC2958 = "AC2958"
+    AC2959 = "AC2959"
+    AC3033 = "AC3033"
+    AC3036 = "AC3036"
+    AC3039 = "AC3039"
+    AC3055 = "AC3055"
+    AC3059 = "AC3059"
+    AC3259 = "AC3259"
+    AC3829 = "AC3829"
+    AC3854_50 = "AC3854/50"
+    AC3854_51 = "AC3854/51"
+    AC3858_50 = "AC3858/50"
+    AC3858_51 = "AC3858/51"
+    AC4236 = "AC4236"
+    AC4558 = "AC4558"
+    AC5659 = "AC5659"
 
-ATTR_AIR_QUALITY_INDEX = "air_quality_index"
-ATTR_CHILD_LOCK = "child_lock"
-ATTR_DEVICE_ID = "device_id"
-ATTR_DEVICE_VERSION = "device_version"
-ATTR_DISPLAY_BACKLIGHT = "display_backlight"
-ATTR_ERROR_CODE = "error_code"
-ATTR_ERROR = "error"
-ATTR_RAW = "raw"
-ATTR_TOTAL = "total"
-ATTR_TIME_REMAINING = "time_remaining"
-ATTR_TYPE = "type"
-ATTR_FILTER_PRE = "pre_filter"
-ATTR_FILTER_HEPA = "hepa_filter"
-ATTR_FILTER_ACTIVE_CARBON = "active_carbon_filter"
-ATTR_FILTER_WICK = "wick"
-ATTR_FILTER_NANOPROTECT = "nanoprotect_filter"
-ATTR_FILTER_NANOPROTECT_CLEAN = "pre_filter"
-ATTR_FUNCTION = "function"
-ATTR_HUMIDITY = "humidity"
-ATTR_HUMIDITY_TARGET = "humidity_target"
-ATTR_INDOOR_ALLERGEN_INDEX = "indoor_allergen_index"
-ATTR_LABEL = "label"
-ATTR_UNIT = "unit"
-ATTR_VALUE = "value"
-ATTR_LANGUAGE = "language"
-ATTR_LIGHT_BRIGHTNESS = "light_brightness"
-ATTR_MODE = "mode"
-ATTR_MODEL_ID = "model_id"
-ATTR_NAME = "name"
-ATTR_PM25 = "pm25"
-ATTR_PREFERRED_INDEX = "preferred_index"
-ATTR_PRODUCT_ID = "product_id"
-ATTR_RUNTIME = "runtime"
-ATTR_SOFTWARE_VERSION = "software_version"
-ATTR_SPEED = "speed"
-ATTR_TOTAL_VOLATILE_ORGANIC_COMPOUNDS = "total_volatile_organic_compounds"
-ATTR_TYPE = "type"
-ATTR_WATER_LEVEL = "water_level"
-ATTR_WIFI_VERSION = "wifi_version"
-ATTR_PREFIX = "prefix"
-ATTR_POSTFIX = "postfix"
-ATTR_WARN_VALUE = "warn_value"
-ATTR_WARN_ICON = "warn_icon"
 
-LEVEL = "Level"
-INDEX = "Index"
-INDOOR_ALLERGEN_INDEX = "IAI"
-AIR_QUALITY_INDEX = "AQI"
+class PresetMode:
+    """Available preset modes."""
 
-PHILIPS_AIR_QUALITY_INDEX = "aqit"
-PHILIPS_CHILD_LOCK = "cl"
-PHILIPS_DEVICE_ID = "DeviceId"
-PHILIPS_DEVICE_VERSION = "DeviceVersion"
-PHILIPS_DISPLAY_BACKLIGHT = "uil"
-PHILIPS_ERROR_CODE = "err"
-PHILIPS_FILTER_PREFIX = "flt"
-PHILIPS_FILTER_WICK_PREFIX = "wick"
-PHILIPS_FILTER_STATUS = "sts"
-PHILIPS_FILTER_TOTAL = "total"
-PHILIPS_FILTER_TYPE = "t"
-PHILIPS_FILTER_PRE = "fltsts0"
-PHILIPS_FILTER_PRE_TOTAL = "flttotal0"
-PHILIPS_FILTER_PRE_TYPE = "fltt0"
-PHILIPS_FILTER_HEPA = "fltsts1"
-PHILIPS_FILTER_HEPA_TOTAL = "flttotal1"
-PHILIPS_FILTER_HEPA_TYPE = "fltt1"
-PHILIPS_FILTER_ACTIVE_CARBON = "fltsts2"
-PHILIPS_FILTER_ACTIVE_CARBON_TOTAL = "flttotal2"
-PHILIPS_FILTER_ACTIVE_CARBON_TYPE = "fltt2"
-PHILIPS_FILTER_WICK = "wicksts"
-PHILIPS_FILTER_WICK_TOTAL = "wicktotal"
-PHILIPS_FILTER_WICK_TYPE = "wickt"
-PHILIPS_FILTER_NANOPROTECT_PREFILTER = "D05-13"
-PHILIPS_FILTER_NANOPROTECT_CLEAN_TOTAL = "D05-07"
-PHILIPS_FILTER_NANOPROTECT = "D05-14"
-PHILIPS_FILTER_NANOPROTECT_TOTAL = "D05-08"
-PHILIPS_FILTER_NANOPROTECT_TYPE = "D05-02"
-PHILIPS_FUNCTION = "func"
-PHILIPS_HUMIDITY = "rh"
-PHILIPS_HUMIDITY_TARGET = "rhset"
-PHILIPS_INDOOR_ALLERGEN_INDEX = "iaql"
-PHILIPS_LANGUAGE = "language"
-PHILIPS_LIGHT_BRIGHTNESS = "aqil"
-PHILIPS_MODE = "mode"
-PHILIPS_MODEL_ID = "modelid"
-PHILIPS_NAME = "name"
-PHILIPS_PM25 = "pm25"
-PHILIPS_POWER = "pwr"
-PHILIPS_PREFERRED_INDEX = "ddp"
-PHILIPS_PRODUCT_ID = "ProductId"
-PHILIPS_RUNTIME = "Runtime"
-PHILIPS_SOFTWARE_VERSION = "swversion"
-PHILIPS_SPEED = "om"
-PHILIPS_TEMPERATURE = "temp"
-PHILIPS_TOTAL_VOLATILE_ORGANIC_COMPOUNDS = "tvoc"
-PHILIPS_TYPE = "type"
-PHILIPS_WATER_LEVEL = "wl"
-PHILIPS_WIFI_VERSION = "WifiVersion"
+    SPEED_1 = "speed 1"
+    SPEED_GENTLE_1 = "gentle/speed 1"
+    SPEED_2 = "speed 2"
+    SPEED_3 = "speed 3"
+    ALLERGEN = "allergen"
+    AUTO = "auto"
+    AUTO_GENERAL = "auto general"
+    BACTERIA = "bacteria"
+    GENTLE = "gentle"
+    NIGHT = "night"
+    SLEEP = "sleep"
+    SLEEP_ALLERGY = "allergy sleep"
+    TURBO = "turbo"
+    GAS = "gas"
+    POLLUTION = "pollution"
 
-PHILIPS_POWER_MAP = {
-    SWITCH_ON: "1",
-    SWITCH_OFF: "0",
-}
-# the AC1715 seems to follow a new scheme, this should later be refactored
-PHILIPS_NEW_NAME = "D01-03"
-PHILIPS_NEW_MODEL_ID = "D01-05"
-PHILIPS_NEW_LANGUAGE = "D01-07"
-PHILIPS_NEW_POWER = "D03-02"
-PHILIPS_NEW_DISPLAY_BACKLIGHT = "D03-05"
-PHILIPS_NEW_MODE = "D03-12"
-PHILIPS_NEW_INDOOR_ALLERGEN_INDEX = "D03-32"
-PHILIPS_NEW_PM25 = "D03-33"
-PHILIPS_NEW_PREFERRED_INDEX = "D03-42"
+    ICON_MAP = {
+        ALLERGEN: ICON.ALLERGEN_MODE,
+        AUTO: ICON.AUTO_MODE,
+        AUTO_GENERAL: ICON.AUTO_MODE,
+        BACTERIA: ICON.BACTERIA_VIRUS_MODE,
+        SPEED_GENTLE_1: ICON.SPEED_1,
+        SPEED_1: ICON.SPEED_1,
+        SPEED_2: ICON.SPEED_2,
+        SPEED_3: ICON.SPEED_3,
+        # we use the sleep mode icon for all related modes
+        GENTLE: ICON.SLEEP_MODE,
+        NIGHT: ICON.SLEEP_MODE,
+        SLEEP: ICON.SLEEP_MODE,
+        # unfortunately, the allergy sleep mode has the same icon as the auto mode on the device
+        SLEEP_ALLERGY: ICON.AUTO_MODE,
+        # some devices have a gas and a pollution mode, but there doesn't seem to be a Philips icon for that
+        POLLUTION: ICON.AUTO_MODE,
+        GAS: ICON.AUTO_MODE,
+    }
 
-PHILIPS_PREFERRED_INDEX_MAP = {
-    "0": "Indoor Allergen Index",
-    "1": "PM2.5",
-    "2": "Gas",
-}
-PHILIPS_NEW_PREFERRED_INDEX_MAP = {
-    "IAI": "Indoor Allergen Index",
-    "PM2.5": "PM2.5",
-}
-PHILIPS_DISPLAY_BACKLIGHT_MAP = {
-    "0": False,
-    "1": True,
-}
-PHILIPS_FUNCTION_MAP = {
-    "P": ("Purification", ICON.PURIFICATION_ONLY_MODE),
-    "PH": ("Purification and Humidification", ICON.TWO_IN_ONE_MODE),
-}
-PHILIPS_HUMIDITY_TARGET_MAP = {
-    40: ("40%", ICON.HUMIDITY_BUTTON),
-    50: ("50%", ICON.HUMIDITY_BUTTON),
-    60: ("60%", ICON.HUMIDITY_BUTTON),
-    70: ("max", ICON.HUMIDITY_BUTTON),
-}
-PHILIPS_ERROR_CODE_MAP = {
-    32768: "no water",
-    49153: "pre-filter must be cleaned",
-    49155: "pre-filter must be cleaned",
-    49408: "no water",
-}
+
+class FanFunction(StrEnum):
+    """The function of the fan."""
+
+    PURIFICATION = "purification"
+    PURIFICATION_HUMIDIFICATION = "purification_humidification"
+
+
+class FanService(StrEnum):
+    """The service of the fan."""
+
+    CHILD_LOCK_OFF = "set_child_lock_off"
+    CHILD_LOCK_ON = "set_child_lock_on"
+    DISPLAY_BACKLIGHT_OFF = "set_display_backlight_off"
+    DISPLAY_BACKLIGHT_ON = "set_display_backlight_on"
+    FUNCTION = "set_function"
+    HUMIDITY_TARGET = "set_humidity_target"
+    LIGHT_BRIGHTNESS = "set_light_brightness"
+
+
+class FanAttributes(StrEnum):
+    """The attributes of a fan."""
+
+    AIR_QUALITY_INDEX = "air_quality_index"
+    CHILD_LOCK = "child_lock"
+    DEVICE_ID = "device_id"
+    DEVICE_VERSION = "device_version"
+    DISPLAY_BACKLIGHT = "display_backlight"
+    ERROR_CODE = "error_code"
+    ERROR = "error"
+    RAW = "raw"
+    TOTAL = "total"
+    TIME_REMAINING = "time_remaining"
+    TYPE = "type"
+    FILTER_PRE = "pre_filter"
+    FILTER_HEPA = "hepa_filter"
+    FILTER_ACTIVE_CARBON = "active_carbon_filter"
+    FILTER_WICK = "wick"
+    FILTER_NANOPROTECT = "nanoprotect_filter"
+    FILTER_NANOPROTECT_CLEAN = "pre_filter"
+    FUNCTION = "function"
+    HUMIDITY = "humidity"
+    HUMIDITY_TARGET = "humidity_target"
+    INDOOR_ALLERGEN_INDEX = "indoor_allergen_index"
+    LABEL = "label"
+    UNIT = "unit"
+    VALUE = "value"
+    LANGUAGE = "language"
+    LIGHT_BRIGHTNESS = "light_brightness"
+    MODE = "mode"
+    MODEL_ID = "model_id"
+    NAME = "name"
+    PM25 = "pm25"
+    PREFERRED_INDEX = "preferred_index"
+    PRODUCT_ID = "product_id"
+    RUNTIME = "runtime"
+    SOFTWARE_VERSION = "software_version"
+    SPEED = "speed"
+    TOTAL_VOLATILE_ORGANIC_COMPOUNDS = "total_volatile_organic_compounds"
+    WATER_LEVEL = "water_level"
+    WIFI_VERSION = "wifi_version"
+    PREFIX = "prefix"
+    POSTFIX = "postfix"
+    WARN_VALUE = "warn_value"
+    WARN_ICON = "warn_icon"
+
+
+class FanUnits(StrEnum):
+    """Units used by the fan attributes."""
+
+    LEVEL = "Level"
+    INDEX = "Index"
+    INDOOR_ALLERGEN_INDEX = "IAI"
+    AIR_QUALITY_INDEX = "AQI"
+
+
+class PhilipsApi:
+    """Field names in the Philips API."""
+
+    PHILIPS_AIR_QUALITY_INDEX = "aqit"
+    PHILIPS_CHILD_LOCK = "cl"
+    PHILIPS_DEVICE_ID = "DeviceId"
+    PHILIPS_DEVICE_VERSION = "DeviceVersion"
+    PHILIPS_DISPLAY_BACKLIGHT = "uil"
+    PHILIPS_ERROR_CODE = "err"
+    PHILIPS_FILTER_PREFIX = "flt"
+    PHILIPS_FILTER_WICK_PREFIX = "wick"
+    PHILIPS_FILTER_STATUS = "sts"
+    PHILIPS_FILTER_TOTAL = "total"
+    PHILIPS_FILTER_TYPE = "t"
+    PHILIPS_FILTER_PRE = "fltsts0"
+    PHILIPS_FILTER_PRE_TOTAL = "flttotal0"
+    PHILIPS_FILTER_PRE_TYPE = "fltt0"
+    PHILIPS_FILTER_HEPA = "fltsts1"
+    PHILIPS_FILTER_HEPA_TOTAL = "flttotal1"
+    PHILIPS_FILTER_HEPA_TYPE = "fltt1"
+    PHILIPS_FILTER_ACTIVE_CARBON = "fltsts2"
+    PHILIPS_FILTER_ACTIVE_CARBON_TOTAL = "flttotal2"
+    PHILIPS_FILTER_ACTIVE_CARBON_TYPE = "fltt2"
+    PHILIPS_FILTER_WICK = "wicksts"
+    PHILIPS_FILTER_WICK_TOTAL = "wicktotal"
+    PHILIPS_FILTER_WICK_TYPE = "wickt"
+    PHILIPS_FILTER_NANOPROTECT_PREFILTER = "D05-13"
+    PHILIPS_FILTER_NANOPROTECT_CLEAN_TOTAL = "D05-07"
+    PHILIPS_FILTER_NANOPROTECT = "D05-14"
+    PHILIPS_FILTER_NANOPROTECT_TOTAL = "D05-08"
+    PHILIPS_FILTER_NANOPROTECT_TYPE = "D05-02"
+    PHILIPS_FUNCTION = "func"
+    PHILIPS_HUMIDITY = "rh"
+    PHILIPS_HUMIDITY_TARGET = "rhset"
+    PHILIPS_INDOOR_ALLERGEN_INDEX = "iaql"
+    PHILIPS_LANGUAGE = "language"
+    PHILIPS_LIGHT_BRIGHTNESS = "aqil"
+    PHILIPS_MODE = "mode"
+    PHILIPS_MODEL_ID = "modelid"
+    PHILIPS_NAME = "name"
+    PHILIPS_PM25 = "pm25"
+    PHILIPS_POWER = "pwr"
+    PHILIPS_PREFERRED_INDEX = "ddp"
+    PHILIPS_PRODUCT_ID = "ProductId"
+    PHILIPS_RUNTIME = "Runtime"
+    PHILIPS_SOFTWARE_VERSION = "swversion"
+    PHILIPS_SPEED = "om"
+    PHILIPS_TEMPERATURE = "temp"
+    PHILIPS_TOTAL_VOLATILE_ORGANIC_COMPOUNDS = "tvoc"
+    PHILIPS_TYPE = "type"
+    PHILIPS_WATER_LEVEL = "wl"
+    PHILIPS_WIFI_VERSION = "WifiVersion"
+
+    PHILIPS_POWER_MAP = {
+        SWITCH_ON: "1",
+        SWITCH_OFF: "0",
+    }
+    # the AC1715 seems to follow a new scheme, this should later be refactored
+    PHILIPS_NEW_NAME = "D01-03"
+    PHILIPS_NEW_MODEL_ID = "D01-05"
+    PHILIPS_NEW_LANGUAGE = "D01-07"
+    PHILIPS_NEW_POWER = "D03-02"
+    PHILIPS_NEW_DISPLAY_BACKLIGHT = "D03-05"
+    PHILIPS_NEW_MODE = "D03-12"
+    PHILIPS_NEW_INDOOR_ALLERGEN_INDEX = "D03-32"
+    PHILIPS_NEW_PM25 = "D03-33"
+    PHILIPS_NEW_PREFERRED_INDEX = "D03-42"
+
+    PHILIPS_PREFERRED_INDEX_MAP = {
+        "0": "Indoor Allergen Index",
+        "1": "PM2.5",
+        "2": "Gas",
+    }
+    PHILIPS_NEW_PREFERRED_INDEX_MAP = {
+        "IAI": "Indoor Allergen Index",
+        "PM2.5": "PM2.5",
+    }
+    PHILIPS_DISPLAY_BACKLIGHT_MAP = {
+        "0": False,
+        "1": True,
+    }
+    PHILIPS_FUNCTION_MAP = {
+        "P": ("Purification", ICON.PURIFICATION_ONLY_MODE),
+        "PH": ("Purification and Humidification", ICON.TWO_IN_ONE_MODE),
+    }
+    PHILIPS_HUMIDITY_TARGET_MAP = {
+        40: ("40%", ICON.HUMIDITY_BUTTON),
+        50: ("50%", ICON.HUMIDITY_BUTTON),
+        60: ("60%", ICON.HUMIDITY_BUTTON),
+        70: ("max", ICON.HUMIDITY_BUTTON),
+    }
+    PHILIPS_ERROR_CODE_MAP = {
+        32768: "no water",
+        49153: "pre-filter must be cleaned",
+        49155: "pre-filter must be cleaned",
+        49408: "no water",
+    }
+
 
 SENSOR_TYPES: dict[str, SensorDescription] = {
     # device sensors
-    PHILIPS_AIR_QUALITY_INDEX: {
+    PhilipsApi.AIR_QUALITY_INDEX: {
         ATTR_ICON: "mdi:blur",
-        ATTR_LABEL: ATTR_AIR_QUALITY_INDEX,
-        ATTR_UNIT: AIR_QUALITY_INDEX,
+        FanAttributes.LABEL: FanAttributes.AIR_QUALITY_INDEX,
+        FanAttributes.UNIT: FanUnits.AIR_QUALITY_INDEX,
         ATTR_STATE_CLASS: SensorStateClass.MEASUREMENT,
     },
-    PHILIPS_INDOOR_ALLERGEN_INDEX: {
+    PhilipsApi.INDOOR_ALLERGEN_INDEX: {
         ATTR_ICON: ICON.IAI,
-        ATTR_LABEL: ATTR_INDOOR_ALLERGEN_INDEX,
-        ATTR_UNIT: INDOOR_ALLERGEN_INDEX,
+        FanAttributes.LABEL: FanAttributes.INDOOR_ALLERGEN_INDEX,
+        FanAttributes.UNIT: FanUnits.INDOOR_ALLERGEN_INDEX,
         ATTR_STATE_CLASS: SensorStateClass.MEASUREMENT,
     },
-    PHILIPS_NEW_INDOOR_ALLERGEN_INDEX: {
+    PhilipsApi.NEW_INDOOR_ALLERGEN_INDEX: {
         ATTR_ICON: ICON.IAI,
-        ATTR_LABEL: ATTR_INDOOR_ALLERGEN_INDEX,
-        ATTR_UNIT: INDOOR_ALLERGEN_INDEX,
+        FanAttributes.LABEL: FanAttributes.INDOOR_ALLERGEN_INDEX,
+        FanAttributes.UNIT: FanUnits.INDOOR_ALLERGEN_INDEX,
         ATTR_STATE_CLASS: SensorStateClass.MEASUREMENT,
     },
-    PHILIPS_PM25: {
+    PhilipsApi.PM25: {
         ATTR_ICON: ICON.PM25,
-        ATTR_LABEL: "PM2.5",
-        ATTR_UNIT: CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+        FanAttributes.LABEL: "PM2.5",
+        FanAttributes.UNIT: CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
         ATTR_STATE_CLASS: SensorStateClass.MEASUREMENT,
     },
-    PHILIPS_NEW_PM25: {
+    PhilipsApi.NEW_PM25: {
         ATTR_ICON: ICON.PM25,
-        ATTR_LABEL: "PM2.5",
-        ATTR_UNIT: CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+        FanAttributes.LABEL: "PM2.5",
+        FanAttributes.UNIT: CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
         ATTR_STATE_CLASS: SensorStateClass.MEASUREMENT,
     },
-    PHILIPS_TOTAL_VOLATILE_ORGANIC_COMPOUNDS: {
+    PhilipsApi.TOTAL_VOLATILE_ORGANIC_COMPOUNDS: {
         ATTR_ICON: "mdi:blur",
-        ATTR_LABEL: ATTR_TOTAL_VOLATILE_ORGANIC_COMPOUNDS,
-        ATTR_UNIT: LEVEL,
+        FanAttributes.LABEL: FanAttributes.TOTAL_VOLATILE_ORGANIC_COMPOUNDS,
+        FanAttributes.UNIT: FanUnits.LEVEL,
         ATTR_STATE_CLASS: SensorStateClass.MEASUREMENT,
     },
-    PHILIPS_HUMIDITY: {
+    PhilipsApi.HUMIDITY: {
         ATTR_DEVICE_CLASS: SensorDeviceClass.HUMIDITY,
-        ATTR_LABEL: ATTR_HUMIDITY,
+        FanAttributes.LABEL: FanAttributes.HUMIDITY,
         ATTR_STATE_CLASS: SensorStateClass.MEASUREMENT,
-        ATTR_UNIT: PERCENTAGE,
+        FanAttributes.UNIT: PERCENTAGE,
     },
-    PHILIPS_TEMPERATURE: {
+    PhilipsApi.TEMPERATURE: {
         ATTR_DEVICE_CLASS: SensorDeviceClass.TEMPERATURE,
-        ATTR_LABEL: ATTR_TEMPERATURE,
+        FanAttributes.LABEL: ATTR_TEMPERATURE,
         ATTR_STATE_CLASS: SensorStateClass.MEASUREMENT,
-        ATTR_UNIT: UnitOfTemperature.CELSIUS,
+        FanAttributes.UNIT: UnitOfTemperature.CELSIUS,
     },
     # diagnostic information
-    PHILIPS_WATER_LEVEL: {
+    PhilipsApi.WATER_LEVEL: {
         ATTR_ICON: "mdi:water",
-        ATTR_LABEL: ATTR_WATER_LEVEL,
-        ATTR_VALUE: lambda value, status: 0
+        FanAttributes.LABEL: FanAttributes.WATER_LEVEL,
+        FanAttributes.VALUE: lambda value, status: 0
         if status.get("err") in [32768, 49408]
         else value,
         ATTR_STATE_CLASS: SensorStateClass.MEASUREMENT,
-        ATTR_UNIT: PERCENTAGE,
+        FanAttributes.UNIT: PERCENTAGE,
         CONF_ENTITY_CATEGORY: EntityCategory.DIAGNOSTIC,
-        ATTR_WARN_VALUE: 10,
-        ATTR_WARN_ICON: ICON.WATER_REFILL,
+        FanAttributes.WARN_VALUE: 10,
+        FanAttributes.WARN_ICON: ICON.WATER_REFILL,
     },
 }
 
 FILTER_TYPES: dict[str, FilterDescription] = {
-    PHILIPS_FILTER_PRE: {
+    PhilipsApi.FILTER_PRE: {
         ATTR_ICON: "mdi:dots-grid",
-        ATTR_WARN_ICON: ICON.FILTER_REPLACEMENT,
-        ATTR_WARN_VALUE: 72,
-        ATTR_LABEL: ATTR_FILTER_PRE,
-        ATTR_TOTAL: PHILIPS_FILTER_PRE_TOTAL,
-        ATTR_TYPE: PHILIPS_FILTER_PRE_TYPE,
+        FanAttributes.WARN_ICON: ICON.FILTER_REPLACEMENT,
+        FanAttributes.WARN_VALUE: 72,
+        FanAttributes.LABEL: FanAttributes.FILTER_PRE,
+        FanAttributes.TOTAL: PhilipsApi.FILTER_PRE_TOTAL,
+        FanAttributes.TYPE: PhilipsApi.FILTER_PRE_TYPE,
     },
-    PHILIPS_FILTER_HEPA: {
+    PhilipsApi.FILTER_HEPA: {
         ATTR_ICON: "mdi:dots-grid",
-        ATTR_WARN_ICON: ICON.FILTER_REPLACEMENT,
-        ATTR_WARN_VALUE: 72,
-        ATTR_LABEL: ATTR_FILTER_HEPA,
-        ATTR_TOTAL: PHILIPS_FILTER_HEPA_TOTAL,
-        ATTR_TYPE: PHILIPS_FILTER_HEPA_TYPE,
+        FanAttributes.WARN_ICON: ICON.FILTER_REPLACEMENT,
+        FanAttributes.WARN_VALUE: 72,
+        FanAttributes.LABEL: FanAttributes.FILTER_HEPA,
+        FanAttributes.TOTAL: PhilipsApi.FILTER_HEPA_TOTAL,
+        FanAttributes.TYPE: PhilipsApi.FILTER_HEPA_TYPE,
     },
-    PHILIPS_FILTER_ACTIVE_CARBON: {
+    PhilipsApi.FILTER_ACTIVE_CARBON: {
         ATTR_ICON: "mdi:dots-grid",
-        ATTR_WARN_ICON: ICON.FILTER_REPLACEMENT,
-        ATTR_WARN_VALUE: 72,
-        ATTR_LABEL: ATTR_FILTER_ACTIVE_CARBON,
-        ATTR_TOTAL: PHILIPS_FILTER_ACTIVE_CARBON_TOTAL,
-        ATTR_TYPE: PHILIPS_FILTER_ACTIVE_CARBON_TYPE,
+        FanAttributes.WARN_ICON: ICON.FILTER_REPLACEMENT,
+        FanAttributes.WARN_VALUE: 72,
+        FanAttributes.LABEL: FanAttributes.FILTER_ACTIVE_CARBON,
+        FanAttributes.TOTAL: PhilipsApi.FILTER_ACTIVE_CARBON_TOTAL,
+        FanAttributes.TYPE: PhilipsApi.FILTER_ACTIVE_CARBON_TYPE,
     },
-    PHILIPS_FILTER_WICK: {
+    PhilipsApi.FILTER_WICK: {
         ATTR_ICON: "mdi:dots-grid",
-        ATTR_WARN_ICON: ICON.PREFILTER_WICK_CLEANING,
-        ATTR_WARN_VALUE: 72,
-        ATTR_LABEL: ATTR_FILTER_WICK,
-        ATTR_TOTAL: PHILIPS_FILTER_WICK_TOTAL,
-        ATTR_TYPE: PHILIPS_FILTER_WICK_TYPE,
+        FanAttributes.WARN_ICON: ICON.PREFILTER_WICK_CLEANING,
+        FanAttributes.WARN_VALUE: 72,
+        FanAttributes.LABEL: FanAttributes.FILTER_WICK,
+        FanAttributes.TOTAL: PhilipsApi.FILTER_WICK_TOTAL,
+        FanAttributes.TYPE: PhilipsApi.FILTER_WICK_TYPE,
     },
-    PHILIPS_FILTER_NANOPROTECT: {
+    PhilipsApi.FILTER_NANOPROTECT: {
         ATTR_ICON: ICON.NANOPROTECT_FILTER,
-        ATTR_WARN_ICON: ICON.FILTER_REPLACEMENT,
-        ATTR_WARN_VALUE: 10,
-        ATTR_LABEL: ATTR_FILTER_NANOPROTECT,
-        ATTR_TOTAL: PHILIPS_FILTER_NANOPROTECT_TOTAL,
-        ATTR_TYPE: PHILIPS_FILTER_NANOPROTECT_TYPE,
+        FanAttributes.WARN_ICON: ICON.FILTER_REPLACEMENT,
+        FanAttributes.WARN_VALUE: 10,
+        FanAttributes.LABEL: FanAttributes.FILTER_NANOPROTECT,
+        FanAttributes.TOTAL: PhilipsApi.FILTER_NANOPROTECT_TOTAL,
+        FanAttributes.TYPE: PhilipsApi.FILTER_NANOPROTECT_TYPE,
     },
-    PHILIPS_FILTER_NANOPROTECT_PREFILTER: {
+    PhilipsApi.FILTER_NANOPROTECT_PREFILTER: {
         ATTR_ICON: ICON.NANOPROTECT_FILTER,
-        ATTR_WARN_ICON: ICON.PREFILTER_CLEANING,
-        ATTR_WARN_VALUE: 10,
-        ATTR_LABEL: ATTR_FILTER_NANOPROTECT_CLEAN,
-        ATTR_TOTAL: PHILIPS_FILTER_NANOPROTECT_CLEAN_TOTAL,
-        ATTR_TYPE: "",
+        FanAttributes.WARN_ICON: ICON.PREFILTER_CLEANING,
+        FanAttributes.WARN_VALUE: 10,
+        FanAttributes.LABEL: FanAttributes.FILTER_NANOPROTECT_CLEAN,
+        FanAttributes.TOTAL: PhilipsApi.FILTER_NANOPROTECT_CLEAN_TOTAL,
+        FanAttributes.TYPE: "",
     },
 }
 
 SWITCH_TYPES: dict[str, SwitchDescription] = {
-    PHILIPS_CHILD_LOCK: {
+    PhilipsApi.CHILD_LOCK: {
         ATTR_ICON: ICON.CHILD_LOCK_BUTTON,
-        ATTR_LABEL: ATTR_CHILD_LOCK,
+        FanAttributes.LABEL: FanAttributes.CHILD_LOCK,
         CONF_ENTITY_CATEGORY: EntityCategory.CONFIG,
         SWITCH_ON: True,
         SWITCH_OFF: False,
@@ -421,24 +452,24 @@ SWITCH_TYPES: dict[str, SwitchDescription] = {
 }
 
 LIGHT_TYPES: dict[str, LightDescription] = {
-    PHILIPS_DISPLAY_BACKLIGHT: {
+    PhilipsApi.DISPLAY_BACKLIGHT: {
         ATTR_ICON: ICON.LIGHT_DIMMING_BUTTON,
-        ATTR_LABEL: ATTR_DISPLAY_BACKLIGHT,
+        FanAttributes.LABEL: FanAttributes.DISPLAY_BACKLIGHT,
         CONF_ENTITY_CATEGORY: EntityCategory.CONFIG,
         SWITCH_ON: "1",
         SWITCH_OFF: "0",
     },
-    PHILIPS_LIGHT_BRIGHTNESS: {
+    PhilipsApi.LIGHT_BRIGHTNESS: {
         ATTR_ICON: "mdi:circle-outline",
-        ATTR_LABEL: ATTR_LIGHT_BRIGHTNESS,
+        FanAttributes.LABEL: FanAttributes.LIGHT_BRIGHTNESS,
         CONF_ENTITY_CATEGORY: EntityCategory.CONFIG,
         SWITCH_ON: 100,
         SWITCH_OFF: 0,
         DIMMABLE: True,
     },
-    PHILIPS_NEW_DISPLAY_BACKLIGHT: {
+    PhilipsApi.NEW_DISPLAY_BACKLIGHT: {
         ATTR_ICON: ICON.LIGHT_DIMMING_BUTTON,
-        ATTR_LABEL: ATTR_DISPLAY_BACKLIGHT,
+        FanAttributes.LABEL: FanAttributes.DISPLAY_BACKLIGHT,
         CONF_ENTITY_CATEGORY: EntityCategory.CONFIG,
         SWITCH_ON: 100,
         SWITCH_OFF: 0,
@@ -446,14 +477,14 @@ LIGHT_TYPES: dict[str, LightDescription] = {
 }
 
 SELECT_TYPES: dict[str, SelectDescription] = {
-    PHILIPS_FUNCTION: {
-        ATTR_LABEL: ATTR_FUNCTION,
+    PhilipsApi.FUNCTION: {
+        FanAttributes.LABEL: FanAttributes.FUNCTION,
         CONF_ENTITY_CATEGORY: EntityCategory.CONFIG,
-        OPTIONS: PHILIPS_FUNCTION_MAP,
+        OPTIONS: PhilipsApi.FUNCTION_MAP,
     },
-    PHILIPS_HUMIDITY_TARGET: {
-        ATTR_LABEL: ATTR_HUMIDITY_TARGET,
+    PhilipsApi.HUMIDITY_TARGET: {
+        FanAttributes.LABEL: FanAttributes.HUMIDITY_TARGET,
         CONF_ENTITY_CATEGORY: EntityCategory.CONFIG,
-        OPTIONS: PHILIPS_HUMIDITY_TARGET_MAP,
+        OPTIONS: PhilipsApi.HUMIDITY_TARGET_MAP,
     },
 }
