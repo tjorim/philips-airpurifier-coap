@@ -44,12 +44,12 @@ class ListingView(HomeAssistantView):
 
     requires_auth = False
 
-    def __init__(self, hass, url):
+    def __init__(self, hass: HomeAssistant, url) -> None:  # noqa: D107
         self._hass = hass
         self.url = url
         self.name = "Icon Listing"
 
-    async def get(self, request):
+    async def get(self, request):  # noqa: D102
         return json.dumps(self._hass.data[DOMAIN][ICONS])
 
 
