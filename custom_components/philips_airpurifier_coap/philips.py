@@ -1250,6 +1250,7 @@ class PhilipsAC4236(PhilipsGenericCoAPFan):
             PhilipsApi.SPEED: "t",
         },
     }
+    AVAILABLE_SWITCHES = [PHILIPS_CHILD_LOCK]
 
 
 class PhilipsAC4558(PhilipsGenericCoAPFan):
