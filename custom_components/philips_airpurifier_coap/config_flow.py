@@ -1,34 +1,22 @@
 """The Philips AirPurifier component."""
 import asyncio
-
-from homeassistant.components import dhcp
-from homeassistant import config_entries, exceptions
-from homeassistant.data_entry_flow import FlowResult
-
-from homeassistant.helpers import config_validation as cv
-from homeassistant.util.timeout import TimeoutManager
-from homeassistant.const import CONF_HOST, CONF_NAME
-
-from aioairctrl import CoAPClient
-
-from .const import (
-    CONF_MODEL,
-    CONF_DEVICE_ID,
-    DOMAIN,
-    PHILIPS_DEVICE_ID,
-    PHILIPS_MODEL_ID,
-    PHILIPS_NAME,
-    PHILIPS_NEW_MODEL_ID,
-    PHILIPS_NEW_NAME,
-)
-from .philips import model_to_class
-
+import ipaddress
+import logging
+import re
 from typing import Any
 
-import logging
+from aioairctrl import CoAPClient
 import voluptuous as vol
-import ipaddress
-import re
+
+from homeassistant import config_entries, exceptions
+from homeassistant.components import dhcp
+from homeassistant.const import CONF_HOST, CONF_NAME
+from homeassistant.data_entry_flow import FlowResult
+from homeassistant.helpers import config_validation as cv
+from homeassistant.util.timeout import TimeoutManager
+
+from .const import CONF_DEVICE_ID, CONF_MODEL, DOMAIN, PhilipsApi
+from .philips import model_to_class
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -51,7 +39,10 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     def __init__(self) -> None:
         """Initialize."""
-        self.host: str = None
+        self._host: str = None
+        self._model: Any = None
+        self._name: Any = None
+        self._device_id: str = None
 
     def _get_schema(self, user_input):
         """Provide schema for user input."""
@@ -62,10 +53,10 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_dhcp(self, discovery_info: dhcp.DhcpServiceInfo) -> FlowResult:
         """Handle initial step of auto discovery flow."""
-        _LOGGER.debug(f"async_step_dhcp: called, found: {discovery_info}")
+        _LOGGER.debug("async_step_dhcp: called, found: %s", discovery_info)
 
         self._host = discovery_info.ip
-        _LOGGER.debug(f"trying to configure host: {self._host}")
+        _LOGGER.debug("trying to configure host: %s", self._host)
 
         # let's try and connect to an AirPurifier
         try:
@@ -75,11 +66,11 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             # try for 30s to get a valid client
             async with timeout.async_timeout(30):
                 client = await CoAPClient.create(self._host)
-                _LOGGER.debug(f"got a valid client for host {self._host}")
+                _LOGGER.debug("got a valid client for host %s", self._host)
 
             # we give it 30s to get a status, otherwise we abort
             async with timeout.async_timeout(30):
-                _LOGGER.debug(f"trying to get status")
+                _LOGGER.debug("trying to get status")
                 status, _ = await client.get_status()
                 _LOGGER.debug("got status")
 
@@ -87,7 +78,7 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 await client.shutdown()
 
             # get the status out of the queue
-            _LOGGER.debug(f"status for host {self._host} is: {status}")
+            _LOGGER.debug("status for host %s is: %s", self._host, status)
 
         except asyncio.TimeoutError:
             _LOGGER.warning(
@@ -102,12 +93,14 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         # autodetect model and name
         self._model = list(
-            filter(None, map(status.get, [PHILIPS_MODEL_ID, PHILIPS_NEW_MODEL_ID]))
+            filter(
+                None, map(status.get, [PhilipsApi.MODEL_ID, PhilipsApi.NEW_MODEL_ID])
+            )
         )[0][:9]
         self._name = list(
-            filter(None, map(status.get, [PHILIPS_NAME, PHILIPS_NEW_NAME]))
+            filter(None, map(status.get, [PhilipsApi.NAME, PhilipsApi.NEW_NAME]))
         )[0]
-        self._device_id = status[PHILIPS_DEVICE_ID]
+        self._device_id = status[PhilipsApi.DEVICE_ID]
         _LOGGER.debug(
             "Detected host %s as model %s with name: %s",
             self._host,
@@ -118,18 +111,20 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         # check if model is supported
         if not self._model in model_to_class.keys():
             _LOGGER.info(
-                f"Model {self._model} found, but not supported directly. Trying model family."
+                "Model %s found, but not supported directly. Trying model family",
+                self._model,
             )
             self._model = self._model[:6]
             if not self._model in model_to_class.keys():
-                _LOGGER.warn(
-                    f"Model {self._model} found, but not supported. Aborting discovery."
+                _LOGGER.warning(
+                    "Model %s found, but not supported. Aborting discovery",
+                    self._model,
                 )
                 return self.async_abort(reason="model_unsupported")
 
         # use the device ID as unique_id
         unique_id = self._device_id
-        _LOGGER.debug(f"async_step_user: unique_id={unique_id}")
+        _LOGGER.debug("async_step_user: unique_id=%s", unique_id)
 
         # set the unique id for the entry, abort if it already exists
         await self.async_set_unique_id(unique_id)
@@ -145,17 +140,20 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
         # show the confirmation form to the user
-        _LOGGER.debug(f"waiting for async_step_confirm")
+        _LOGGER.debug("waiting for async_step_confirm")
         return await self.async_step_confirm()
 
     async def async_step_confirm(self, user_input: dict[str, Any] = None) -> FlowResult:
         """Confirm the dhcp discovered data."""
-        _LOGGER.debug(f"async_step_confirm called with user_input: {user_input}")
+        _LOGGER.debug("async_step_confirm called with user_input: %s", user_input)
 
         # user input was provided, so check and save it
         if user_input is not None:
             _LOGGER.debug(
-                f"entered creation for model {self._model} with name '{self._name}' at {self._host}"
+                "entered creation for model %s with name '%s' at %s",
+                self._model,
+                self._name,
+                self._host,
             )
             user_input[CONF_MODEL] = self._model
             user_input[CONF_NAME] = self._name
@@ -166,7 +164,7 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 title=self._model + " " + self._name, data=user_input
             )
 
-        _LOGGER.debug(f"showing confirmation form")
+        _LOGGER.debug("showing confirmation form")
         # show the form to the user
         self._set_confirm_only()
         return self.async_show_form(
@@ -200,7 +198,7 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
                     # we give it 30s to get a status, otherwise we abort
                     async with timeout.async_timeout(30):
-                        _LOGGER.debug(f"trying to get status")
+                        _LOGGER.debug("trying to get status")
                         status, _ = await client.get_status()
                         _LOGGER.debug("got status")
 
@@ -220,13 +218,16 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 # autodetect model and name
                 self._model = list(
                     filter(
-                        None, map(status.get, [PHILIPS_MODEL_ID, PHILIPS_NEW_MODEL_ID])
+                        None,
+                        map(status.get, [PhilipsApi.MODEL_ID, PhilipsApi.NEW_MODEL_ID]),
                     )
                 )[0][:9]
                 self._name = list(
-                    filter(None, map(status.get, [PHILIPS_NAME, PHILIPS_NEW_NAME]))
+                    filter(
+                        None, map(status.get, [PhilipsApi.NAME, PhilipsApi.NEW_NAME])
+                    )
                 )[0]
-                self._device_id = status[PHILIPS_DEVICE_ID]
+                self._device_id = status[PhilipsApi.DEVICE_ID]
                 user_input[CONF_MODEL] = self._model
                 user_input[CONF_NAME] = self._name
                 user_input[CONF_DEVICE_ID] = self._device_id
@@ -240,7 +241,7 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 # check if model is supported
                 if not self._model in model_to_class.keys():
                     _LOGGER.info(
-                        f"Model {self._model} not supported. Trying model family."
+                        "Model %s not supported. Trying model family", self._model
                     )
                     self._model = self._model[:6]
                     if not self._model in model_to_class.keys():
@@ -249,7 +250,7 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
                 # use the device ID as unique_id
                 unique_id = self._device_id
-                _LOGGER.debug(f"async_step_user: unique_id={unique_id}")
+                _LOGGER.debug("async_step_user: unique_id=%s", unique_id)
 
                 # set the unique id for the entry, abort if it already exists
                 await self.async_set_unique_id(unique_id)
