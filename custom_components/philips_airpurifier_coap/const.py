@@ -229,95 +229,95 @@ class FanUnits(StrEnum):
 class PhilipsApi:
     """Field names in the Philips API."""
 
-    PHILIPS_AIR_QUALITY_INDEX = "aqit"
-    PHILIPS_CHILD_LOCK = "cl"
-    PHILIPS_DEVICE_ID = "DeviceId"
-    PHILIPS_DEVICE_VERSION = "DeviceVersion"
-    PHILIPS_DISPLAY_BACKLIGHT = "uil"
-    PHILIPS_ERROR_CODE = "err"
-    PHILIPS_FILTER_PREFIX = "flt"
-    PHILIPS_FILTER_WICK_PREFIX = "wick"
-    PHILIPS_FILTER_STATUS = "sts"
-    PHILIPS_FILTER_TOTAL = "total"
-    PHILIPS_FILTER_TYPE = "t"
-    PHILIPS_FILTER_PRE = "fltsts0"
-    PHILIPS_FILTER_PRE_TOTAL = "flttotal0"
-    PHILIPS_FILTER_PRE_TYPE = "fltt0"
-    PHILIPS_FILTER_HEPA = "fltsts1"
-    PHILIPS_FILTER_HEPA_TOTAL = "flttotal1"
-    PHILIPS_FILTER_HEPA_TYPE = "fltt1"
-    PHILIPS_FILTER_ACTIVE_CARBON = "fltsts2"
-    PHILIPS_FILTER_ACTIVE_CARBON_TOTAL = "flttotal2"
-    PHILIPS_FILTER_ACTIVE_CARBON_TYPE = "fltt2"
-    PHILIPS_FILTER_WICK = "wicksts"
-    PHILIPS_FILTER_WICK_TOTAL = "wicktotal"
-    PHILIPS_FILTER_WICK_TYPE = "wickt"
-    PHILIPS_FILTER_NANOPROTECT_PREFILTER = "D05-13"
-    PHILIPS_FILTER_NANOPROTECT_CLEAN_TOTAL = "D05-07"
-    PHILIPS_FILTER_NANOPROTECT = "D05-14"
-    PHILIPS_FILTER_NANOPROTECT_TOTAL = "D05-08"
-    PHILIPS_FILTER_NANOPROTECT_TYPE = "D05-02"
-    PHILIPS_FUNCTION = "func"
-    PHILIPS_HUMIDITY = "rh"
-    PHILIPS_HUMIDITY_TARGET = "rhset"
-    PHILIPS_INDOOR_ALLERGEN_INDEX = "iaql"
-    PHILIPS_LANGUAGE = "language"
-    PHILIPS_LIGHT_BRIGHTNESS = "aqil"
-    PHILIPS_MODE = "mode"
-    PHILIPS_MODEL_ID = "modelid"
-    PHILIPS_NAME = "name"
-    PHILIPS_PM25 = "pm25"
-    PHILIPS_POWER = "pwr"
-    PHILIPS_PREFERRED_INDEX = "ddp"
-    PHILIPS_PRODUCT_ID = "ProductId"
-    PHILIPS_RUNTIME = "Runtime"
-    PHILIPS_SOFTWARE_VERSION = "swversion"
-    PHILIPS_SPEED = "om"
-    PHILIPS_TEMPERATURE = "temp"
-    PHILIPS_TOTAL_VOLATILE_ORGANIC_COMPOUNDS = "tvoc"
-    PHILIPS_TYPE = "type"
-    PHILIPS_WATER_LEVEL = "wl"
-    PHILIPS_WIFI_VERSION = "WifiVersion"
+    AIR_QUALITY_INDEX = "aqit"
+    CHILD_LOCK = "cl"
+    DEVICE_ID = "DeviceId"
+    DEVICE_VERSION = "DeviceVersion"
+    DISPLAY_BACKLIGHT = "uil"
+    ERROR_CODE = "err"
+    FILTER_PREFIX = "flt"
+    FILTER_WICK_PREFIX = "wick"
+    FILTER_STATUS = "sts"
+    FILTER_TOTAL = "total"
+    FILTER_TYPE = "t"
+    FILTER_PRE = "fltsts0"
+    FILTER_PRE_TOTAL = "flttotal0"
+    FILTER_PRE_TYPE = "fltt0"
+    FILTER_HEPA = "fltsts1"
+    FILTER_HEPA_TOTAL = "flttotal1"
+    FILTER_HEPA_TYPE = "fltt1"
+    FILTER_ACTIVE_CARBON = "fltsts2"
+    FILTER_ACTIVE_CARBON_TOTAL = "flttotal2"
+    FILTER_ACTIVE_CARBON_TYPE = "fltt2"
+    FILTER_WICK = "wicksts"
+    FILTER_WICK_TOTAL = "wicktotal"
+    FILTER_WICK_TYPE = "wickt"
+    FILTER_NANOPROTECT_PREFILTER = "D05-13"
+    FILTER_NANOPROTECT_CLEAN_TOTAL = "D05-07"
+    FILTER_NANOPROTECT = "D05-14"
+    FILTER_NANOPROTECT_TOTAL = "D05-08"
+    FILTER_NANOPROTECT_TYPE = "D05-02"
+    FUNCTION = "func"
+    HUMIDITY = "rh"
+    HUMIDITY_TARGET = "rhset"
+    INDOOR_ALLERGEN_INDEX = "iaql"
+    LANGUAGE = "language"
+    LIGHT_BRIGHTNESS = "aqil"
+    MODE = "mode"
+    MODEL_ID = "modelid"
+    NAME = "name"
+    PM25 = "pm25"
+    POWER = "pwr"
+    PREFERRED_INDEX = "ddp"
+    PRODUCT_ID = "ProductId"
+    RUNTIME = "Runtime"
+    SOFTWARE_VERSION = "swversion"
+    SPEED = "om"
+    TEMPERATURE = "temp"
+    TOTAL_VOLATILE_ORGANIC_COMPOUNDS = "tvoc"
+    TYPE = "type"
+    WATER_LEVEL = "wl"
+    WIFI_VERSION = "WifiVersion"
 
-    PHILIPS_POWER_MAP = {
+    POWER_MAP = {
         SWITCH_ON: "1",
         SWITCH_OFF: "0",
     }
     # the AC1715 seems to follow a new scheme, this should later be refactored
-    PHILIPS_NEW_NAME = "D01-03"
-    PHILIPS_NEW_MODEL_ID = "D01-05"
-    PHILIPS_NEW_LANGUAGE = "D01-07"
-    PHILIPS_NEW_POWER = "D03-02"
-    PHILIPS_NEW_DISPLAY_BACKLIGHT = "D03-05"
-    PHILIPS_NEW_MODE = "D03-12"
-    PHILIPS_NEW_INDOOR_ALLERGEN_INDEX = "D03-32"
-    PHILIPS_NEW_PM25 = "D03-33"
-    PHILIPS_NEW_PREFERRED_INDEX = "D03-42"
+    NEW_NAME = "D01-03"
+    NEW_MODEL_ID = "D01-05"
+    NEW_LANGUAGE = "D01-07"
+    NEW_POWER = "D03-02"
+    NEW_DISPLAY_BACKLIGHT = "D03-05"
+    NEW_MODE = "D03-12"
+    NEW_INDOOR_ALLERGEN_INDEX = "D03-32"
+    NEW_PM25 = "D03-33"
+    NEW_PREFERRED_INDEX = "D03-42"
 
-    PHILIPS_PREFERRED_INDEX_MAP = {
+    PREFERRED_INDEX_MAP = {
         "0": "Indoor Allergen Index",
         "1": "PM2.5",
         "2": "Gas",
     }
-    PHILIPS_NEW_PREFERRED_INDEX_MAP = {
+    NEW_PREFERRED_INDEX_MAP = {
         "IAI": "Indoor Allergen Index",
         "PM2.5": "PM2.5",
     }
-    PHILIPS_DISPLAY_BACKLIGHT_MAP = {
+    DISPLAY_BACKLIGHT_MAP = {
         "0": False,
         "1": True,
     }
-    PHILIPS_FUNCTION_MAP = {
+    FUNCTION_MAP = {
         "P": ("Purification", ICON.PURIFICATION_ONLY_MODE),
         "PH": ("Purification and Humidification", ICON.TWO_IN_ONE_MODE),
     }
-    PHILIPS_HUMIDITY_TARGET_MAP = {
+    HUMIDITY_TARGET_MAP = {
         40: ("40%", ICON.HUMIDITY_BUTTON),
         50: ("50%", ICON.HUMIDITY_BUTTON),
         60: ("60%", ICON.HUMIDITY_BUTTON),
         70: ("max", ICON.HUMIDITY_BUTTON),
     }
-    PHILIPS_ERROR_CODE_MAP = {
+    ERROR_CODE_MAP = {
         32768: "no water",
         49153: "pre-filter must be cleaned",
         49155: "pre-filter must be cleaned",
