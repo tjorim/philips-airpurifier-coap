@@ -109,13 +109,13 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
         # check if model is supported
-        if not self._model in model_to_class.keys():
+        if self._model not in model_to_class:
             _LOGGER.info(
                 "Model %s found, but not supported directly. Trying model family",
                 self._model,
             )
             self._model = self._model[:6]
-            if not self._model in model_to_class.keys():
+            if self._model not in model_to_class:
                 _LOGGER.warning(
                     "Model %s found, but not supported. Aborting discovery",
                     self._model,
@@ -239,12 +239,12 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 )
 
                 # check if model is supported
-                if not self._model in model_to_class.keys():
+                if self._model not in model_to_class:
                     _LOGGER.info(
                         "Model %s not supported. Trying model family", self._model
                     )
                     self._model = self._model[:6]
-                    if not self._model in model_to_class.keys():
+                    if self._model not in model_to_class:
                         return self.async_abort(reason="model_unsupported")
                     user_input[CONF_MODEL] = self._model
 
