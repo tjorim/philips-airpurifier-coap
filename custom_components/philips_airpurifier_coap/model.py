@@ -24,8 +24,9 @@ class SensorDescription(_SensorDescription, total=False):
     unit: str
     state_class: str
     value: Callable[[Any, DeviceStatus], StateType]
-    warn_value: int
-    warn_icon: str
+    icon_map: [int, str]
+    # warn_value: int
+    # warn_icon: str
 
 
 class FilterDescription(TypedDict):
@@ -34,8 +35,9 @@ class FilterDescription(TypedDict):
     prefix: str
     postfix: str
     icon: str
-    warn_icon: str
-    warn_value: int
+    icon_map: [int, str]
+    # warn_icon: str
+    # warn_value: int
 
 
 class SwitchDescription(TypedDict):

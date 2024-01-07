@@ -10,7 +10,6 @@ from homeassistant.components.sensor import ATTR_STATE_CLASS, SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     ATTR_DEVICE_CLASS,
-    ATTR_ICON,
     CONF_ENTITY_CATEGORY,
     CONF_HOST,
     CONF_NAME,
@@ -82,9 +81,12 @@ class PhilipsSensor(PhilipsEntity, SensorEntity):
         super().__init__(coordinator)
         self._model = model
         self._description = SENSOR_TYPES[kind]
-        self._warn_icon = self._description.get(FanAttributes.WARN_ICON)
-        self._warn_value = self._description.get(FanAttributes.WARN_VALUE)
-        self._norm_icon = self._description.get(ATTR_ICON)
+        self._icon_map = self._description.get(FanAttributes.ICON_MAP)
+        self._norm_icon = (
+            next(iter(self._icon_map.items()))[1]
+            if self._icon_map is not None
+            else None
+        )
         self._attr_state_class = self._description.get(ATTR_STATE_CLASS)
         self._attr_device_class = self._description.get(ATTR_DEVICE_CLASS)
         self._attr_entity_category = self._description.get(CONF_ENTITY_CATEGORY)
@@ -116,10 +118,15 @@ class PhilipsSensor(PhilipsEntity, SensorEntity):
     @property
     def icon(self) -> str:
         """Return the icon of the sensor."""
-        if self._warn_value and self._warn_value >= int(self.native_value):
-            return self._warn_icon
-        else:
-            return self._norm_icon
+        icon = self._norm_icon
+        if not self._icon_map:
+            return icon
+
+        value = int(self.native_value)
+        for level_value, level_icon in self._icon_map.items():
+            if value >= level_value:
+                icon = level_icon
+        return icon
 
 
 class PhilipsFilterSensor(PhilipsEntity, SensorEntity):
@@ -131,9 +138,12 @@ class PhilipsFilterSensor(PhilipsEntity, SensorEntity):
         super().__init__(coordinator)
         self._model = model
         self._description = FILTER_TYPES[kind]
-        self._warn_icon = self._description[FanAttributes.WARN_ICON]
-        self._warn_value = self._description[FanAttributes.WARN_VALUE]
-        self._norm_icon = self._description[ATTR_ICON]
+        self._icon_map = self._description[FanAttributes.ICON_MAP]
+        self._norm_icon = (
+            next(iter(self._icon_map.items()))[1]
+            if self._icon_map is not None
+            else None
+        )
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
         self._attr_name = (
             f"{name} {self._description[FanAttributes.LABEL].replace('_', ' ').title()}"
@@ -199,8 +209,13 @@ class PhilipsFilterSensor(PhilipsEntity, SensorEntity):
 
     @property
     def icon(self) -> str:
-        """Return the icon of the filter sensor."""
-        if self._warn_value and self._warn_value >= int(self.native_value):
-            return self._warn_icon
-        else:
-            return self._norm_icon
+        """Return the icon of the sensor."""
+        icon = self._norm_icon
+        if not self._icon_map:
+            return icon
+
+        value = int(self.native_value)
+        for level_value, level_icon in self._icon_map.items():
+            if value >= level_value:
+                icon = level_icon
+        return icon

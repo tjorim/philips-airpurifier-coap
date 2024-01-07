@@ -15,6 +15,7 @@ from homeassistant.const import (
     CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
     CONF_ENTITY_CATEGORY,
     PERCENTAGE,
+    SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
     UnitOfTemperature,
 )
 from homeassistant.helpers.entity import EntityCategory
@@ -202,7 +203,7 @@ class FanAttributes(StrEnum):
     MODE = "mode"
     MODEL_ID = "model_id"
     NAME = "name"
-    PM25 = "pm25"
+    PM25 = "PM2.5"
     PREFERRED_INDEX = "preferred_index"
     PRODUCT_ID = "product_id"
     RUNTIME = "runtime"
@@ -213,8 +214,10 @@ class FanAttributes(StrEnum):
     WIFI_VERSION = "wifi_version"
     PREFIX = "prefix"
     POSTFIX = "postfix"
+    ICON_MAP = "icon_map"
     WARN_VALUE = "warn_value"
     WARN_ICON = "warn_icon"
+    RSSI = "rssi"
 
 
 class FanUnits(StrEnum):
@@ -278,6 +281,7 @@ class PhilipsApi:
     TYPE = "type"
     WATER_LEVEL = "wl"
     WIFI_VERSION = "WifiVersion"
+    RSSI = "rssi"
 
     POWER_MAP = {
         SWITCH_ON: "1",
@@ -328,56 +332,63 @@ class PhilipsApi:
 SENSOR_TYPES: dict[str, SensorDescription] = {
     # device sensors
     PhilipsApi.AIR_QUALITY_INDEX: {
-        ATTR_ICON: "mdi:blur",
+        ATTR_DEVICE_CLASS: SensorDeviceClass.AQI,
+        FanAttributes.ICON_MAP: {0: "mdi:blur"},
         FanAttributes.LABEL: FanAttributes.AIR_QUALITY_INDEX,
-        FanAttributes.UNIT: FanUnits.AIR_QUALITY_INDEX,
         ATTR_STATE_CLASS: SensorStateClass.MEASUREMENT,
     },
     PhilipsApi.INDOOR_ALLERGEN_INDEX: {
-        ATTR_ICON: ICON.IAI,
+        FanAttributes.ICON_MAP: {0: ICON.IAI},
         FanAttributes.LABEL: FanAttributes.INDOOR_ALLERGEN_INDEX,
-        FanAttributes.UNIT: FanUnits.INDOOR_ALLERGEN_INDEX,
         ATTR_STATE_CLASS: SensorStateClass.MEASUREMENT,
     },
     PhilipsApi.NEW_INDOOR_ALLERGEN_INDEX: {
-        ATTR_ICON: ICON.IAI,
+        FanAttributes.ICON_MAP: {0: ICON.IAI},
         FanAttributes.LABEL: FanAttributes.INDOOR_ALLERGEN_INDEX,
-        FanAttributes.UNIT: FanUnits.INDOOR_ALLERGEN_INDEX,
         ATTR_STATE_CLASS: SensorStateClass.MEASUREMENT,
     },
     PhilipsApi.PM25: {
-        ATTR_ICON: ICON.PM25,
-        FanAttributes.LABEL: "PM2.5",
+        ATTR_DEVICE_CLASS: SensorDeviceClass.PM25,
+        FanAttributes.ICON_MAP: {0: ICON.PM25},
+        FanAttributes.LABEL: FanAttributes.PM25,
         FanAttributes.UNIT: CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
         ATTR_STATE_CLASS: SensorStateClass.MEASUREMENT,
     },
     PhilipsApi.NEW_PM25: {
-        ATTR_ICON: ICON.PM25,
-        FanAttributes.LABEL: "PM2.5",
+        ATTR_DEVICE_CLASS: SensorDeviceClass.PM25,
+        FanAttributes.ICON_MAP: {0: ICON.PM25},
+        FanAttributes.LABEL: FanAttributes.PM25,
         FanAttributes.UNIT: CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
         ATTR_STATE_CLASS: SensorStateClass.MEASUREMENT,
     },
     PhilipsApi.TOTAL_VOLATILE_ORGANIC_COMPOUNDS: {
-        ATTR_ICON: "mdi:blur",
+        ATTR_DEVICE_CLASS: SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS,
+        FanAttributes.ICON_MAP: {0: "mdi:blur"},
         FanAttributes.LABEL: FanAttributes.TOTAL_VOLATILE_ORGANIC_COMPOUNDS,
-        FanAttributes.UNIT: FanUnits.LEVEL,
+        FanAttributes.UNIT: CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
         ATTR_STATE_CLASS: SensorStateClass.MEASUREMENT,
     },
     PhilipsApi.HUMIDITY: {
         ATTR_DEVICE_CLASS: SensorDeviceClass.HUMIDITY,
+        FanAttributes.ICON_MAP: {0: "mdi:water-percent"},
         FanAttributes.LABEL: FanAttributes.HUMIDITY,
         ATTR_STATE_CLASS: SensorStateClass.MEASUREMENT,
         FanAttributes.UNIT: PERCENTAGE,
     },
     PhilipsApi.TEMPERATURE: {
         ATTR_DEVICE_CLASS: SensorDeviceClass.TEMPERATURE,
+        FanAttributes.ICON_MAP: {
+            0: "mdi:thermometer-low",
+            17: "mdi:thermometer",
+            23: "mdi:thermometer-high",
+        },
         FanAttributes.LABEL: ATTR_TEMPERATURE,
         ATTR_STATE_CLASS: SensorStateClass.MEASUREMENT,
         FanAttributes.UNIT: UnitOfTemperature.CELSIUS,
     },
     # diagnostic information
     PhilipsApi.WATER_LEVEL: {
-        ATTR_ICON: "mdi:water",
+        FanAttributes.ICON_MAP: {0: ICON.WATER_REFILL, 10: "mdi:water"},
         FanAttributes.LABEL: FanAttributes.WATER_LEVEL,
         FanAttributes.VALUE: lambda value, status: 0
         if status.get("err") in [32768, 49408]
@@ -385,56 +396,63 @@ SENSOR_TYPES: dict[str, SensorDescription] = {
         ATTR_STATE_CLASS: SensorStateClass.MEASUREMENT,
         FanAttributes.UNIT: PERCENTAGE,
         CONF_ENTITY_CATEGORY: EntityCategory.DIAGNOSTIC,
-        FanAttributes.WARN_VALUE: 10,
-        FanAttributes.WARN_ICON: ICON.WATER_REFILL,
+    },
+    PhilipsApi.RSSI: {
+        FanAttributes.ICON_MAP: {
+            -150: "mdi:wifi-strength-off-outline",
+            -90: "mdi:wifi-strength-outline",
+            -80: "mdi:wifi-strength-1",
+            -70: "mdi:wifi-strength-2",
+            -67: "mdi:wifi-strength-3",
+            -30: "mdi:wifi-strength-4",
+        },
+        FanAttributes.LABEL: FanAttributes.RSSI,
+        ATTR_STATE_CLASS: SensorStateClass.MEASUREMENT,
+        ATTR_DEVICE_CLASS: SensorDeviceClass.SIGNAL_STRENGTH,
+        FanAttributes.UNIT: SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
+        CONF_ENTITY_CATEGORY: EntityCategory.DIAGNOSTIC,
     },
 }
 
 FILTER_TYPES: dict[str, FilterDescription] = {
     PhilipsApi.FILTER_PRE: {
-        ATTR_ICON: "mdi:dots-grid",
-        FanAttributes.WARN_ICON: ICON.FILTER_REPLACEMENT,
-        FanAttributes.WARN_VALUE: 72,
+        FanAttributes.ICON_MAP: {0: ICON.FILTER_REPLACEMENT, 72: "mdi:dots-grid"},
         FanAttributes.LABEL: FanAttributes.FILTER_PRE,
         FanAttributes.TOTAL: PhilipsApi.FILTER_PRE_TOTAL,
         FanAttributes.TYPE: PhilipsApi.FILTER_PRE_TYPE,
     },
     PhilipsApi.FILTER_HEPA: {
-        ATTR_ICON: "mdi:dots-grid",
-        FanAttributes.WARN_ICON: ICON.FILTER_REPLACEMENT,
-        FanAttributes.WARN_VALUE: 72,
+        FanAttributes.ICON_MAP: {0: ICON.FILTER_REPLACEMENT, 72: "mdi:dots-grid"},
         FanAttributes.LABEL: FanAttributes.FILTER_HEPA,
         FanAttributes.TOTAL: PhilipsApi.FILTER_HEPA_TOTAL,
         FanAttributes.TYPE: PhilipsApi.FILTER_HEPA_TYPE,
     },
     PhilipsApi.FILTER_ACTIVE_CARBON: {
-        ATTR_ICON: "mdi:dots-grid",
-        FanAttributes.WARN_ICON: ICON.FILTER_REPLACEMENT,
-        FanAttributes.WARN_VALUE: 72,
+        FanAttributes.ICON_MAP: {0: ICON.FILTER_REPLACEMENT, 72: "mdi:dots-grid"},
         FanAttributes.LABEL: FanAttributes.FILTER_ACTIVE_CARBON,
         FanAttributes.TOTAL: PhilipsApi.FILTER_ACTIVE_CARBON_TOTAL,
         FanAttributes.TYPE: PhilipsApi.FILTER_ACTIVE_CARBON_TYPE,
     },
     PhilipsApi.FILTER_WICK: {
-        ATTR_ICON: "mdi:dots-grid",
-        FanAttributes.WARN_ICON: ICON.PREFILTER_WICK_CLEANING,
-        FanAttributes.WARN_VALUE: 72,
+        FanAttributes.ICON_MAP: {0: ICON.PREFILTER_WICK_CLEANING, 72: "mdi:dots-grid"},
         FanAttributes.LABEL: FanAttributes.FILTER_WICK,
         FanAttributes.TOTAL: PhilipsApi.FILTER_WICK_TOTAL,
         FanAttributes.TYPE: PhilipsApi.FILTER_WICK_TYPE,
     },
     PhilipsApi.FILTER_NANOPROTECT: {
-        ATTR_ICON: ICON.NANOPROTECT_FILTER,
-        FanAttributes.WARN_ICON: ICON.FILTER_REPLACEMENT,
-        FanAttributes.WARN_VALUE: 10,
+        FanAttributes.ICON_MAP: {
+            0: ICON.FILTER_REPLACEMENT,
+            10: ICON.NANOPROTECT_FILTER,
+        },
         FanAttributes.LABEL: FanAttributes.FILTER_NANOPROTECT,
         FanAttributes.TOTAL: PhilipsApi.FILTER_NANOPROTECT_TOTAL,
         FanAttributes.TYPE: PhilipsApi.FILTER_NANOPROTECT_TYPE,
     },
     PhilipsApi.FILTER_NANOPROTECT_PREFILTER: {
-        ATTR_ICON: ICON.NANOPROTECT_FILTER,
-        FanAttributes.WARN_ICON: ICON.PREFILTER_CLEANING,
-        FanAttributes.WARN_VALUE: 10,
+        FanAttributes.ICON_MAP: {
+            0: ICON.PREFILTER_CLEANING,
+            10: ICON.NANOPROTECT_FILTER,
+        },
         FanAttributes.LABEL: FanAttributes.FILTER_NANOPROTECT_CLEAN,
         FanAttributes.TOTAL: PhilipsApi.FILTER_NANOPROTECT_CLEAN_TOTAL,
         FanAttributes.TYPE: "",
