@@ -871,6 +871,7 @@ class PhilipsAC29xx(PhilipsGenericCoAPFan):
         PresetMode.TURBO: {PhilipsApi.POWER: "1", PhilipsApi.MODE: "T"},
     }
     AVAILABLE_SELECTS = [PhilipsApi.PREFERRED_INDEX]
+    AVAILABLE_SWITCHES = [PhilipsApi.CHILD_LOCK]
 
 
 class PhilipsAC2936(PhilipsAC29xx):
