@@ -890,8 +890,77 @@ class PhilipsAC2959(PhilipsAC29xx):
     """AC2959."""
 
 
-class PhilipsAC30xx(PhilipsGenericCoAPFan):
+class PhilipsAC303x(PhilipsGenericCoAPFan):
     """AC30xx family."""
+
+    AVAILABLE_PRESET_MODES = {
+        PresetMode.AUTO: {PhilipsApi.POWER: "1", PhilipsApi.MODE: "AG"},
+        # make speeds available as preset
+        PresetMode.SLEEP: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "S",
+            PhilipsApi.SPEED: "s",
+        },
+        PresetMode.SLEEP_ALLERGY: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "AS",
+            PhilipsApi.SPEED: "as",
+        },
+        PresetMode.SPEED_1: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "1",
+        },
+        PresetMode.SPEED_2: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "2",
+        },
+        PresetMode.TURBO: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "T",
+            PhilipsApi.SPEED: "t",
+        },
+    }
+    AVAILABLE_SPEEDS = {
+        PresetMode.SLEEP: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "S",
+            PhilipsApi.SPEED: "s",
+        },
+        PresetMode.SPEED_1: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "1",
+        },
+        PresetMode.SPEED_2: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "M",
+            PhilipsApi.SPEED: "2",
+        },
+        PresetMode.TURBO: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "T",
+            PhilipsApi.SPEED: "t",
+        },
+    }
+    AVAILABLE_SELECTS = [PhilipsApi.GAS_PREFERRED_INDEX]
+
+
+class PhilipsAC3033(PhilipsAC303x):
+    """AC3033."""
+
+
+class PhilipsAC3036(PhilipsAC303x):
+    """AC3036."""
+
+
+class PhilipsAC3039(PhilipsAC303x):
+    """AC3039."""
+
+
+class PhilipsAC305x(PhilipsGenericCoAPFan):
+    """AC305x family."""
 
     AVAILABLE_PRESET_MODES = {
         PresetMode.AUTO: {PhilipsApi.POWER: "1", PhilipsApi.MODE: "AG"},
@@ -942,23 +1011,11 @@ class PhilipsAC30xx(PhilipsGenericCoAPFan):
     AVAILABLE_SELECTS = [PhilipsApi.GAS_PREFERRED_INDEX]
 
 
-class PhilipsAC3033(PhilipsAC30xx):
-    """AC3033."""
-
-
-class PhilipsAC3036(PhilipsAC30xx):
-    """AC3036."""
-
-
-class PhilipsAC3039(PhilipsAC30xx):
-    """AC3039."""
-
-
-class PhilipsAC3055(PhilipsAC30xx):
+class PhilipsAC3055(PhilipsAC305x):
     """AC3055."""
 
 
-class PhilipsAC3059(PhilipsAC30xx):
+class PhilipsAC3059(PhilipsAC305x):
     """AC3059."""
 
 
