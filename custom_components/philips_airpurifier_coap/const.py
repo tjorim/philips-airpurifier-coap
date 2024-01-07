@@ -109,6 +109,7 @@ class FanModel(StrEnum):
     AC3858_50 = "AC3858/50"
     AC3858_51 = "AC3858/51"
     AC4236 = "AC4236"
+    AC4550 = "AC4550"
     AC4558 = "AC4558"
     AC5659 = "AC5659"
 

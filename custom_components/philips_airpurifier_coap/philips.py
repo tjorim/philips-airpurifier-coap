@@ -1331,8 +1331,16 @@ class PhilipsAC4558(PhilipsGenericCoAPFan):
 
     AVAILABLE_PRESET_MODES = {
         # there doesn't seem to be a manual mode, so no speed setting as part of preset
-        PresetMode.AUTO: {PhilipsApi.POWER: "1", PhilipsApi.MODE: "AG"},
-        PresetMode.GAS: {PhilipsApi.POWER: "1", PhilipsApi.MODE: "F"},
+        PresetMode.AUTO: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "AG",
+            PhilipsApi.SPEED: "a",
+        },
+        PresetMode.GAS: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "F",
+            PhilipsApi.SPEED: "a",
+        },
         # it seems that when setting the pollution and allergen modes, we also need to set speed "a"
         PresetMode.POLLUTION: {
             PhilipsApi.POWER: "1",
@@ -1352,6 +1360,11 @@ class PhilipsAC4558(PhilipsGenericCoAPFan):
         PresetMode.TURBO: {PhilipsApi.POWER: "1", PhilipsApi.SPEED: "t"},
     }
     AVAILABLE_SELECTS = [PhilipsApi.PREFERRED_INDEX]
+    AVAILABLE_SWITCHES = [PhilipsApi.CHILD_LOCK]
+
+
+class PhilipsAC4550(PhilipsAC4558):
+    """AC4550."""
 
 
 class PhilipsAC5659(PhilipsGenericCoAPFan):
@@ -1440,6 +1453,7 @@ model_to_class = {
     FanModel.AC3858_50: PhilipsAC385850,
     FanModel.AC3858_51: PhilipsAC385851,
     FanModel.AC4236: PhilipsAC4236,
+    FanModel.AC4550: PhilipsAC4550,
     FanModel.AC4558: PhilipsAC4558,
     FanModel.AC5659: PhilipsAC5659,
 }
