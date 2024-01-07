@@ -17,6 +17,7 @@ from homeassistant.const import (
     PERCENTAGE,
     SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
     UnitOfTemperature,
+    UnitOfTime,
 )
 from homeassistant.helpers.entity import EntityCategory
 
@@ -412,6 +413,14 @@ SENSOR_TYPES: dict[str, SensorDescription] = {
         FanAttributes.UNIT: SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
         CONF_ENTITY_CATEGORY: EntityCategory.DIAGNOSTIC,
     },
+    # PhilipsApi.RUNTIME: {
+    #     FanAttributes.ICON_MAP: {0: "mdi:timer"},
+    #     FanAttributes.LABEL: FanAttributes.RUNTIME,
+    #     ATTR_STATE_CLASS: SensorStateClass.TOTAL,
+    #     ATTR_DEVICE_CLASS: SensorDeviceClass.DURATION,
+    #     FanAttributes.UNIT: UnitOfTime.MILLISECONDS,
+    #     CONF_ENTITY_CATEGORY: EntityCategory.DIAGNOSTIC,
+    # },
 }
 
 FILTER_TYPES: dict[str, FilterDescription] = {
