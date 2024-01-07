@@ -272,7 +272,10 @@ class PhilipsApi:
     NAME = "name"
     PM25 = "pm25"
     POWER = "pwr"
-    PREFERRED_INDEX = "ddp"
+    # Unfortunately, the preferred index key for the index with and without gas are the same.
+    # To distinguish, # is used as a separator, which is then filtered out in the select entity.
+    PREFERRED_INDEX = "ddp#1"
+    GAS_PREFERRED_INDEX = "ddp#2"
     PRODUCT_ID = "ProductId"
     RUNTIME = "Runtime"
     SOFTWARE_VERSION = "swversion"
@@ -300,13 +303,17 @@ class PhilipsApi:
     NEW_PREFERRED_INDEX = "D03-42"
 
     PREFERRED_INDEX_MAP = {
-        "0": "Indoor Allergen Index",
-        "1": "PM2.5",
-        "2": "Gas",
+        "0": ("Indoor Allergen Index", ICON.IAI),
+        "1": ("PM2.5", ICON.PM25),
+    }
+    GAS_PREFERRED_INDEX_MAP = {
+        "0": ("Indoor Allergen Index", ICON.IAI),
+        "1": ("PM2.5", ICON.PM25),
+        "2": ("Gas", "mdi:air"),
     }
     NEW_PREFERRED_INDEX_MAP = {
-        "IAI": "Indoor Allergen Index",
-        "PM2.5": "PM2.5",
+        "IAI": ("Indoor Allergen Index", ICON.IAI),
+        "PM2.5": ("PM2.5", ICON.PM25),
     }
     DISPLAY_BACKLIGHT_MAP = {
         "0": False,
@@ -513,5 +520,25 @@ SELECT_TYPES: dict[str, SelectDescription] = {
         FanAttributes.LABEL: FanAttributes.HUMIDITY_TARGET,
         CONF_ENTITY_CATEGORY: EntityCategory.CONFIG,
         OPTIONS: PhilipsApi.HUMIDITY_TARGET_MAP,
+    },
+    PhilipsApi.PREFERRED_INDEX: {
+        FanAttributes.LABEL: FanAttributes.PREFERRED_INDEX,
+        CONF_ENTITY_CATEGORY: EntityCategory.CONFIG,
+        OPTIONS: PhilipsApi.PREFERRED_INDEX_MAP,
+    },
+    PhilipsApi.PREFERRED_INDEX: {
+        FanAttributes.LABEL: FanAttributes.PREFERRED_INDEX,
+        CONF_ENTITY_CATEGORY: EntityCategory.CONFIG,
+        OPTIONS: PhilipsApi.PREFERRED_INDEX_MAP,
+    },
+    PhilipsApi.GAS_PREFERRED_INDEX: {
+        FanAttributes.LABEL: FanAttributes.PREFERRED_INDEX,
+        CONF_ENTITY_CATEGORY: EntityCategory.CONFIG,
+        OPTIONS: PhilipsApi.GAS_PREFERRED_INDEX_MAP,
+    },
+    PhilipsApi.NEW_PREFERRED_INDEX: {
+        FanAttributes.LABEL: FanAttributes.PREFERRED_INDEX,
+        CONF_ENTITY_CATEGORY: EntityCategory.CONFIG,
+        OPTIONS: PhilipsApi.NEW_PREFERRED_INDEX_MAP,
     },
 }

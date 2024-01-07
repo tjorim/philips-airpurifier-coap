@@ -80,9 +80,9 @@ class PhilipsSelect(PhilipsEntity, SelectEntity):
         self._model = model
         self._description = SELECT_TYPES[select]
         self._attr_device_class = self._description.get(ATTR_DEVICE_CLASS)
-        self._attr_name = (
-            f"{name} {self._description[FanAttributes.LABEL].replace('_', ' ').title()}"
-        )
+        label = FanAttributes.LABEL
+        label = label.partition("#")[0]
+        self._attr_name = f"{name} {self._description[label].replace('_', ' ').title()}"
         self._attr_entity_category = self._description.get(CONF_ENTITY_CATEGORY)
 
         self._attr_options = []
@@ -102,7 +102,7 @@ class PhilipsSelect(PhilipsEntity, SelectEntity):
             _LOGGER.error("Failed retrieving unique_id: %s", e)
             raise PlatformNotReady
         self._attrs: dict[str, Any] = {}
-        self.kind = select
+        self.kind = select.partition("#")[0]
 
     @property
     def current_option(self) -> str:
@@ -129,6 +129,7 @@ class PhilipsSelect(PhilipsEntity, SelectEntity):
             )
             await self.coordinator.client.set_control_value(self.kind, option_key)
         except Exception as e:
+            # TODO: catching Exception is actually too broad and needs to be tightened
             _LOGGER.error("Failed setting option: '%s' with error: %s", option, e)
 
     @property

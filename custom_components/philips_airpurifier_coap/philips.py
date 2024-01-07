@@ -424,10 +424,15 @@ class PhilipsGenericCoAPFanBase(PhilipsGenericFan):
             philips_key: str,
             value_map: Union[dict, Callable[[Any, Any], Any]] = None,
         ):
-            if philips_key in self._device_status:
-                value = self._device_status[philips_key]
+            # some philips keys are not unique, so # serves as a marker and needs to be filtered out
+            philips_clean_key = philips_key.partition("#")[0]
+
+            if philips_clean_key in self._device_status:
+                value = self._device_status[philips_clean_key]
                 if isinstance(value_map, dict) and value in value_map:
                     value = value_map.get(value, "unknown")
+                    if isinstance(value, tuple):
+                        value = value[0]
                 elif callable(value_map):
                     value = value_map(value, self._device_status)
                 attributes.update({key: value})
@@ -513,7 +518,7 @@ class PhilipsNewGenericCoAPFan(PhilipsGenericCoAPFanBase):
         (
             FanAttributes.PREFERRED_INDEX,
             PhilipsApi.NEW_PREFERRED_INDEX,
-            PhilipsApi.PREFERRED_INDEX_MAP,
+            PhilipsApi.NEW_PREFERRED_INDEX_MAP,
         ),
         # device sensors
         (
@@ -525,7 +530,7 @@ class PhilipsNewGenericCoAPFan(PhilipsGenericCoAPFanBase):
 
     AVAILABLE_LIGHTS = []
     AVAILABLE_SWITCHES = []
-    AVAILABLE_SELECTS = []
+    AVAILABLE_SELECTS = [PhilipsApi.NEW_PREFERRED_INDEX]
     UNAVAILABLE_FILTERS = [PhilipsApi.FILTER_NANOPROTECT_PREFILTER]
 
     KEY_PHILIPS_POWER = PhilipsApi.NEW_POWER
@@ -616,6 +621,7 @@ class PhilipsAC1214(PhilipsGenericCoAPFan):
         PresetMode.TURBO: {PhilipsApi.MODE: "M", PhilipsApi.SPEED: "t"},
     }
     AVAILABLE_SWITCHES = [PhilipsApi.CHILD_LOCK]
+    AVAILABLE_SELECTS = [PhilipsApi.PREFERRED_INDEX]
 
     async def async_set_a(self) -> None:
         """Set the preset mode to Allergen."""
@@ -783,6 +789,7 @@ class PhilipsAC2729(
         },
     }
     AVAILABLE_SWITCHES = [PhilipsApi.CHILD_LOCK]
+    AVAILABLE_SELECTS = [PhilipsApi.PREFERRED_INDEX]
 
 
 class PhilipsAC2889(PhilipsGenericCoAPFan):
@@ -846,6 +853,7 @@ class PhilipsAC2889(PhilipsGenericCoAPFan):
             PhilipsApi.SPEED: "t",
         },
     }
+    AVAILABLE_SELECTS = [PhilipsApi.PREFERRED_INDEX]
 
 
 class PhilipsAC29xx(PhilipsGenericCoAPFan):
@@ -862,6 +870,7 @@ class PhilipsAC29xx(PhilipsGenericCoAPFan):
         PresetMode.GENTLE: {PhilipsApi.POWER: "1", PhilipsApi.MODE: "GT"},
         PresetMode.TURBO: {PhilipsApi.POWER: "1", PhilipsApi.MODE: "T"},
     }
+    AVAILABLE_SELECTS = [PhilipsApi.PREFERRED_INDEX]
 
 
 class PhilipsAC2936(PhilipsAC29xx):
@@ -929,6 +938,7 @@ class PhilipsAC30xx(PhilipsGenericCoAPFan):
             PhilipsApi.SPEED: "t",
         },
     }
+    AVAILABLE_SELECTS = [PhilipsApi.GAS_PREFERRED_INDEX]
 
 
 class PhilipsAC3033(PhilipsAC30xx):
@@ -1012,6 +1022,7 @@ class PhilipsAC3259(PhilipsGenericCoAPFan):
             PhilipsApi.SPEED: "t",
         },
     }
+    AVAILABLE_SELECTS = [PhilipsApi.GAS_PREFERRED_INDEX]
 
 
 class PhilipsAC3829(PhilipsHumidifierMixin, PhilipsGenericCoAPFan):
@@ -1075,6 +1086,7 @@ class PhilipsAC3829(PhilipsHumidifierMixin, PhilipsGenericCoAPFan):
         },
     }
     AVAILABLE_SWITCHES = [PhilipsApi.CHILD_LOCK]
+    AVAILABLE_SELECTS = [PhilipsApi.GAS_PREFERRED_INDEX]
 
 
 class PhilipsAC385x50(PhilipsGenericCoAPFan):
@@ -1126,6 +1138,7 @@ class PhilipsAC385x50(PhilipsGenericCoAPFan):
             PhilipsApi.SPEED: "t",
         },
     }
+    AVAILABLE_SELECTS = [PhilipsApi.GAS_PREFERRED_INDEX]
 
 
 class PhilipsAC385450(PhilipsAC385x50):
@@ -1191,6 +1204,7 @@ class PhilipsAC385x51(PhilipsGenericCoAPFan):
         },
     }
     AVAILABLE_SWITCHES = [PhilipsApi.CHILD_LOCK]
+    AVAILABLE_SELECTS = [PhilipsApi.GAS_PREFERRED_INDEX]
 
 
 class PhilipsAC385451(PhilipsAC385x51):
@@ -1251,6 +1265,7 @@ class PhilipsAC4236(PhilipsGenericCoAPFan):
         },
     }
     AVAILABLE_SWITCHES = [PhilipsApi.CHILD_LOCK]
+    AVAILABLE_SELECTS = [PhilipsApi.PREFERRED_INDEX]
 
 
 class PhilipsAC4558(PhilipsGenericCoAPFan):
@@ -1278,6 +1293,7 @@ class PhilipsAC4558(PhilipsGenericCoAPFan):
         PresetMode.SPEED_2: {PhilipsApi.POWER: "1", PhilipsApi.SPEED: "2"},
         PresetMode.TURBO: {PhilipsApi.POWER: "1", PhilipsApi.SPEED: "t"},
     }
+    AVAILABLE_SELECTS = [PhilipsApi.PREFERRED_INDEX]
 
 
 class PhilipsAC5659(PhilipsGenericCoAPFan):
@@ -1341,6 +1357,7 @@ class PhilipsAC5659(PhilipsGenericCoAPFan):
             PhilipsApi.SPEED: "t",
         },
     }
+    AVAILABLE_SELECTS = [PhilipsApi.PREFERRED_INDEX]
 
 
 model_to_class = {
