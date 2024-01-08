@@ -31,6 +31,9 @@ Philips has recently introduced a proper API to remote control the devices. Howe
  - The rework has been done by @Denaun at https://github.com/Denaun/philips-airpurifier-coap
  - Obviously, many other people contributed, notably @mhetzi, @Kraineff and @shexbeer
 
+## Coffee
+
+<a href="https://www.buymeacoffee.com/kongo09" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
 
 ## Install
 
