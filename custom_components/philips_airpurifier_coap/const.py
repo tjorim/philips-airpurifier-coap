@@ -316,10 +316,6 @@ class PhilipsApi:
         "IAI": ("Indoor Allergen Index", ICON.IAI),
         "PM2.5": ("PM2.5", ICON.PM25),
     }
-    DISPLAY_BACKLIGHT_MAP = {
-        "0": False,
-        "1": True,
-    }
     FUNCTION_MAP = {
         "P": ("Purification", ICON.PURIFICATION_ONLY_MODE),
         "PH": ("Purification and Humidification", ICON.TWO_IN_ONE_MODE),

@@ -114,12 +114,12 @@ class PhilipsLight(PhilipsEntity, LightEntity):
     @property
     def is_on(self) -> bool:
         """Return if the light is on."""
-        status = self._device_status.get(self.kind)
+        status = int(self._device_status.get(self.kind))
         # _LOGGER.debug("is_on, kind: %s - status: %s - on: %s", self.kind, status, self._on)
         if self._dimmable:
             return status > 0
         else:
-            return status == self._on
+            return status == int(self._on)
 
     @property
     def brightness(self) -> int | None:
