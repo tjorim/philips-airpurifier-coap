@@ -531,7 +531,6 @@ class PhilipsNewGenericCoAPFan(PhilipsGenericCoAPFanBase):
     AVAILABLE_LIGHTS = []
     AVAILABLE_SWITCHES = []
     AVAILABLE_SELECTS = [PhilipsApi.NEW_PREFERRED_INDEX]
-    UNAVAILABLE_FILTERS = [PhilipsApi.FILTER_NANOPROTECT_PREFILTER]
 
     KEY_PHILIPS_POWER = PhilipsApi.NEW_POWER
     STATE_POWER_ON = "ON"
@@ -561,6 +560,8 @@ class PhilipsAC0850(PhilipsNewGenericCoAPFan):
         PresetMode.SLEEP: {PhilipsApi.NEW_POWER: "ON", PhilipsApi.NEW_MODE: "Sleep"},
         PresetMode.TURBO: {PhilipsApi.NEW_POWER: "ON", PhilipsApi.NEW_MODE: "Turbo"},
     }
+    # the prefilter data is present but doesn't change for this device, so let's take it out
+    UNAVAILABLE_FILTERS = [PhilipsApi.FILTER_NANOPROTECT_PREFILTER]
 
 
 # the AC1715 seems to be a new class of devices that follows some patterns of its own
