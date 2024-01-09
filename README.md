@@ -78,6 +78,8 @@ Note: `configuration.yaml` is no longer supported and your configuration is not 
 - AC4550
 - AC4558
 - AC5659
+- AMF765
+- CX5120
 
 
 ## Is your model not supported yet?
