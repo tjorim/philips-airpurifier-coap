@@ -1148,6 +1148,43 @@ class PhilipsAC3829(PhilipsHumidifierMixin, PhilipsGenericCoAPFan):
     AVAILABLE_SELECTS = [PhilipsApi.GAS_PREFERRED_INDEX]
 
 
+class PhilipsAC3836(PhilipsGenericCoAPFan):
+    """AC3836."""
+
+    AVAILABLE_PRESET_MODES = {
+        PresetMode.AUTO: {
+            PhilipsApi.POWER: "1", 
+            PhilipsApi.MODE: "AG", 
+            PhilipsApi.SPEED: "1"
+        },
+        # make speeds available as preset
+        PresetMode.SLEEP: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "S",
+            PhilipsApi.SPEED: "s",
+        },
+        PresetMode.TURBO: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "T",
+            PhilipsApi.SPEED: "t",
+        },
+    }
+    AVAILABLE_SPEEDS = {
+        PresetMode.SLEEP: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "S",
+            PhilipsApi.SPEED: "s",
+        },
+        PresetMode.TURBO: {
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "T",
+            PhilipsApi.SPEED: "t",
+        },
+    }
+    AVAILABLE_SWITCHES = [PhilipsApi.CHILD_LOCK]
+    AVAILABLE_SELECTS = [PhilipsApi.GAS_PREFERRED_INDEX]
+
+
 class PhilipsAC385x50(PhilipsGenericCoAPFan):
     """AC385x/50 family."""
 
@@ -1449,6 +1486,7 @@ model_to_class = {
     FanModel.AC3059: PhilipsAC3059,
     FanModel.AC3259: PhilipsAC3259,
     FanModel.AC3829: PhilipsAC3829,
+    FanModel.AC3836: PhilipsAC3836,
     FanModel.AC3854_50: PhilipsAC385450,
     FanModel.AC3854_51: PhilipsAC385451,
     FanModel.AC3858_50: PhilipsAC385850,
