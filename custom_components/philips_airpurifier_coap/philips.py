@@ -537,6 +537,45 @@ class PhilipsNewGenericCoAPFan(PhilipsGenericCoAPFanBase):
     STATE_POWER_OFF = "OFF"
 
 
+class PhilipsNew2GenericCoAPFan(PhilipsGenericCoAPFanBase):
+    """Class to manage another new generic CoAP fan."""
+
+    AVAILABLE_PRESET_MODES = {}
+    AVAILABLE_SPEEDS = {}
+
+    AVAILABLE_ATTRIBUTES = [
+        # device information
+        (FanAttributes.NAME, PhilipsApi.NEW2_NAME),
+        (FanAttributes.MODEL_ID, PhilipsApi.NEW2_MODEL_ID),
+        (FanAttributes.PRODUCT_ID, PhilipsApi.PRODUCT_ID),
+        (FanAttributes.DEVICE_ID, PhilipsApi.DEVICE_ID),
+        # (FanAttributes.SOFTWARE_VERSION, PhilipsApi.SOFTWARE_VERSION),
+        (FanAttributes.WIFI_VERSION, PhilipsApi.WIFI_VERSION),
+        # (FanAttributes.ERROR_CODE, PhilipsApi.ERROR_CODE),
+        # (FanAttributes.ERROR, PhilipsApi.ERROR_CODE, PhilipsApi.ERROR_CODE_MAP),
+        # device configuration
+        # (
+        #     FanAttributes.PREFERRED_INDEX,
+        #     PhilipsApi.NEW_PREFERRED_INDEX,
+        #     PhilipsApi.NEW_PREFERRED_INDEX_MAP,
+        # ),
+        # device sensors
+        # (
+        #     FanAttributes.RUNTIME,
+        #     PhilipsApi.RUNTIME,
+        #     lambda x, _: str(timedelta(seconds=round(x / 1000))),
+        # ),
+    ]
+
+    AVAILABLE_LIGHTS = [PhilipsApi.NEW2_DISPLAY_BACKLIGHT]
+    AVAILABLE_SWITCHES = []
+    AVAILABLE_SELECTS = []
+
+    KEY_PHILIPS_POWER = PhilipsApi.NEW2_POWER
+    STATE_POWER_ON = 1
+    STATE_POWER_OFF = 0
+
+
 class PhilipsHumidifierMixin(PhilipsGenericCoAPFanBase):
     """Mixin for humidifiers."""
 
@@ -1153,9 +1192,9 @@ class PhilipsAC3836(PhilipsGenericCoAPFan):
 
     AVAILABLE_PRESET_MODES = {
         PresetMode.AUTO: {
-            PhilipsApi.POWER: "1", 
-            PhilipsApi.MODE: "AG", 
-            PhilipsApi.SPEED: "1"
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "AG",
+            PhilipsApi.SPEED: "1",
         },
         # make speeds available as preset
         PresetMode.SLEEP: {
@@ -1469,6 +1508,14 @@ class PhilipsAC5659(PhilipsGenericCoAPFan):
     AVAILABLE_SELECTS = [PhilipsApi.PREFERRED_INDEX]
 
 
+class PhilipsAMF765(PhilipsNew2GenericCoAPFan):
+    """AMF765."""
+
+
+class PhilipsCX5120(PhilipsNew2GenericCoAPFan):
+    """CX5120."""
+
+
 model_to_class = {
     FanModel.AC0850: PhilipsAC0850,
     FanModel.AC1214: PhilipsAC1214,
@@ -1495,4 +1542,6 @@ model_to_class = {
     FanModel.AC4550: PhilipsAC4550,
     FanModel.AC4558: PhilipsAC4558,
     FanModel.AC5659: PhilipsAC5659,
+    FanModel.AMF765: PhilipsAMF765,
+    FanModel.CX5120: PhilipsCX5120,
 }

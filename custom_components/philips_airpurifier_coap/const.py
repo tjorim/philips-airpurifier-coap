@@ -113,6 +113,8 @@ class FanModel(StrEnum):
     AC4550 = "AC4550"
     AC4558 = "AC4558"
     AC5659 = "AC5659"
+    AMF765 = "AMF765"
+    CX5120 = "CX5120"
 
 
 class PresetMode:
@@ -293,6 +295,7 @@ class PhilipsApi:
         SWITCH_ON: "1",
         SWITCH_OFF: "0",
     }
+
     # the AC1715 seems to follow a new scheme, this should later be refactored
     NEW_NAME = "D01-03"
     NEW_MODEL_ID = "D01-05"
@@ -303,6 +306,12 @@ class PhilipsApi:
     NEW_INDOOR_ALLERGEN_INDEX = "D03-32"
     NEW_PM25 = "D03-33"
     NEW_PREFERRED_INDEX = "D03-42"
+
+    # there is a third generation of devices with yet another scheme
+    NEW2_NAME = "D01S03"
+    NEW2_MODEL_ID = "D01S05"
+    NEW2_POWER = "D03102"
+    NEW2_DISPLAY_BACKLIGHT = "D0312D"
 
     PREFERRED_INDEX_MAP = {
         "0": ("Indoor Allergen Index", ICON.IAI),
@@ -500,6 +509,13 @@ LIGHT_TYPES: dict[str, LightDescription] = {
         DIMMABLE: True,
     },
     PhilipsApi.NEW_DISPLAY_BACKLIGHT: {
+        ATTR_ICON: ICON.LIGHT_DIMMING_BUTTON,
+        FanAttributes.LABEL: FanAttributes.DISPLAY_BACKLIGHT,
+        CONF_ENTITY_CATEGORY: EntityCategory.CONFIG,
+        SWITCH_ON: 100,
+        SWITCH_OFF: 0,
+    },
+    PhilipsApi.NEW2_DISPLAY_BACKLIGHT: {
         ATTR_ICON: ICON.LIGHT_DIMMING_BUTTON,
         FanAttributes.LABEL: FanAttributes.DISPLAY_BACKLIGHT,
         CONF_ENTITY_CATEGORY: EntityCategory.CONFIG,
