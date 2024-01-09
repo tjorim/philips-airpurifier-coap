@@ -134,7 +134,7 @@ class PhilipsLight(PhilipsEntity, LightEntity):
         """Turn the light on."""
         if self._dimmable:
             if ATTR_BRIGHTNESS in kwargs:
-                value = int(100 * int(kwargs[ATTR_BRIGHTNESS]) / 255)
+                value = round(100 * int(kwargs[ATTR_BRIGHTNESS]) / 255)
             else:
                 value = 100
         else:
