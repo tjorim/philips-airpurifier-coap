@@ -125,7 +125,7 @@ class PhilipsLight(PhilipsEntity, LightEntity):
     def brightness(self) -> int | None:
         """Return the brightness of the light."""
         if self._dimmable:
-            brightness = self._device_status.get(self.kind)
+            brightness = int(self._device_status.get(self.kind))
             return round(255 * brightness / 100)
         else:
             return None
@@ -134,7 +134,7 @@ class PhilipsLight(PhilipsEntity, LightEntity):
         """Turn the light on."""
         if self._dimmable:
             if ATTR_BRIGHTNESS in kwargs:
-                value = int(100 * kwargs[ATTR_BRIGHTNESS] / 255)
+                value = int(100 * int(kwargs[ATTR_BRIGHTNESS]) / 255)
             else:
                 value = 100
         else:
