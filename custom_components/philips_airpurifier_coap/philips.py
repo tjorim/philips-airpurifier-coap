@@ -183,7 +183,10 @@ class PhilipsEntity(Entity):
         self._name = list(
             filter(
                 None,
-                map(coordinator.status.get, [PhilipsApi.NAME, PhilipsApi.NEW_NAME]),
+                map(
+                    coordinator.status.get,
+                    [PhilipsApi.NAME, PhilipsApi.NEW_NAME, PhilipsApi.NEW2_NAME],
+                ),
             )
         )[0]
         # self._modelName = coordinator.status["modelid"]
@@ -192,7 +195,11 @@ class PhilipsEntity(Entity):
                 None,
                 map(
                     coordinator.status.get,
-                    [PhilipsApi.MODEL_ID, PhilipsApi.NEW_MODEL_ID],
+                    [
+                        PhilipsApi.MODEL_ID,
+                        PhilipsApi.NEW_MODEL_ID,
+                        PhilipsApi.NEW2_MODEL_ID,
+                    ],
                 ),
             )
         )[0]
