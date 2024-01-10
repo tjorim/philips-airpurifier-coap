@@ -91,14 +91,34 @@ class PhilipsAirPurifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             _LOGGER.warning(r"Failed to connect: %s", ex)
             raise exceptions.ConfigEntryNotReady from ex
 
-        # autodetect model and name
-        self._model = list(
-            filter(
-                None, map(status.get, [PhilipsApi.MODEL_ID, PhilipsApi.NEW_MODEL_ID])
-            )
-        )[0][:9]
+        # autodetect model
+        model_map = map(
+            status.get,
+            [
+                PhilipsApi.MODEL_ID,
+                PhilipsApi.NEW_MODEL_ID,
+                PhilipsApi.NEW2_MODEL_ID,
+            ],
+        )
+        _LOGGER.debug("model_map retrieved: %s", model_map)
+        model_filter = filter(None, model_map)
+        _LOGGER.debug("model_filter applied: %s", model_filter)
+        model_list = list(model_filter)
+        _LOGGER.debug("model_list built: %s", model_list)
+        first_model = model_list[0]
+        _LOGGER.debug("first model selected: %s", first_model)
+        self._model = first_model[:9]
+        _LOGGER.debug("model type extracted: %s", self._model)
+
+        # autodetect name
         self._name = list(
-            filter(None, map(status.get, [PhilipsApi.NAME, PhilipsApi.NEW_NAME]))
+            filter(
+                None,
+                map(
+                    status.get,
+                    [PhilipsApi.NAME, PhilipsApi.NEW_NAME, PhilipsApi.NEW2_NAME],
+                ),
+            )
         )[0]
         self._device_id = status[PhilipsApi.DEVICE_ID]
         _LOGGER.debug(
