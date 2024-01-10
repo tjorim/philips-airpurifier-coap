@@ -1153,9 +1153,9 @@ class PhilipsAC3836(PhilipsGenericCoAPFan):
 
     AVAILABLE_PRESET_MODES = {
         PresetMode.AUTO: {
-            PhilipsApi.POWER: "1", 
-            PhilipsApi.MODE: "AG", 
-            PhilipsApi.SPEED: "1"
+            PhilipsApi.POWER: "1",
+            PhilipsApi.MODE: "AG",
+            PhilipsApi.SPEED: "1",
         },
         # make speeds available as preset
         PresetMode.SLEEP: {
@@ -1181,7 +1181,6 @@ class PhilipsAC3836(PhilipsGenericCoAPFan):
             PhilipsApi.SPEED: "t",
         },
     }
-    AVAILABLE_SWITCHES = [PhilipsApi.CHILD_LOCK]
     AVAILABLE_SELECTS = [PhilipsApi.GAS_PREFERRED_INDEX]
 
 
